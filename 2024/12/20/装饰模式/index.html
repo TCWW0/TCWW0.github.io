@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="TCWW">
+
+
+
+
+
+<title>装饰模式 | Hexo</title>
+
+
+
+    <link rel="icon" href="/6bn9d-tfkj9-001.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">TCWW&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">TCWW&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">装饰模式</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">TCWW</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">December 20, 2024&nbsp;&nbsp;20:36:19</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p><em><strong>该文档进行设计模式的装饰模式的介绍</strong></em></p>
+<h1 id="装饰模式"><a href="#装饰模式" class="headerlink" title="装饰模式"></a>装饰模式</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><blockquote>
+<p>​	装饰模式，重要就在于<strong>装饰</strong>俩字。装饰模式存在的意义是在于不改变一个对象本身的基础上去给对象添加添加额外的新行为。这种模式可以用一种现实生活中的一个行为进行类比。最贴近的就是一个裸人不断的穿上衣服，这个不断穿衣服的过程就可以视为装饰模式的目的。体现在具体类的设计中就是对于一个类的属性的不断扩充。</p>
+<p>​	我们再来从设计模式三原则的角度来分析一下。主要看到开放封闭原则。我们在设计中如果想要去添加一个类的属性，由于开放封闭原则，我们是不希望去直接修改类的设计的。那么我们就需要另外一种方法来进行这个属性的扩充，这种设计的方法或者说模式就被定义为装饰模式。</p>
+<p>​	总的来说，这种模式的真正意义就在于解决<strong>类的扩展性问题</strong></p>
+</blockquote>
+<h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><p>要了解设计模式还是得回到具体的例子中去，我们举个网络传输的例子</p>
+<img src="/2024/12/20/%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/example.png" alt="example" style="zoom:80%;">
+
+<blockquote>
+<p>图中其实已经显示的很明确了，在网络传输的模型中，每层模型其实就相当于一个<strong>装饰器</strong>。每经过一层模型，我们的数据就会多一些属性，而这些属性就是装饰器给它进行添加的。在进入下一层后，我们会保留在这一层中获取到的新属性。或者这么理解，即使你当前数据已经经历过了一个装饰器的装饰，但是当你到达下一个装饰器的时候，你可以将这个数据对象看做是一个没有经历过装饰的数据。</p>
+</blockquote>
+<h2 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h2><p>对于装饰模式提到的装饰方法，其实我们一般能够想到俩种装饰技巧</p>
+<p>第一种就是最直观的<strong>继承</strong>，这种很好理解，你继承了一个类就继承了这个类的属性</p>
+<p>你再在这个新类中去添加一些属性就可以实现这种封装了</p>
+<p>第二种方法是装饰模式中常用的方法，使用<strong>关联机制</strong></p>
+<p>这个你去看关联关系的UML类图也能够一眼看出来(你都看到这了不至于连这个都不知道吧)</p>
+<h3 id="区别-优劣"><a href="#区别-优劣" class="headerlink" title="区别(优劣)"></a>区别(优劣)</h3><blockquote>
+<p>既然这俩都能够实现装饰，那我们更常用<strong>关联机制</strong>下的装饰模式的原因以及这俩的优劣呢？</p>
+</blockquote>
+<h4 id="继承机制"><a href="#继承机制" class="headerlink" title="继承机制"></a>继承机制</h4><blockquote>
+<p>​	使用继承的直接优点就是简单，我们需要一个新的属性，就直接在这个子类中去添加属性就可以了，但是这种设计也带来了一些问题。回想一下我们C++中继承类的创建。这种类的创建其实是静态的。</p>
+</blockquote>
+<p>​	或者这么说吧，你的子类对象创建其实是需要创建一套属于子类自己的数据的，也就是说，包括了父类的对象也是在构建子类对象时进行初始化的，这其实会导致一个什么问题呢，就是我们其实很难去控制这个子类包含的基类数据。因为这是一个属于自己的副本，那么当我们想将这个子类再装饰上另一个子类时，这里的设计其实会比较混乱，即使你会说可以使用父类指针，但事实上这种设计会导致在后续中我们的冗余数据会增多。因为在装饰时我们并不是使用现有的进行装饰，而是创建了一个副本进行装饰的，这个就是整个继承机制的最大弊端。</p>
+<p>​	而且在传统的继承模型中，我们是通过类层次结构来扩展功能的，但这会导致子类的功能是预先定义好的。如果想要动态地扩展或修改对象的功能，传统的继承设计就显得不够灵活。例如：</p>
+<ul>
+<li>如果我们想给一个已有的类添加新的行为，通常需要通过继承来创建新的子类，这种方式是静态的，需要在编译时确定。</li>
+<li>如果某个子类已经被创建，我们无法在运行时再灵活地对其进行修改或扩展，不能随时给对象增加新的功能。这就是静态继承的局限性。</li>
+</ul>
+<h4 id="关联机制"><a href="#关联机制" class="headerlink" title="关联机制"></a>关联机制</h4><blockquote>
+<p>​	关联机制，顾名思义就是使用关联关系来实现的机制，这是一种更加灵活的方法，通过将一个类的对象嵌入到另一个新对象中，有另一个对象来进行决定是否调用嵌入对象的api方法以及决定是否对于这个对象的行为进行扩展。我们将这么一个新对象称之为<strong>装饰器</strong>。</p>
+</blockquote>
+<p>​	为了使得装饰器以及被装饰器装饰的对象相对于客户端来首透明，我们规定这俩者必须实现相同的接口。通过这样的设计，客户端使用时不需要去关注这个类是否已经被装饰过。</p>
+<p>​	我们可以在被装饰的类中去调用在装饰器类中定义的方法，来为这个类实现更多的功能。而且由于我们前面规定的接口统一而衍生出来的透明性，这里就实现了我们前面的递归嵌套，即对于已经装饰过的对象可以继续作为新的被装饰的对象进行装饰。这种架构下我们可以去递归嵌套多个装饰，从而添加任意多的功能。</p>
+<p>​	也就是说，我们以关联机制来实现的装饰模式其实是以对客户来说透明的方式来动态的给一个对象加上更多的属性，换句话说，客户端并不会觉的对象在装饰前后有什么不同，这句话说的有点歧义，不过你需要自己理解一下。装饰模式可以在不需要创建额外更多的子类的情况下去对对象的功能进行扩展，这个就是装饰模式的模式动机。</p>
+<p>​	我再对这里进行一下解析，可能对于前面的动态添加有点误会。简单来看吧，我们只需要在程序编译时去设计出对应的装饰器类并进行实例化，然后我们就可以在代码中进行设计，在必要时将这些个装饰类绑定上我们需要的类对象，需要注意的是，我们这些装饰类中，一般都存在一个父类指针用于指向一个相对唯一的对象，这个将会由一定区域内的代码进行使用。接着，当我们想要使用这个装饰器时，我们只需要去调用对应的类方法即可，此时装饰器就能够实现我们的功能。就比如对应装饰api的多次调用应该实现对于包含的类对象的多次装饰行为。</p>
+<h2 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h2><p><img src="/2024/12/20/%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/1419489-20190630151918778-1393745886.png" alt="img"></p>
+<blockquote>
+<p>​	<strong>在任何一个设计模式中，它的UML类图都是重中之重。</strong></p>
+</blockquote>
+<h3 id="继承问题"><a href="#继承问题" class="headerlink" title="继承问题"></a>继承问题</h3><blockquote>
+<p>​	这里你第一眼可能会注意到其中的<strong>继承</strong>关系。在这个类图中，你可以看到对应的所有子类的父类都是Component类。为什么呢，不是说我们不应该使用继承关系来实现吗？</p>
+</blockquote>
+<p>​	这里我们就需要来进行一些实际的分析了。首先我们应该明白，事实上在实际设计中，能够完全符合设计模式原则的项目是少之又少的，各个模式的具体应用落到项目中后，不免会发生一些变形，就比如这里。我们所有的类都是由Compontent类出来的，为什么呢？</p>
+<p>​	这里其实就考虑了一个我们接口设计规范方面的问题了。在我们最理想的设计下，我们是期望我们的抽象装饰类是不依赖于这个Compontent类的。我们期望我们的封装类只包含对应的抽象构建类指针和对应的接口。我们实际上也完全可以这么做，但是我们这里为什么还是将这个装饰类从抽象构建类继承下来的呢。这里就是我们前面提到的接口规范。</p>
+<h3 id="接口规范"><a href="#接口规范" class="headerlink" title="接口规范"></a>接口规范</h3><p>​	这我们一个项目的接口规范设计中，这个一般是需要在项目初期就进行确定的。但是吧，如果是手动去规定一个个类中的命名格式，其实是很不切实际的，毕竟这么做的工作量很大，而且一不小心就会出错。所以这里我们就考虑通过继承这种强耦合来实现我们整个装饰模式的接口规范。</p>
+<p>​	我们前文已经提到，我们在装饰模式中，需要尽可能的实现装饰前类和装饰后类都尽可能的对用户<strong>透明</strong>。这种透明其实可以简单的理解为:通过学习一个类的api方法，我们基本可以通过同名api调用对应的所有类似的类，或者说继承下来的类以及那些通过设计模式实现的具有层次关系的类。这个就是我们的接口规范所能能做到的事。而这里巧妙的运用了继承这种前耦合的关系来进行设计，大大简化了设计的难度。</p>
+<h3 id="妥协"><a href="#妥协" class="headerlink" title="妥协"></a>妥协</h3><p>​	对于这个抽象构件类，既然我们在这个装饰模式的设计中，我们需要其作为我们的接口规范，那么我们就还需要对其进行一些属性的限定。在这个抽象构件类中，我们一般需要为其添加任何成员变量，对于不必要的api，我们都不予以实现，一般的api都使用纯虚函数进行限定。通过一系列的规则设置，我们能够了解到这个接口类的规范以及系列子类的接口，大大简化了设计难度以及了解难度。</p>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>​	我们回来对这个结构进行分析，其实我们可以看到，这种继承的妥协是十分<strong>优雅</strong>的。你看，从抽象构建类中继承下来的具体构建类以及抽象装饰者类中都将具有相同的接口，那么，在我们的抽象装饰者类中，我们就已经可以对于接口进行一层最简单的装饰了，就是在这个装饰者类中的同名函数去调用我们的成员指针所拥有的成员函数。这种对于默认行为的简单规定，将给我们这个抽象装饰类的具体装饰子类的设计省去很多麻烦。</p>
+<p>​	<em><strong>多优雅吧，你看。</strong></em></p>
+<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><blockquote>
+<p><em><strong>所有的代码和文档我都会放在另外一个仓库里，自行访问我的gitHub账号获取</strong></em></p>
+</blockquote>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>TCWW</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="https://tcww0.github.io/2024/12/20/%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/">https://tcww0.github.io/2024/12/20/%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"># 设计模式</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/12/20/QLineEdit/">QLineEdit</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© TCWW | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
