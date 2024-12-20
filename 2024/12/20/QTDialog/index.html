@@ -13,7 +13,7 @@
 
 
 
-<title>Hello World | Hexo</title>
+<title>QT对话框 | Hexo</title>
 
 
 
@@ -196,7 +196,7 @@
     
     <article class="post-wrap">
         <header class="post-header">
-            <h1 class="post-title">Hello World</h1>
+            <h1 class="post-title">QT对话框</h1>
             
                 <div class="post-meta">
                     
@@ -205,28 +205,33 @@
 
                     
                         <span class="post-time">
-                        Date: <a href="#">December 20, 2024&nbsp;&nbsp;8:44:47</a>
+                        Date: <a href="#">December 20, 2024&nbsp;&nbsp;10:51:15</a>
                         </span>
                     
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/QT/">-QT</a>
+                            
+                        </span>
                     
                 </div>
             
         </header>
 
         <div class="post-content">
-            <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+            <p>​	<em><strong>在该博文中，我们将会进行一些QT对话框的了解</strong></em></p>
+<p>​	<em>在本文中，将基于QT的api进行简单的了解，不会进行深入</em></p>
+<h1 id="颜色对话框"><a href="#颜色对话框" class="headerlink" title="颜色对话框"></a>颜色对话框</h1><p>​	<img src="/2024/12/20/QTDialog/colorDialog.png" alt="colorDialog"></p>
+<p>​	上面这个对话框就是我们QT控件中自带的颜色对话框样式。</p>
+<h4 id="对话框类名-QColorDialog"><a href="#对话框类名-QColorDialog" class="headerlink" title="对话框类名:	QColorDialog"></a>对话框类名:	<code>QColorDialog</code></h4><h4 id="构造函数所需参数"><a href="#构造函数所需参数" class="headerlink" title="构造函数所需参数:"></a>构造函数所需参数:</h4><p>​		1~<em>QColor颜色宏</em>	使用任意一个颜色宏以指定打开对话框时的默认颜色</p>
+<p>​		2~<em>QWidget</em>指针*	使用任意一个<em>QWidget</em>类型类对象，将颜色对话框挂载到该窗口</p>
+<h4 id="一些简单性质："><a href="#一些简单性质：" class="headerlink" title="一些简单性质："></a>一些简单性质：</h4><blockquote>
+<p>​		<em>对于这个对话框，右下角会有俩个默认的和[Cancel]按钮。对于这俩个按钮，当	我们选择完或者自定义完我们的颜色并按下按钮后，这个颜色对话框将会被关闭，在默认	情况下，只有你站在最后关闭窗口是使用按钮，最后窗口的颜色属性都会被保存。否	则，还是只会保存上一次设定的颜色值，没有就是默认的颜色属性。</em></p>
+<p>​		<em>我们可以使用QColorDialog类的currentColor方法进行获取这个颜色的属性，当然可	能看不懂它的输出。</em></p>
+</blockquote>
+<p>​		</p>
 
         </div>
 
@@ -241,7 +246,7 @@
                 
                     <p class="copyright-item">
                         <span>Permalink:</span>
-                        <span><a href="http://example.com/2024/12/20/hello-world/">http://example.com/2024/12/20/hello-world/</a></span>
+                        <span><a href="http://example.com/2024/12/20/QTDialog/">http://example.com/2024/12/20/QTDialog/</a></span>
                     </p>
                 
                 
@@ -264,6 +269,10 @@
                 <span>Tag(s):</span>
                 <span class="tag">
                     
+                    
+                        <a href="/tags/QT%E6%8E%A7%E4%BB%B6/"># -QT控件</a>
+                    
+                        
                 </span>
             </div>
             <div>
@@ -274,8 +283,8 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2024/12/20/Text2/">blogText</a>
             
+            <a class="next" rel="next" href="/2024/12/20/Text2/">blogText</a>
             
         </section>
 
