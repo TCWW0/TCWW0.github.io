@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="TCWW">
+
+
+
+
+
+<title>外观模式 | Hexo</title>
+
+
+
+    <link rel="icon" href="/6bn9d-tfkj9-001.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">TCWW&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">TCWW&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">外观模式</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">TCWW</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">December 21, 2024&nbsp;&nbsp;14:09:26</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%BB%93%E6%9E%84%E5%9E%8B%E6%A8%A1%E5%BC%8F/">设计模式 结构型模式</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>​	<em>本文将进行结构性模式的外观模式的分析</em></p>
+<h1 id="外观模式"><a href="#外观模式" class="headerlink" title="外观模式"></a>外观模式</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><blockquote>
+<p>​	为子系统中的一组接口提供一个统一的入口。外观模式定义类一个高层系统，使得下层的子系统更加容易使用。在外观模式中，外部与一个子系统的通信可以通过一个统一的外观对象进行。外观模式又叫做门面模式，它是一种对象结构型模式。</p>
+</blockquote>
+<h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><p>​	外观模式跟装饰模式在一些属性上有点类似。从名字上也可以窥见一些东西，所谓装饰和外观，在显示生活中就是一种对于事物进行进一步的修饰。装饰模式是通过关联关系去给现有的事物进行一层修饰去给其添加一些属性。就比如我们穿衣服这个动作给我们添加了衣服这个属性。以此类推，外观模式在生活中的体现就是对现有一层修饰。在外观模式中，我们会对现有的方法进行外包装，让其变得易于使用。</p>
+<p>​	先举一个现实生活中的外观模式的例子吧。就比如显示中你如果要去冲一杯茶，你如果是自己沏的话，你就需要经历选茶叶，过一遍茶水，倒茶水等众多步骤，这是由你自己进行的沏茶的这个行为所需要的步骤。而你如果去外面茶馆喝茶，你只需要提出需求，交出对应的费用，让小二给你上茶即可，你就不必去费心费力去沏一杯茶。在设计模式中，外观模式的目的与现实中这个茶馆存在的意义有些类似，就是去方便那些不愿意自己沏茶的人，去给这些想要方便的人提供一个更加简便的获取方式。</p>
+<p>​	抽象茶馆的行为，我们可以看到这沏茶的中间步骤每一步都是一个行为，抽象到程序中每个行为就是一个行为类。而茶馆这个东家则是最大的行为类，它负责的就是给我们的用户提供一些接口，在这里就是提供一个茶给我们用户，而且我们顾客不再需要去关注这个背后的步骤到底是什么，到底需要先做哪个后做哪个，我们只需要付出相应的代价，就能够获取我们需要的商品。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><blockquote>
+<p>​	我们再对外观模式进行一下总结，外观模式的存在意义就是给现有的一系列复杂的步骤进行一次外部的封装并提供一个简单的接口，用户通过提供一些简单的参数供给可以调用这个接口，通过对这个接口的调用用户可以实现一些复杂的功能但是却不用去关注这些复杂功能的实现</p>
+</blockquote>
+<h2 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h2><p><img src="/2024/12/21/%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F/6983a8f93a172d723e31bd05cc3ae005.png" alt="img"></p>
+<p><strong>简单找了一个UML类图来进行分析，简单但是很好的体现了外观模式下的UML架构</strong></p>
+<p>​	可以看到，这里运用了一个抽象基类作为第二层具体构件类的父类，这个的抽象类的作用我们在前面装饰模式中一起分析过了，主要就是起到一个<strong>接口规范</strong>的作用，没什么好说的。</p>
+<p>​	接下来看到由接口规范派生出的一系列的子类，可以看到，每一个都具有相对简单，单一的功能，符合了三原则的单一职责原则。主要来看我们下面的这个Computer类。在这个类中，我们可以看到这里使用了一个组合关系来进行该类的创建。从Computer类的成员的属性也可以看出，这个是与当前类的生命周期所挂钩的。</p>
+<p>​	其实这里是否要使用组合来创建还是得看具体的设计，不过一般来说使用外观模式的话都是需要使用组合的。毕竟你想，我们使用外观来设计，就代表着这个外观之下的逻辑是相对复杂且精密的。既然这样，我们不应该允许用户能够随意的去访问这些子系统，毕竟这样的随机访问对于整个系统架构来说是存在较大的风险的。总之，注意使用环境，必要时再去使用聚合来构建关系对象。</p>
+<p>​	主要来看这个Computer类的start函数，此时我们也可以感觉到一个接口规范的好处了，通过一个接口规范，我们可以保证在这个类图上的所有的具有相似功能的接口都能够保证接口的一致性以简化设计以及理解，不然你这里写个函数名是start那里写个函数名是open，那我还得费劲去了解你的源码，麻烦滴很啊。</p>
+<p>​	我们这里就不给出代码示例了，因为这个外观模式确实很简单。我们简单来说一个这里的Computer类的start函数将会是一个怎么样的构造。在这个层次架构中，Computer类是直接与外界用户层所交互的，当外界调用start函数时，我们的期望是一个计算机能够被正确的启动，所以我们的这里的start函数就应该包含所有的应该被启动的硬件的start方法。通过这种包装，我们能够实现对于一个复杂操作的简单化。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Computer::start</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">this</span>-&gt;CPU.<span class="built_in">start</span>();</span><br><span class="line">    <span class="keyword">this</span>-&gt;Disk.<span class="built_in">start</span>();</span><br><span class="line">    <span class="keyword">this</span>-&gt;Memory.<span class="built_in">start</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	这就是一种可能存在的代码顺序，当然，实际顺序并不重要，重要的是你需要去理解这里为什么需要这个外部类来进行这些操作的封装，以及这些封装的内生逻辑，这些才是外观模式的核心。</p>
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>​	外观模式是一个相对简单的结构型设计模式，但是它的使用频率也是相当高的，你可以把它类比为创建型模式中的原型模式，这你就应该知道为什么这么高了吧。</p>
+<blockquote>
+<p>差不多了，风紧扯呼~~~</p>
+</blockquote>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>TCWW</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="https://tcww0.github.io/2024/12/21/%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F/">https://tcww0.github.io/2024/12/21/%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"># 设计模式</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/12/20/%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F/">装饰模式</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© TCWW | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
