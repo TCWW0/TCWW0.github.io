@@ -1228,7 +1228,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #ff9cfb;
+  background: #ff90af;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -2889,4 +2889,60 @@ code {
   color: #a9a9a9;
   border-radius: 100%;
   background-color: rgba(0,0,0,0.75);
+}
+/* 美化目录栏样式 */
+.toc {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 260px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  overflow-y: auto;
+  max-height: calc(100vh - 40px);
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+/* 目录标题 */
+.toc h2 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 10px;
+  text-align: center;
+}
+/* 目录项 */
+.toc ul {
+  padding-left: 0;
+}
+.toc ul li {
+  margin-bottom: 8px;
+}
+.toc ul li a {
+  font-size: 16px;
+  color: #555;
+  text-decoration: none;
+}
+.toc ul li a:hover {
+  color: #3498db;
+  text-decoration: underline;
+}
+/* 鼠标悬停效果 */
+.toc ul li:hover {
+  background-color: #f0f0f0;
+  border-radius: 4px;
+}
+/* 小屏幕响应式设计 */
+@media (max-width: 768px) {
+  .toc {
+    width: 100%;
+    top: 10px;
+    left: 0;
+  }
+  .toc h2 {
+    font-size: 16px;
+  }
 }
