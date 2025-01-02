@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="​	在这个栏目中，我们将不会对于一个知识点进行系统的学习，将只会对于各个我在过程中遇到的一些问题进行一些分析。  零散知识点const属性​	首先来看到一句话  当我们创建类的一个const对象时，直到构造函数完成初始化过程，对象才能真正取得其“常量”属性。因此，构造函数在const对象的构造过程中可以向其写值。  ​	这句话其实涉及到了C++中对于const属性的一些分析，我们来看一下。 ​">
+<meta property="og:type" content="article">
+<meta property="og:title" content="类常量">
+<meta property="og:url" content="https://tcww0.github.io/2024/12/28/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E5%B8%B8%E9%87%8F/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="​	在这个栏目中，我们将不会对于一个知识点进行系统的学习，将只会对于各个我在过程中遇到的一些问题进行一些分析。  零散知识点const属性​	首先来看到一句话  当我们创建类的一个const对象时，直到构造函数完成初始化过程，对象才能真正取得其“常量”属性。因此，构造函数在const对象的构造过程中可以向其写值。  ​	这句话其实涉及到了C++中对于const属性的一些分析，我们来看一下。 ​">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-12-28T05:51:15.000Z">
+<meta property="article:modified_time" content="2024-12-28T07:22:32.421Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="C++">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://tcww0.github.io/2024/12/28/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E5%B8%B8%E9%87%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>类常量 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2024/12/28/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E5%B8%B8%E9%87%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          类常量
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2024-12-28 13:51:15 / Modified: 15:22:32" itemprop="dateCreated datePublished" datetime="2024-12-28T13:51:15+08:00">2024-12-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.8k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>​	在这个栏目中，我们将不会对于一个知识点进行系统的学习，将只会对于各个我在过程中遇到的一些问题进行一些分析。</p>
+</blockquote>
+<h1 id="零散知识点"><a href="#零散知识点" class="headerlink" title="零散知识点"></a>零散知识点</h1><h2 id="const属性"><a href="#const属性" class="headerlink" title="const属性"></a>const属性</h2><p>​	首先来看到一句话</p>
+<blockquote>
+<p>当我们创建类的一个const对象时，直到构造函数完成初始化过程，对象才能真正取得其“常量”属性。因此，构造函数在const对象的构造过程中可以向其写值。</p>
+</blockquote>
+<p>​	这句话其实涉及到了C++中对于const属性的一些分析，我们来看一下。</p>
+<p>​	在C++中，const声明的值是一种常量，我们通常会使用这种来做为程序中不变的量，但是我们是否考虑过这种常量是怎么来的呢。其实在CSAPP中，我们学到了一点，就是基本来说这些个常量，或者说局部静态变量在编译链接后生成的二进制文件中都存在着一块各自的内存区域。</p>
+<p>​	回顾一下吧，GPT真好用，我都省的去敲了。</p>
+<span id="more"></span>
+
+<hr>
+<h3 id="1-bss-段"><a href="#1-bss-段" class="headerlink" title="1. .bss 段"></a>1. <strong><code>.bss</code> 段</strong></h3><ul>
+<li><strong>全称</strong>：Block Started by Symbol。</li>
+<li>存储内容：<ul>
+<li><strong>未初始化的全局变量</strong>。</li>
+<li><strong>未初始化的静态变量</strong>（包括 <code>static</code> 修饰的局部变量）。</li>
+<li><strong>初始化为零的全局或静态变量</strong>。</li>
+</ul>
+</li>
+</ul>
+<h4 id="特点："><a href="#特点：" class="headerlink" title="特点："></a>特点：</h4><ul>
+<li><strong>节省空间</strong>：未初始化变量在 <code>.bss</code> 段中只记录变量大小和布局，实际运行时会分配内存，并自动初始化为零（通常由操作系统负责）。(这也是未初始化的全局变量默认为0的原因)</li>
+<li>不直接存储在程序的可执行文件中，而是在加载时动态分配。</li>
+</ul>
+<h4 id="分析："><a href="#分析：" class="headerlink" title="分析："></a>分析：</h4><p>​	我又来开始发散思维了，来分析下这里所谓的节省空间的含义。</p>
+<p>​	首先，对于这些个.bss段中的数据，可执行文件中值存在着这些数据的部分属性。就比如，标识这个数据存在，这个数据的变量名，这个数据的类型等。但是，在这个文件之中，并不存在对于这个数据实际的值的表示。这也是符合出现在这个文本段中的数据的性质的。</p>
+<p>​	这里面的这系列数据只会在可执行文件被操作系统加载到内存中去再进行一次初始化，而且这系列的初始化都会为0，这里就不要问为什么了，毕竟初始化不为0的就不再这个文本段中而在我们的.data段中了。</p>
+<h4 id="示例："><a href="#示例：" class="headerlink" title="示例："></a>示例：</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> x;              <span class="comment">// 全局未初始化变量 -&gt; .bss</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> y;       <span class="comment">// 静态未初始化变量 -&gt; .bss</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> z = <span class="number">0</span>;   <span class="comment">// 静态初始化为零 -&gt; .bss</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-data-段"><a href="#2-data-段" class="headerlink" title="2. .data 段"></a>2. <strong><code>.data</code> 段</strong></h3><ul>
+<li><strong>全称</strong>：Data Segment。</li>
+<li>存储内容：<ul>
+<li><strong>已初始化的全局变量</strong>。</li>
+<li><strong>已初始化的静态变量</strong>（包括局部静态变量）。</li>
+</ul>
+</li>
+</ul>
+<h4 id="特点：-1"><a href="#特点：-1" class="headerlink" title="特点："></a>特点：</h4><ul>
+<li><code>.data</code> 段中的变量在程序运行前已经完成初始化，初始化的值直接存储在可执行文件中。</li>
+<li>这些变量的内容在运行时可以修改。</li>
+</ul>
+<h4 id="示例：-1"><a href="#示例：-1" class="headerlink" title="示例："></a>示例：</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">10</span>;             <span class="comment">// 全局已初始化变量 -&gt; .data</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> b = <span class="number">20</span>;      <span class="comment">// 静态已初始化变量 -&gt; .data</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="3-rodata-段"><a href="#3-rodata-段" class="headerlink" title="3. .rodata 段"></a>3. <strong><code>.rodata</code> 段</strong></h3><ul>
+<li><strong>全称</strong>：Read-Only Data Segment。</li>
+<li>存储内容：<ul>
+<li><strong>只读的常量</strong>（如字符串字面量）。</li>
+<li><strong><code>const</code> 修饰的全局或静态变量</strong>。</li>
+<li>某些编译器优化后的结果（如 <code>constexpr</code>）。</li>
+</ul>
+</li>
+</ul>
+<h4 id="特点：-2"><a href="#特点：-2" class="headerlink" title="特点："></a>特点：</h4><ul>
+<li><code>.rodata</code> 是只读的，运行时无法修改。</li>
+<li>主要用于存储不会改变的值，编译器可能利用这段内容进行内存保护。</li>
+<li>常量通常会存储在 <code>.rodata</code> 中，而不是 <code>.data</code>。</li>
+</ul>
+<h4 id="示例：-2"><a href="#示例：-2" class="headerlink" title="示例："></a>示例：</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> c = <span class="number">30</span>;           <span class="comment">// 全局 const 变量 -&gt; .rodata</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="type">int</span> d = <span class="number">40</span>;    <span class="comment">// 静态 const 变量 -&gt; .rodata</span></span><br><span class="line"><span class="type">char</span>* str = <span class="string">&quot;Hello&quot;</span>;        <span class="comment">// 字符串字面量 -&gt; .rodata</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="4-总结对比"><a href="#4-总结对比" class="headerlink" title="4. 总结对比"></a>4. <strong>总结对比</strong></h3><table>
+<thead>
+<tr>
+<th><strong>段名</strong></th>
+<th><strong>存储内容</strong></th>
+<th><strong>是否初始化</strong></th>
+<th><strong>运行时可修改</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>.bss</code></strong></td>
+<td>未初始化的全局变量，静态变量，初始化为零的变量</td>
+<td>否（加载时清零）</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong><code>.data</code></strong></td>
+<td>已初始化的全局变量，已初始化的静态变量</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong><code>.rodata</code></strong></td>
+<td>只读常量、<code>const</code> 全局或静态变量，字符串字面量</td>
+<td>是</td>
+<td>否</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="5-运行时的内存布局"><a href="#5-运行时的内存布局" class="headerlink" title="5. 运行时的内存布局"></a>5. <strong>运行时的内存布局</strong></h3><p>程序在运行时的内存结构主要分为以下区域：</p>
+<ul>
+<li><strong>代码段（.text）</strong>：存储程序的可执行代码。</li>
+<li>数据段：<ul>
+<li><code>.bss</code>：未初始化的全局或静态变量。</li>
+<li><code>.data</code>：已初始化的全局或静态变量。</li>
+<li><code>.rodata</code>：只读常量和字面量。</li>
+</ul>
+</li>
+<li><strong>堆（Heap）</strong>：动态分配的内存（如 <code>malloc</code> 或 <code>new</code>）。</li>
+<li><strong>栈（Stack）</strong>：局部变量和函数调用栈。</li>
+</ul>
+<hr>
+<h3 id="6-可视化示例"><a href="#6-可视化示例" class="headerlink" title="6. 可视化示例"></a>6. <strong>可视化示例</strong></h3><p>假设以下代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> global_var;             <span class="comment">// -&gt; .bss</span></span><br><span class="line"><span class="type">int</span> global_init_var = <span class="number">10</span>;   <span class="comment">// -&gt; .data</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> const_var = <span class="number">20</span>;   <span class="comment">// -&gt; .rodata</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> static_var;      <span class="comment">// -&gt; .bss</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> static_init_var = <span class="number">30</span>; <span class="comment">// -&gt; .data</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> local_var = <span class="number">40</span>;     <span class="comment">// -&gt; 栈</span></span><br><span class="line">    <span class="type">static</span> <span class="type">int</span> static_local_var = <span class="number">50</span>; <span class="comment">// -&gt; .data</span></span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* str = <span class="string">&quot;Hello, World!&quot;</span>; <span class="comment">// -&gt; .rodata</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>​	现在看完了上面几个，其实，并没有对于我们理解上面那句话有什么用处，举出上面那个例子主要是要把我接下来的对于const对象性质和.rodata段的性质做一些区分。</p>
+<h3 id="const-对象的构造"><a href="#const-对象的构造" class="headerlink" title="const 对象的构造"></a><strong><code>const</code> 对象的构造</strong></h3><ul>
+<li><p>当我们声明一个 <strong><code>const</code> 对象</strong> 时，编译器要求这个对象的值在构造之后不能被修改。这是对象的<strong>常量性</strong>。</p>
+</li>
+<li><p>然而，<code>const</code> 对象的构造过程</p>
+<p>并不等同于 .rodata段的只读数据，它实际上是对象的生命周期的一部分。</p>
+<p>在对象的构造过程中，<code>const</code> 对象的成员变量是可以被初始化的，即使它们之后不能被修改。</p>
+<ul>
+<li>在构造函数中，你仍然可以对 <code>const</code> 对象的成员进行赋值，但一旦构造函数完成，成员就会被标记为“常量”，不能再修改。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>当我们创建类的一个const对象时，直到构造函数完成初始化过程，对象才能真正取得其“常量”属性。因此，构造函数在const对象的构造过程中可以向其写值。</p>
+</blockquote>
+<p>​	我们需要先来分析下我们现在需要分析的是谁。首先，我们分析的必然不是那些在.rodata段中的数据。毕竟这些数据已经被严格保护起来了，没有进行研究的价值。</p>
+<p>​	我们需要重点看的其实是对于那些存在于栈帧上的const常量，这些常量的生命周期与栈帧绑定，这些就不赘述了。主要是看到，我们在栈帧中对于这些变量到底是怎么构造的。</p>
+<h4 id="栈帧常量"><a href="#栈帧常量" class="headerlink" title="栈帧常量"></a>栈帧常量</h4><p>​	对于栈帧的常量，由于它是从0开始构造的，所以它必须经过一个初始化的过程，而这个就是起初困惑我的地方。毕竟你已经是一个常量了，但是你为什么还需要去进行初始化呢。但是，这是我对常量先入为主造成的一种后果。我忽略了语言设计的细节。如果不去进行初始化，我还怎么去取得一个常量呢。所以，这里就存在一个可能的异或。</p>
+<p>​	所以，我们需要知道const常量构建的流程，在一个const常量构建中，这个数据一开始并不具有const这个属性，这个属性可以看做是在这块数据处理的最后阶段才进行处理的。毕竟学了CSAPP后我们应该简单的知道这些所谓的权限管理到底是一个什么个情况，实际上其实就是一些标志位的修改，就比如这里，通过将可修改的标志位置0等来进行变量的锁定。</p>
+<p>​	但是，在这个锁定之前，我们这块数据还是可以修改的，这就意味着我们完全可以在这段时期对于数据进行处理。而这段时间就是我们const常量的实际初始化时间，在这个时间中，所谓的const常量其实可以视为只是一个简单的变量，所以我们可以对于这块数据进行任意的修改知道我们的权限标志位被锁。</p>
+<p>​	</p>
+<blockquote>
+<p>​	<strong>通过对于const常量的较为深入的理解，我们理解了为什么在这种初始化过程中可以向其中去写值。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>接下来想一些比较零碎的知识点，主要是关于类的构造函数那一块的</strong></p>
+</blockquote>
+<p>我们主要来看那些默认构造函数的一些性质。</p>
+<h2 id="合成默认构造函数的限制"><a href="#合成默认构造函数的限制" class="headerlink" title="合成默认构造函数的限制"></a><strong>合成默认构造函数的限制</strong></h2><hr>
+<h3 id="1-默认构造函数的生成规则"><a href="#1-默认构造函数的生成规则" class="headerlink" title="1. 默认构造函数的生成规则"></a>1. <strong>默认构造函数的生成规则</strong></h3><ul>
+<li>编译器只有在类<strong>未显式声明任何构造函数</strong>时，才会为类生成一个<strong>合成的默认构造函数</strong>。</li>
+<li>如果类中声明了任何构造函数（比如带参数的构造函数），编译器不会再生成默认构造函数。</li>
+<li><strong>规则的依据</strong>：如果一个类需要通过特定构造函数控制初始化，则可能在所有情况下都需要这种控制。由用户显式定义默认构造函数可以确保这种一致性。</li>
+</ul>
+<h4 id="例子："><a href="#例子：" class="headerlink" title="例子："></a>例子：</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    <span class="type">int</span> x;</span><br><span class="line">    <span class="built_in">A</span>(<span class="type">int</span> value) : <span class="built_in">x</span>(value) &#123;&#125; <span class="comment">// 自定义构造函数</span></span><br><span class="line">    <span class="comment">// 编译器不会合成默认构造函数</span></span><br><span class="line">&#125;;</span><br><span class="line">A obj; <span class="comment">// 错误，缺少默认构造函数</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-合成默认构造函数可能执行错误操作"><a href="#2-合成默认构造函数可能执行错误操作" class="headerlink" title="2. 合成默认构造函数可能执行错误操作"></a>2. <strong>合成默认构造函数可能执行错误操作</strong></h3><p>对于含有<strong>内置类型或复合类型</strong>的类，如果这些成员未显式初始化，编译器生成的合成默认构造函数不会为它们赋值，可能导致未定义行为。</p>
+<h4 id="为什么可能出错？"><a href="#为什么可能出错？" class="headerlink" title="为什么可能出错？"></a>为什么可能出错？</h4><ul>
+<li><p><strong>内置类型</strong>（如 <code>int</code>、<code>float</code>）和<strong>复合类型</strong>（如数组、指针）在默认初始化时，其值未定义。</p>
+</li>
+<li><p>如果用户没有手动初始化这些成员变量，程序可能使用未定义的值，导致潜在的逻辑错误或运行时异常。</p>
+<blockquote>
+<p>这里来对于这种为定义的行为存在的分析</p>
+</blockquote>
+<p>​	我们一直听所谓的未初始化导致随机值，但是为什么呢？这个的原因其实如果学过CSAPP应该很好理解。毕竟这些所谓的声明，其实就是一段开辟内存的代码，这段代码所开辟的内存将交给我们的操作系统进行维护。但是，这里只是开辟了一段内存，进行了一段指针的偏移，这块内存上的值呢？我们并没有对其进行初始化，由于我们所谓的销毁变量其实就是操作系统取消对其的维护，一些指针进行额外的移动等。在这其中并不存在对于内存区域的重新初始化。所以，这块内存上的东西可能是任何时候遗留下来的，但是系统并不会去检查它到底是什么，它只是去读取并且解析，所以这就导致了所谓的未定义的情况。</p>
+</li>
+</ul>
+<h4 id="解决方法："><a href="#解决方法：" class="headerlink" title="解决方法："></a>解决方法：</h4><ul>
+<li>提供<strong>类内初始化</strong>（C++11 引入）或<strong>自定义默认构造函数</strong>，确保所有成员变量有明确的初始值。</li>
+</ul>
+<h4 id="例子：-1"><a href="#例子：-1" class="headerlink" title="例子："></a>例子：</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line">    <span class="type">int</span> num;       <span class="comment">// 内置类型，未初始化</span></span><br><span class="line">    <span class="type">int</span> *ptr;      <span class="comment">// 指针类型，未初始化</span></span><br><span class="line">    <span class="comment">// 合成的默认构造函数不会初始化 num 和 ptr</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">B obj; <span class="comment">// 使用 num 和 ptr 时会导致未定义行为</span></span><br></pre></td></tr></table></figure>
+
+<p>改进：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line">    <span class="type">int</span> num = <span class="number">0</span>;   <span class="comment">// 类内初始化</span></span><br><span class="line">    <span class="type">int</span> *ptr = <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="comment">// 合成的默认构造函数现在是安全的</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>或者：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line">    <span class="type">int</span> num;</span><br><span class="line">    <span class="type">int</span> *ptr;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">B</span>() : <span class="built_in">num</span>(<span class="number">0</span>), <span class="built_in">ptr</span>(<span class="literal">nullptr</span>) &#123;&#125; <span class="comment">// 自定义默认构造函数</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="3-无法为某些类合成默认构造函数"><a href="#3-无法为某些类合成默认构造函数" class="headerlink" title="3. 无法为某些类合成默认构造函数"></a>3. <strong>无法为某些类合成默认构造函数</strong></h3><p>如果类包含的成员类型本身<strong>没有默认构造函数</strong>，编译器将无法为该类生成合成的默认构造函数。</p>
+<h4 id="为什么无法生成？"><a href="#为什么无法生成？" class="headerlink" title="为什么无法生成？"></a>为什么无法生成？</h4><ul>
+<li>成员对象的初始化必须调用其构造函数。</li>
+<li>如果成员类型没有默认构造函数，编译器无法完成其初始化。</li>
+</ul>
+<h4 id="例子：-2"><a href="#例子：-2" class="headerlink" title="例子："></a>例子：</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">C</span> &#123;</span><br><span class="line">    <span class="type">int</span> x;</span><br><span class="line">    <span class="built_in">C</span>(<span class="type">int</span> val) : <span class="built_in">x</span>(val) &#123;&#125; <span class="comment">// 没有默认构造函数</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">D</span> &#123;</span><br><span class="line">    C c; <span class="comment">// 成员 c 的类型是 C</span></span><br><span class="line">    <span class="comment">// 编译器无法合成默认构造函数，因为 C 类型没有默认构造函数</span></span><br><span class="line">&#125;;</span><br><span class="line">D obj; <span class="comment">// 错误：D 的默认构造函数无法生成</span></span><br></pre></td></tr></table></figure>
+
+<p>解决方法：</p>
+<ul>
+<li>为成员类型提供默认构造函数，或者在包含该成员的类中显式定义默认构造函数并指定初始化方式。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">C</span> &#123;</span><br><span class="line">    <span class="type">int</span> x;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">C</span>(<span class="type">int</span> val = <span class="number">0</span>) : <span class="built_in">x</span>(val) &#123;&#125; <span class="comment">// 添加默认构造函数</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">D</span> &#123;</span><br><span class="line">    C c; <span class="comment">// 成员 c 的类型现在有默认构造函数</span></span><br><span class="line">&#125;;</span><br><span class="line">D obj; <span class="comment">// 正常工作</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. <strong>总结</strong></h3><h4 id="为什么某些类不能依赖合成的默认构造函数？"><a href="#为什么某些类不能依赖合成的默认构造函数？" class="headerlink" title="为什么某些类不能依赖合成的默认构造函数？"></a>为什么某些类不能依赖合成的默认构造函数？</h4><ol>
+<li><strong>用户显式声明构造函数后，编译器不会生成默认构造函数</strong>。</li>
+<li><strong>合成默认构造函数对内置或复合类型成员不安全</strong>，可能导致未定义行为。</li>
+<li><strong>当成员类型缺少默认构造函数时，编译器无法生成默认构造函数</strong>。</li>
+</ol>
+<h4 id="最佳实践："><a href="#最佳实践：" class="headerlink" title="最佳实践："></a>最佳实践：</h4><ul>
+<li>如果类中含有<strong>非简单类型成员</strong>或<strong>需要自定义初始化逻辑</strong>，显式定义默认构造函数。</li>
+<li>利用 <strong>类内初始化</strong> 提高代码安全性和可读性。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2024/12/28/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E5%B8%B8%E9%87%8F/" title="类常量">https://tcww0.github.io/2024/12/28/C++学习/类常量/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/C/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> C++</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/28/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/19-%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F/" rel="prev" title="责任链模式">
+      <i class="fa fa-chevron-left"></i> 责任链模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/12/29/QT%E6%8E%A7%E4%BB%B6/4-eventfiliter/" rel="next" title="QEventFilter">
+      QEventFilter <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9B%B6%E6%95%A3%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">零散知识点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#const%E5%B1%9E%E6%80%A7"><span class="nav-number">1.1.</span> <span class="nav-text">const属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-bss-%E6%AE%B5"><span class="nav-number">1.1.1.</span> <span class="nav-text">1. .bss 段</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E7%82%B9%EF%BC%9A"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">特点：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90%EF%BC%9A"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">分析：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">示例：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-data-%E6%AE%B5"><span class="nav-number">1.1.2.</span> <span class="nav-text">2. .data 段</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E7%82%B9%EF%BC%9A-1"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">特点：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A-1"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">示例：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-rodata-%E6%AE%B5"><span class="nav-number">1.1.3.</span> <span class="nav-text">3. .rodata 段</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E7%82%B9%EF%BC%9A-2"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">特点：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A-2"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">示例：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%80%BB%E7%BB%93%E5%AF%B9%E6%AF%94"><span class="nav-number">1.1.4.</span> <span class="nav-text">4. 总结对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%BF%90%E8%A1%8C%E6%97%B6%E7%9A%84%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80"><span class="nav-number">1.1.5.</span> <span class="nav-text">5. 运行时的内存布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E5%8F%AF%E8%A7%86%E5%8C%96%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.1.6.</span> <span class="nav-text">6. 可视化示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#const-%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%9E%84%E9%80%A0"><span class="nav-number">1.1.7.</span> <span class="nav-text">const 对象的构造</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%88%E5%B8%A7%E5%B8%B8%E9%87%8F"><span class="nav-number">1.1.7.1.</span> <span class="nav-text">栈帧常量</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%88%E6%88%90%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E9%99%90%E5%88%B6"><span class="nav-number">1.2.</span> <span class="nav-text">合成默认构造函数的限制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%9F%E6%88%90%E8%A7%84%E5%88%99"><span class="nav-number">1.2.1.</span> <span class="nav-text">1. 默认构造函数的生成规则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90%EF%BC%9A"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">例子：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%90%88%E6%88%90%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%8F%AF%E8%83%BD%E6%89%A7%E8%A1%8C%E9%94%99%E8%AF%AF%E6%93%8D%E4%BD%9C"><span class="nav-number">1.2.2.</span> <span class="nav-text">2. 合成默认构造函数可能执行错误操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AF%E8%83%BD%E5%87%BA%E9%94%99%EF%BC%9F"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">为什么可能出错？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%9A"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">解决方法：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90%EF%BC%9A-1"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">例子：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%97%A0%E6%B3%95%E4%B8%BA%E6%9F%90%E4%BA%9B%E7%B1%BB%E5%90%88%E6%88%90%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="nav-number">1.2.3.</span> <span class="nav-text">3. 无法为某些类合成默认构造函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%97%A0%E6%B3%95%E7%94%9F%E6%88%90%EF%BC%9F"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">为什么无法生成？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90%EF%BC%9A-2"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">例子：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%80%BB%E7%BB%93"><span class="nav-number">1.2.4.</span> <span class="nav-text">4. 总结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9F%90%E4%BA%9B%E7%B1%BB%E4%B8%8D%E8%83%BD%E4%BE%9D%E8%B5%96%E5%90%88%E6%88%90%E7%9A%84%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%EF%BC%9F"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">为什么某些类不能依赖合成的默认构造函数？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%EF%BC%9A"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">最佳实践：</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">88k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">1:20</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : '83ed94dafc1debd0ae3d4b34ed78f935',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

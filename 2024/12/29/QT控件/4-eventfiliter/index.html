@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="​	在接下来的QT中，我将会是一个相对无厘头的形态，属于是看到哪学到哪，并且大部分时间不会搓代码，只在之后使用一俩个相对不错的项目来进行熟悉。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="QEventFilter">
+<meta property="og:url" content="https://tcww0.github.io/2024/12/29/QT%E6%8E%A7%E4%BB%B6/4-eventfiliter/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="​	在接下来的QT中，我将会是一个相对无厘头的形态，属于是看到哪学到哪，并且大部分时间不会搓代码，只在之后使用一俩个相对不错的项目来进行熟悉。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-12-29T01:27:54.000Z">
+<meta property="article:modified_time" content="2024-12-29T06:41:13.610Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="QT">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://tcww0.github.io/2024/12/29/QT%E6%8E%A7%E4%BB%B6/4-eventfiliter/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>QEventFilter | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2024/12/29/QT%E6%8E%A7%E4%BB%B6/4-eventfiliter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          QEventFilter
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2024-12-29 09:27:54 / Modified: 14:41:13" itemprop="dateCreated datePublished" datetime="2024-12-29T09:27:54+08:00">2024-12-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/QT/" itemprop="url" rel="index"><span itemprop="name">QT</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>6.3k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>6 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>​	在接下来的QT中，我将会是一个相对无厘头的形态，属于是看到哪学到哪，并且大部分时间不会搓代码，只在之后使用一俩个相对不错的项目来进行熟悉。</p>
+</blockquote>
+<span id="more"></span>
+
+<h1 id="事件系统"><a href="#事件系统" class="headerlink" title="事件系统"></a>事件系统</h1><p>QT中存在着一系列的系统供我们使用，信号与槽系统就是其中最出名的一个，同时，事件机制也是一个相当重要的系统。</p>
+<p>​	</p>
+<p>​	事件系统中相当重要的是一套函数:<em><em>event(QEcent</em> pevent)</em>*</p>
+<p>​	QT中通过这套函数来进行事件的传递，我们这里不进行一些详细的分析，只进行一些简单的介绍，主要是我自己也不是很了解这东西。</p>
+<p>​	</p>
+<h2 id="杂谈"><a href="#杂谈" class="headerlink" title="杂谈"></a>杂谈</h2><blockquote>
+<p>​	在QT中，基本所有的类都存在着一套继承下来的event机制函数，通过这套函数，可以去使用QT的事件机制。</p>
+</blockquote>
+<p>​	首先来看一些比较经典的事件函数</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">MyEdit::keyPressEvent</span><span class="params">(QKeyEvent * event)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>​	这里的MyEdit是我们继承的LineEdit类，而这里的函数是我们对于父类的keyPressEvent函数的重写，通过这个重写，我们可以自定义处理我们的这个事件的行为。这个没什么好说的。</p>
+<h3 id="装饰"><a href="#装饰" class="headerlink" title="装饰"></a>装饰</h3><p>​	<strong>主要是来我们事件的传递机制。</strong></p>
+<p>​	在这里，我们其实是对于QLineEdit进行了一次继承的封装，那么，如果从设计模式来看的话，这里其实类似于一种由继承实现的装饰模式。在这个装饰类中，我们可以去使用对应的父类的事件函数来进行重写来添加我们的行为。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">MyEdit::keyPressEvent</span><span class="params">(QKeyEvent * event)</span></span>&#123;</span><br><span class="line">    <span class="built_in">qDebug</span>()&lt;&lt;<span class="string">&quot;MyEdit key press event&quot;</span>;</span><br><span class="line">    QLineEdit::<span class="built_in">keyPressEvent</span>(event);</span><br><span class="line">    event-&gt;<span class="built_in">ignore</span>();    <span class="comment">//将这个事件往上抛</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	在这种装饰下，本来的话当我们想要去使用一个QLineEdit控件的时候，其的对应的事件会直接传递给我们的控件基类去进行处理，而我们这里继承了该类并且重写了对应的事件处理函数，这就意味着我们为我们的基类信号处理行为添加了一层代理，所有的信号将会优先通过这个接口，而不是基类的接口。</p>
+<h3 id="包装"><a href="#包装" class="headerlink" title="包装"></a>包装</h3><p>​	在这里，你如果没有使用基类的方法，那么你会发现它只是一个日志输出。所以，我们可以使用C++11的特性去进行父类方法的使用，这样的话我们就能够同时使用原有的控件的功能了，这样的话，其实又像极了设计模式中的外观模式。添加了一层额外的包装，这层包装与原来的包装形成了一套更加复杂的系统。但是，我们不必要去了解这上下的层次关系，只需要去关注于当前的设计即可，优秀啊。</p>
+<h3 id="传递"><a href="#传递" class="headerlink" title="传递"></a>传递</h3><p>​	需要注意的是，在QT的事件机制中，当一个事件被处理之后，它会被自动的标记为已处理，并且不会再继续地去场传递。但是有时候我们希望我们的这些个事件可以被父对象给进行处理，这时候我们就需要使用我们的Event类的ignore函数。</p>
+<p>​	通过这个函数，我们可以把这个事件重新标记为一种还未被处理的状态，然后这个事件就能够被父对象给进行接受了。以此类推，整个事件链条都支持这种处理方式。</p>
+<p>​	也就是说，这种处理方式其实还是使用了设计模式的行为性设计模式的责任链模式的。</p>
+<h4 id="事件传递与责任链模式"><a href="#事件传递与责任链模式" class="headerlink" title="事件传递与责任链模式"></a><strong>事件传递与责任链模式</strong></h4><p>Qt 的事件传递机制本质上可以视为一种 <strong>责任链模式</strong>，因为：</p>
+<ol>
+<li>事件的默认处理方式：<ul>
+<li>事件被目标对象的事件处理函数捕获。</li>
+<li>如果事件被标记为 <code>accepted</code>，则不再继续传递。</li>
+</ul>
+</li>
+<li>通过 <code>ignore()</code> 实现传递：<ul>
+<li>调用 <code>event-&gt;ignore()</code> 可以将事件标记为未处理。</li>
+<li>未处理的事件会沿着父对象链向上传递，直到找到可以处理的对象，或最终丢弃。</li>
+</ul>
+</li>
+</ol>
+<h2 id="阶段归纳"><a href="#阶段归纳" class="headerlink" title="阶段归纳"></a>阶段归纳</h2><p>​	也就是说，QT的事件机制其实可以看做是一种责任链模式的高级应用。在这些个责任链上，基础的消息就是我们的事件。而这些个责任链的传递起始点，就是我们的用户层。第一个处理用户发出的事件的，就是我们对于一些类的额外实现。如果没有，那么就是我们的系列控件类，以此类推。</p>
+<p>​	让我们来重新归纳下这个责任链条。在这个责任链条上，每一种类都是责任链条上的一个处理者。整个责任链条的起始点就是我们的用户层面，我们发出的总总行为动作就是这个责任链条上传递的信息，这些责任链条的构成其实就是我们的一种父子关系的一种体现。可以这么说，每个责任链条上的节点的上一层节点都是他的父对象。注意，不是对应的继承的父对象，而是绑定的父对象。</p>
+<p>​	这个责任链条上，每一层的节点代表的是一个大类，就比如我们的QLineEdit，这个会是对应的使用的原本的QLineEdit的链条上的一个环节。而如果是我们自己实现的MyEdit，这个会是我们另一个使用这个MyEdit对象的链条上的另一个节点，这俩者之间是不一定相交的。</p>
+<h3 id="特殊处"><a href="#特殊处" class="headerlink" title="特殊处"></a>特殊处</h3><p>​	我们再来对这个责任链条上的节点进行一些分析，需要注意的是，这些</p>
+<p>责任链条上对于事件的处理是有一定的逻辑的。所有的事件当它到达我们的对应的层级时，它会先被我们这个节点上的event函数进行分析并且处理，如果可能，这个信号还会被继续分发到更下层的处理函数中进行处理，以此类推，这些事件处理可能存在多个层次，但是总的来说一般只有event和具体的event处理这俩个层次。</p>
+<p>​	还有，对于事件的处理，这俩个都会进行接受，但是否进行对应的操作，取决于这个事件中的一个特殊属性。姑且可以把这个属性称之为是否已处理。在进入任何一个event处理函数后，这个对应的事件都会被标记为已处理的，如果已经被标记为以处理，那么这个事件将不会被传递到这个链条的任何一层，哪怕是同一层的更深处也是一样。</p>
+<h3 id="event和深层函数处理"><a href="#event和深层函数处理" class="headerlink" title="event和深层函数处理"></a>event和深层函数处理</h3><p>​	event是一个节点层次的一个相对来说更接近时间发出者的一个层次，在这个层次中，其控制了这个信号接下来的具体流向，其返回一个bool值，如果我们在这个函数处理后返回了一个true，就代表着这个信号已经处理完毕，接下来这个信号将不会被任何处理函数所接收。如果我们这个函数最后返回了一个false，那么这个函数还是会被接下来的下一层次的节点所进行解析。</p>
+<p>​	但是，这里简单的返回true和返回false有时并不能满足我们的需求，因为这种返回是不会使得函数实现原有的功能的，要实现我们原有的功能，就需要去在这个event函数中去使用C++11中的新特性，去调用对应的事件处理函数。</p>
+<p>​	我们一种常见的用法就是在我们的return语句中去进行对应的父类事件处理函数的调用，毕竟这些个事件处理函数都是一个受保护的状态，我们可以通过对应的操作去进行使用，就比如</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">MyEdit::event</span><span class="params">(QEvent *pevent)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//保证重写的是当前类的函数</span></span><br><span class="line">    <span class="keyword">if</span>(pevent-&gt;<span class="built_in">type</span>() == QEvent::KeyPress)&#123;</span><br><span class="line">        <span class="built_in">qDebug</span>() &lt;&lt; <span class="built_in">tr</span>(<span class="string">&quot;my edit event&quot;</span>) &lt;&lt; Qt::endl;</span><br><span class="line">        <span class="comment">//return false;</span></span><br><span class="line">        <span class="comment">//在一层的event函数返回false就代表着这个类的这个信号处理结束</span></span><br><span class="line">        <span class="comment">//返回true标志处理好了，接下来会传递但不会继续处理</span></span><br><span class="line">        <span class="comment">//返回false会继续向下一层进行处理</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span>  QLineEdit::<span class="built_in">event</span>(pevent);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	需要注意的是，在在这里面，其实就是进行了一次控制流的更改，将当前流转向对应的事件处理流中，等到全部处理完成后返回这个event才会继续去判断这个是否还要继续去往上层去传递。</p>
+<p>​	也就是说，这种流的转向其实是用于我们当前event函数中去进行特定额外的信号处理的机制的。</p>
+<p>​	接下来我们来时候一下这种流的转向会遇到的一种有趣的情况。</p>
+<p>​	在我们的event函数中调用注入**QLineEdit::event(pavent);**函数后，这个函数会去进行对应的函数的调用，有趣的是，这里产生的效果却是我们重载的事件处理函数的效果。</p>
+<p>​	目前来说这几个函数对我们来说都是黑盒，但是我们不难猜测，这是运用了多态的一种特性。在整个事件处理链条的层次中，每个层次中的事件处理函数只会存在一个。如果我们对于事件处理函数进行了重载，那么这个处理函数就会去替换原有的函数的位置，全部的事件处理函数都遵守这个规则。所以，我们如果需要去进行额外的添加，我们还需要做的是在重载的事件处理函数中去使用原有的事件处理方法去进行这个节点的行为的填充。这种又是一种装饰模式的体现。</p>
+<p>​	</p>
+<blockquote>
+<p>接下来给出一个GPT的总结版本</p>
+</blockquote>
+<h2 id="GPT归纳版本"><a href="#GPT归纳版本" class="headerlink" title="GPT归纳版本"></a>GPT归纳版本</h2><hr>
+<h3 id="事件机制与责任链模式"><a href="#事件机制与责任链模式" class="headerlink" title="事件机制与责任链模式"></a>事件机制与责任链模式</h3><ol>
+<li><strong>事件的责任链传递</strong>：<ul>
+<li>事件从用户层发起，沿着父对象关系形成的链条逐级向上传递。</li>
+<li>每个对象是责任链上的一个处理节点，具有决定是否处理该事件的权利。</li>
+</ul>
+</li>
+<li><strong>父对象 vs. 父类</strong>：<ul>
+<li>父对象是通过 <code>QObject::setParent</code> 或构造函数参数指定的对象，形成实际的对象层级关系。</li>
+<li>父类是继承层级中的基类，与责任链无直接关系。</li>
+</ul>
+</li>
+<li><strong>节点上的事件处理逻辑</strong>：<ul>
+<li>事件到达一个节点时，优先调用该节点的 <code>event</code> 方法。</li>
+<li>如果未处理（返回 <code>false</code>），则事件继续向上层节点传递。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="event-函数的深度解析"><a href="#event-函数的深度解析" class="headerlink" title="event 函数的深度解析"></a><code>event</code> 函数的深度解析</h3><ol>
+<li><strong><code>event</code> 的双层处理机制</strong>：<ul>
+<li><strong>第一层</strong>：<code>event</code> 函数负责高层次的事件分发，比如识别事件类型。</li>
+<li><strong>第二层</strong>：更具体的事件处理函数（如 <code>keyPressEvent</code>）完成细化逻辑。</li>
+</ul>
+</li>
+<li><strong>流控制</strong>：<ul>
+<li>返回 <code>true</code>：事件被标记为已处理，不再传递。</li>
+<li>返回 <code>false</code>：事件未处理，继续向上层或同层其他处理器传递。</li>
+</ul>
+</li>
+<li><strong>保留原功能的方式</strong>：<ul>
+<li>调用基类的 <code>event</code> 或具体的事件处理方法（如 <code>QLineEdit::event</code>），保留该类原有的事件处理逻辑。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="多态与装饰模式的结合"><a href="#多态与装饰模式的结合" class="headerlink" title="多态与装饰模式的结合"></a>多态与装饰模式的结合</h3><ol>
+<li><strong>多态性</strong>：<ul>
+<li>当调用 <code>QLineEdit::event(pevent)</code> 时，实际上调用的是 <code>MyEdit</code> 的重载实现（如果存在）。</li>
+<li>这是 C++ 中多态特性的体现，通过虚函数机制确保子类对基类行为的覆盖。</li>
+</ul>
+</li>
+<li><strong>装饰模式的体现</strong>：<ul>
+<li>在子类的 <code>event</code> 方法中，通过调用基类的 <code>event</code>，在其基础上添加额外逻辑，形成装饰模式的效果。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="示例补充"><a href="#示例补充" class="headerlink" title="示例补充"></a>示例补充</h3><p>可以扩展现有代码的注释，进一步强调核心逻辑：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">MyEdit::event</span><span class="params">(QEvent *pevent)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 判断事件类型</span></span><br><span class="line">    <span class="keyword">if</span> (pevent-&gt;<span class="built_in">type</span>() == QEvent::KeyPress) &#123;</span><br><span class="line">        <span class="built_in">qDebug</span>() &lt;&lt; <span class="built_in">tr</span>(<span class="string">&quot;my edit event&quot;</span>) &lt;&lt; Qt::endl;</span><br><span class="line">        <span class="comment">// 处理自定义逻辑，但不阻止事件向下传递</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;  <span class="comment">// 返回 false 表示未完全处理，允许后续处理</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 调用父类的事件处理逻辑，保留 QLineEdit 原有行为</span></span><br><span class="line">    <span class="keyword">return</span> QLineEdit::<span class="built_in">event</span>(pevent);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>你已经很好地总结了 Qt 事件机制与相关设计模式的核心思路。可以进一步结合代码实践，验证如下几个问题：</p>
+<ul>
+<li><strong>事件传递</strong>：在某节点标记为已处理后，观察事件是否会继续传递到父对象。</li>
+<li><strong>多态行为</strong>：通过不同的继承与重写组合，探究多态在事件处理中的实际效果。</li>
+</ul>
+<h2 id="事件过滤器"><a href="#事件过滤器" class="headerlink" title="事件过滤器"></a>事件过滤器</h2><blockquote>
+<p>​	在QT中的事件处理机制中，还存在着一个相当重要的机制，就是我们的过滤器机制。通过这个机制，我们可以对于一个用户发出的事件进行过滤，没错，就是你想的那种过滤。</p>
+</blockquote>
+<h3 id="使用事件过滤器的步骤"><a href="#使用事件过滤器的步骤" class="headerlink" title="使用事件过滤器的步骤"></a>使用事件过滤器的步骤</h3><ol>
+<li>继承 <code>QObject</code> 并重写 <code>eventFilter</code> 方法：<ul>
+<li>事件过滤器需要继承自 <code>QObject</code> 并实现 <code>eventFilter()</code> 方法。</li>
+<li><code>eventFilter()</code> 接收两个参数：目标对象和事件本身。</li>
+</ul>
+</li>
+<li>安装事件过滤器：<ul>
+<li>通过 <code>installEventFilter()</code> 方法，将事件过滤器安装到目标对象上。</li>
+</ul>
+</li>
+</ol>
+<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QCoreApplication&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QDebug&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QKeyEvent&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;QWidget&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyEventFilter</span> : <span class="keyword">public</span> QObject</span><br><span class="line">&#123;</span><br><span class="line">    Q_OBJECT</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">eventFilter</span><span class="params">(QObject *watched, QEvent *event)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 判断事件类型</span></span><br><span class="line">        <span class="keyword">if</span> (event-&gt;<span class="built_in">type</span>() == QEvent::KeyPress) &#123;</span><br><span class="line">            QKeyEvent *keyEvent = <span class="built_in">static_cast</span>&lt;QKeyEvent *&gt;(event);</span><br><span class="line">            <span class="built_in">qDebug</span>() &lt;&lt; <span class="string">&quot;Key pressed:&quot;</span> &lt;&lt; keyEvent-&gt;<span class="built_in">text</span>();</span><br><span class="line">            <span class="comment">// 返回 true 阻止事件继续传播，返回 false 允许传播</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;  <span class="comment">// 事件被拦截</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> QObject::<span class="built_in">eventFilter</span>(watched, event);  <span class="comment">// 调用基类处理其他事件</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">QCoreApplication <span class="title">a</span><span class="params">(argc, argv)</span></span>;</span><br><span class="line"></span><br><span class="line">    QWidget w;</span><br><span class="line">    MyEventFilter *filter = <span class="keyword">new</span> <span class="built_in">MyEventFilter</span>();</span><br><span class="line">    w.<span class="built_in">installEventFilter</span>(filter);  <span class="comment">// 将事件过滤器安装到 QWidget 上</span></span><br><span class="line"></span><br><span class="line">    w.<span class="built_in">show</span>();</span><br><span class="line">    <span class="keyword">return</span> a.<span class="built_in">exec</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="事件过滤器的作用"><a href="#事件过滤器的作用" class="headerlink" title="事件过滤器的作用"></a>事件过滤器的作用</h3><ul>
+<li><strong>拦截和修改事件</strong>：比如，你可以拦截按键事件，修改或阻止某些特定的按键。</li>
+<li><strong>监听多个对象的事件</strong>：事件过滤器可以安装到多个对象上，统一处理这些对象的事件。</li>
+<li><strong>事件传播控制</strong>：通过返回 <code>true</code> 或 <code>false</code>，你可以控制事件是否继续传递，或是否被完全阻止。</li>
+</ul>
+<h3 id="事件过滤器的优缺点"><a href="#事件过滤器的优缺点" class="headerlink" title="事件过滤器的优缺点"></a>事件过滤器的优缺点</h3><p><strong>优点</strong>：</p>
+<ul>
+<li>可以在不改变目标对象的情况下，灵活地处理事件。</li>
+<li>适用于需要跨多个对象进行事件监听或处理的场景。</li>
+</ul>
+<h3 id="简单分析"><a href="#简单分析" class="headerlink" title="简单分析"></a>简单分析</h3><p>​	不难猜想到，这个事件过滤器其实是我们事件链条上的一环。再者，在这个链条上，这个事件过滤器的优先级甚至于要高于event函数的，所有的事件都需要先通过这个事件过滤器去进行一次过滤，所有返回true的事件将会被拦截。在经过我们的事件过滤器后，如果我们还想要在本层次中去进行对应的事件处理，我们需要使得这些个事件在最后在这个层级中能够返回false被event函数所接收。</p>
+<p>​	对于一个经过事件处理器的事件，如果最后这个事件过滤器对这个事件的处理返回值是true，就代表这个事件被拦截了，如果返回false，那么这个事件就会被传递到对应的这个层次上的event中去进行后续的处理。当然，我们在这里还可以进行进一步的过滤，就比如再次的去调用另一个事件过滤器，但是总体来说处理逻辑都是一样的。</p>
+<p>​	现在就可以对于这个节点的层次逻辑进行进一步的填充，所有的事件，都会先经过当前节点的事件过滤器去进行识别，当经过这个事件过滤器并且返回值是false后，这个事件将会被分发到event中去进行我们上面已经分析过的处理，这俩者之间没有一个紧密的联系。俩者之间的耦合度相当低使得我们可以只专注于当前事件过滤器的设计。</p>
+<p>​	需要注意一点的是，事件过滤器的安装需要一个事件过滤器指针，这个指针可以有多种情况，最简单的就是去定义一个通用的事件过滤器，所有的都可以使用这个事件过滤器，如果我们是在一个类中去进行了我们事件过滤器函数的重写。如果我们想要安装这个重写的事件过滤器，需要注意的是，我们只需要去在对应的install函数中去传入这个对象的指针即可。</p>
+<blockquote>
+<p>事需缓图，欲速不达也。</p>
+<p>得找个时间去练练手，今天就先到这，溜溜球。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2024/12/29/QT%E6%8E%A7%E4%BB%B6/4-eventfiliter/" title="QEventFilter">https://tcww0.github.io/2024/12/29/QT控件/4-eventfiliter/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/QT/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> QT</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/28/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E5%B8%B8%E9%87%8F/" rel="prev" title="类常量">
+      <i class="fa fa-chevron-left"></i> 类常量
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/12/30/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/" rel="next" title="命令模式">
+      命令模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.</span> <span class="nav-text">事件系统</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%82%E8%B0%88"><span class="nav-number">1.1.</span> <span class="nav-text">杂谈</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%85%E9%A5%B0"><span class="nav-number">1.1.1.</span> <span class="nav-text">装饰</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%85%E8%A3%85"><span class="nav-number">1.1.2.</span> <span class="nav-text">包装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E9%80%92"><span class="nav-number">1.1.3.</span> <span class="nav-text">传递</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E4%B8%8E%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">事件传递与责任链模式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E5%BD%92%E7%BA%B3"><span class="nav-number">1.2.</span> <span class="nav-text">阶段归纳</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E5%A4%84"><span class="nav-number">1.2.1.</span> <span class="nav-text">特殊处</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#event%E5%92%8C%E6%B7%B1%E5%B1%82%E5%87%BD%E6%95%B0%E5%A4%84%E7%90%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">event和深层函数处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GPT%E5%BD%92%E7%BA%B3%E7%89%88%E6%9C%AC"><span class="nav-number">1.3.</span> <span class="nav-text">GPT归纳版本</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E6%9C%BA%E5%88%B6%E4%B8%8E%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.3.1.</span> <span class="nav-text">事件机制与责任链模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#event-%E5%87%BD%E6%95%B0%E7%9A%84%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90"><span class="nav-number">1.3.2.</span> <span class="nav-text">event 函数的深度解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E6%80%81%E4%B8%8E%E8%A3%85%E9%A5%B0%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%BB%93%E5%90%88"><span class="nav-number">1.3.3.</span> <span class="nav-text">多态与装饰模式的结合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%E8%A1%A5%E5%85%85"><span class="nav-number">1.3.4.</span> <span class="nav-text">示例补充</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.3.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="nav-number">1.4.</span> <span class="nav-text">事件过滤器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E4%BA%8B%E4%BB%B6%E8%BF%87%E6%BB%A4%E5%99%A8%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.4.1.</span> <span class="nav-text">使用事件过滤器的步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.4.2.</span> <span class="nav-text">代码示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E8%BF%87%E6%BB%A4%E5%99%A8%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.4.3.</span> <span class="nav-text">事件过滤器的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E8%BF%87%E6%BB%A4%E5%99%A8%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">1.4.4.</span> <span class="nav-text">事件过滤器的优缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90"><span class="nav-number">1.4.5.</span> <span class="nav-text">简单分析</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">88k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">1:20</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : '444b155a700dbb6497b63388013ff65b',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

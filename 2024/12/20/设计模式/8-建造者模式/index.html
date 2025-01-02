@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="接下来我们进入到建造者模式中最麻烦的模式，生成者模式(建造者模式)。这种模式可以看做是对于抽象工厂模式的一个方面的改良。我们先回来看到抽象工厂模式，在抽象工厂模式中，一个工厂只需要去负责对应零件的获取即可，只需要获取到了这一系列一个具体产品需要的具体零件，我们就默认这些零件已经组合好成为了我们需要的一个具体产品。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="建造者模式">
+<meta property="og:url" content="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="接下来我们进入到建造者模式中最麻烦的模式，生成者模式(建造者模式)。这种模式可以看做是对于抽象工厂模式的一个方面的改良。我们先回来看到抽象工厂模式，在抽象工厂模式中，一个工厂只需要去负责对应零件的获取即可，只需要获取到了这一系列一个具体产品需要的具体零件，我们就默认这些零件已经组合好成为了我们需要的一个具体产品。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/1.jpeg">
+<meta property="og:image" content="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/2.jpeg">
+<meta property="og:image" content="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/3.jpeg">
+<meta property="og:image" content="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/4.jpeg">
+<meta property="og:image" content="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/5.jpeg">
+<meta property="og:image" content="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/6.png">
+<meta property="article:published_time" content="2024-12-20T12:29:19.000Z">
+<meta property="article:modified_time" content="2024-12-23T04:54:14.195Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="创建型设计模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/1.jpeg">
+
+<link rel="canonical" href="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>建造者模式 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          建造者模式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-12-20 20:29:19" itemprop="dateCreated datePublished" datetime="2024-12-20T20:29:19+08:00">2024-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-12-23 12:54:14" itemprop="dateModified" datetime="2024-12-23T12:54:14+08:00">2024-12-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>3.8k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>3 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>接下来我们进入到建造者模式中最麻烦的模式，生成者模式(<strong>建造者模式</strong>)。这种模式可以看做是对于抽象工厂模式的一个方面的改良。我们先回来看到抽象工厂模式，在抽象工厂模式中，一个工厂只需要去负责对应零件的获取即可，只需要获取到了这一系列一个具体产品需要的具体零件，我们就默认这些零件已经组合好成为了我们需要的一个具体产品。</p>
+<span id="more"></span>
+<p>看到这个过程，我们其实可以看到它其实省略了一个过程，就是零件是怎么组装形成我们最后的产品的。在现实世界中，我们仅仅获取到了一些零件是远远不够的，毕竟，就算给你一个手机所需要的所有零件，你也不知道这些零件要怎么组装才能形成我们需要的具体产品。这时就引入了一种新的创建型模式：生成者模式(<strong>建造者模式</strong>)。</p>
+<p>既然它是创建型模式，那么它最后的目的就还是一个具体类对象的创建，但是正如我们前面所说，这个模式相对于抽象工厂模式来说进行了一些改进，其相对于不注重细节的抽象工厂模式进行了在零件组装上的细化。使得在对象创建时能够更加细致的对整个过程进行管理。就比如把，你要建造一栋楼，那么你至少需要地基才能建造第一层乃至更多层的楼吧。在抽象工厂模式中，其不关注你到底怎么建造的。哪怕你先提供了最高层的楼，再提供一个地基，它也是允许的，毕竟它忽略了一个组装的细节。</p>
+<p>但是我们建造者模式不允许这样的创建。建造者模式将一个创建对象的过程进行细化和规定，其规定了一个具体产品的组成零件，以及这些个零件之间的组装细节。就比如，你需要先有地基，你才能建第一层楼，才能接着建造接下来的一系列楼层。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/1.jpeg" alt="1"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/2.jpeg" alt="2"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/3.jpeg" alt="3"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/4.jpeg" alt="4"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/5.jpeg" alt="5"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/6.png" alt="6"></p>
+<p>来简单看一个生成器模式下的UML类图。简单来分析下建造者类中的层次，首先我们应该看到的就是ShipBuilder这个类，可以看到，这个类是接下来的俩个具体类的子类。也可以这么说，这个是一个抽象工厂层，这个层次规定了一个产品所需要的步骤，我们所有具体的工厂类都应该是从这些个抽象工厂类中派生出来的。在这个类中，你可以看到其实相对于抽象工厂它是相似的。在演示中由于设计的复杂性这里不会让其去下辖抽象工厂层次中的零件类，但我们需要知道其实是有的。</p>
+<p>在这些具体的建造者工厂类中，我们一般会存在一个成员来对我们建造的规则进行一个记录，这个的具体类型取决于实现。</p>
+<p>说完了船的建造这一块，我们来说指令发出这一块的。在生成一个船的指令发出时，可能经过多层的处理。一般来说，为了好看，我们都会考虑增加一个管理者类，在用户层可以通过这个类去跟具体的工厂进行间接的交互，而不必直接去找到对应的工厂，其实就是加了一层中介。在这个管理者类中，需要这个管理者类可以管理我们需要的一系列产品的生产。所以这里就需要这个管理者类包含一个抽象工厂类的指针，令其可以指向所有的子类对象。再者，如果说一个产品中还有细分的品种，我们就需要让这个管理者类中去添加对应的生产函数，毕竟一个指针只能指向对应的对象，但是对应对象的生产是必须通过方法的(即函数)。也就是说，一个管理者类的方法数量，取决于我们一个产品的种类。</p>
+<p>好，接下来就是最后一层，用户层，在我们这里中，由于存在管理者类，所以与用户层直接进行交互的将会是管理者类，用户层通过想管理者类提出要求，就比如要那艘船，要什么品质的船等相对来说更加细致的要求，就可以获取对应的产品了，不用关注底层的实现。</p>
+<p>也就是说，生产者模式其实还可以看做是一种对于抽象工厂模式的扩充。其更加注重了各个零件组装的细节，能够相对于抽象工厂类去实现更加细致化的操作。</p>
+<p>好了，我好像对建造者模式有一定的理解了，让我们启动。</p>
+<p>首先，在建造者模式中，存在几个比较重要的层次需要我们了解。首先是用户层，这个其实对应的调用，我们不多赘述。</p>
+<p>但是吧，我决定建造者模式从下往上去建模比较好，来吧。我们首先需要看到我们整个模式需要生产的东西，就是一个具体的类对象。用上面造船为例子吧。船的类就是整个模式要生产的东西的板子。对于这一层，可能是由一个抽象类来规定我们生产的产品的基本属性，然后通过一个具体的派生类来实现具体的一个船对象所需要的属性。当然，也有可能不是使用多态而是穷举所有的船类。这个取决于我们具体的实现。但是无论是哪种实现，我们需要注意的是，在这一层的船类中，对船的约束是相当宽泛的。就好比说，这个东西我给你标签为船，但是这个东西的具体并不会在这个标签上就注明，这里也是如此。</p>
+<p>接下来需要看到建造者层，这是在整个层次中的底层。这一层中我们还是可以抽象出来俩层，一层是抽象建造者层，一层是具体建造者层。这个抽象建造者层规定了这一系列的建造者所要建造的物品的种类。就比如，你如果是一个船建造者，那么它要派生出来的类就是具体的船的建造者，但是，并不规定到底是哪一个船。</p>
+<p>一般来说，在抽象建造者层中，一般只存在着一系列的建造方法，不会存在一个成员对象用于储存。这个其实是为了方便一个扩展。因为我们不确定在设计中我们的船类是否是使用多态的，如果你的具体船类是使用多态的，那么使用成员指针自然是一个极好的方法，但是，如果你是穷举出一系列的船的，你使用成员指针的话，你就必须包括所有的可能创建的船，这个其实不是很符合单一职责原则的。</p>
+<p>所以我们可以看到，在建造者类中，我们特别需要注意的就是其所遵守的<strong>单一职责原则</strong>，这个原则使得建造者类在设计上是关注与船的功能的构建即可。其在设计中一般来说都是提供一系列的对应的要创建的对象的组装方法的。就比如组装船。在建造者类中，其可能存在的方法就包括武器，能源，装饰等等。但是，一般来说，在建造者类中，不会包括这些方法的组合。也就是说，建造者类负责提供一些(较大块的)零件，让其他模块来组合形成一个具体的类对象。</p>
+<p>接下来我们需要来看到更接近用户层的类，<strong>管理者层</strong>。这个层在一些资料中说是可有可无的，但是吧，现实设计中一般都是包含这个类的。</p>
+<p>这个类可以看做是对用户需求提出的层次和建造者层次的缓冲。管理者类一般是可以存在多个的，一个管理者类负责一类船的生产。</p>
+<p>用现实生活来举例吧，一个船厂一般有自己生产的船的方向，但是并不固定。当一个公司甲方想要去委托一个船厂去生产一个具有特定功能的船的时候，其一般都不会直接去找到制造部门，而是去找到船厂的销售部门，向这个部门去阐述自己的需求，或者说选择自己需要的船型号。接下来这个销售部门会去解析这个需求，将这个需求解析成一步步可以落地的步骤，然后让这个船厂的制造部门去做。</p>
+<p>在这个例子中，甲方扮演的角色就是用户层，销售部门扮演的就是管理者层，制造部门扮演的就是建造者层，而我们最后的需求产品，就是我们一个具体的船类的对象。</p>
+<p>可以看出来，我们管理者层这里负责一个需求的解析，就比如甲方去A船厂提出我需要你们一个标准型号的船，那么这个管理者类就会对这个需求进行解析，就假设一个标准型号的船需要一个船身，一个发动机，一个武器这个配置，那么管理者层就会把这个配置发送给我们具体的建造者类中去，然后这个建造者类就会依照这个管理者类发来的需求按顺序去一个个实现到一个船对象中。当执行完后，一个标准A船就被制造出来了。</p>
+<p>接下来，就需要船厂能够提供一个接口让用户能够提船。这个一般应该在制造者类中去实现，至于是在抽象类中就有还是每个类维护一个自己的方法取决于各自的实现。其实，这些个制造者类就好像一个公司一个部门的不同项目，其各自有着一套对接流程，甲方需要依照这些接口流程去获取自己需要的东西。</p>
+<p>同时，我们可以考虑到如果不想要A船厂的船而想要B船厂的船。那我们需要怎么做，那我们需要去找到对应船厂的中介(管理者)，对应船厂需要特定的船产品(具体的产品类)，还需要对应船厂有自己的制造部门(建造者类)，这是最简单的配置了，这也是我们在建造者模式中想要进行扩展需要添加的几个方面。</p>
+<p>我再来对制造者类来进行下分析。我们抽象这个建造者类为具体的生产部门。在这个部门中，其的目的是生成出一个管理者可能会要求生产的产品，也就是说，在制造者类中，应该存在一个可以用来储存当前生产的对象的地方，在类中就抽象为一个成员指针。这个可以玩笑为”新建文件夹”。在制造者类中，其一开始并不知道这个类将要被怎么个设计，但是这个制造者类中应该包含着对于这个新建文件夹的所有操作。</p>
+<p>既然这个制造者类不能自己决定要怎么个制作方法，那么就需要外部来给他提出要求，在生产者模式中就是管理者类起到了这方面的作用。前面已经提到了，管理者类会将用户提出的需求转化为具体的组装步骤转发给制造者类去进行实现。</p>
+<p>也就是说，管理者类会提供一个完整的设计流程给制造者，制造者类只需要按这个提供的流程去进行组装即可。</p>
+<p>差不多了，那么接下来我们来讨论下管理者类的必要性。其实理论上管理者类的存在不是必须的，但是正如设计模式存在的意义一般，这个层次的存在也是为了方便我们的设计和使用。我们当然可以把这个管理者要要提供的组装流程直接封装在制造者类中。但是吧，这就像你一个甲方要去直接与对应乙方的技术部门进行交流一样。这通常是一份吃力不讨好的工作。为了更高效的交流，我们应该考虑这个公司中的对接部门，这个部门能够协调甲方的需求和自己方公司的实际能力，这种缓存能更好的提高效率。</p>
+<p>也就是说，对于设计模式的学习，我们一定得结合实际来看，毕竟设计模式其实就是一种对于现实世界的抽象建模，其旨在解决现实生活中的问题，结合现实问题能让我们更好的理解设计模式。</p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/" title="建造者模式">https://tcww0.github.io/2024/12/20/设计模式/8-建造者模式/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 创建型设计模式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/7-%E5%B7%A5%E5%8E%82%E7%AE%80%E4%BB%8B/" rel="prev" title="工厂模式">
+      <i class="fa fa-chevron-left"></i> 工厂模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/9-%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F/" rel="next" title="原型模式">
+      原型模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">88k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">1:20</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : 'ca7252ac9102d1e3ac08b20b6443ddd2',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

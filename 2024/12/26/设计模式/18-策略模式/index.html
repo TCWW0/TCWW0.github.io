@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="策略模式意图​	定义一系列的算法，将它们一个个封装起来，并且使得它们可以相互替换。策略模式使得算法可以独立使用与它的用户而变化。 举例 ​	在我们使用的许多编辑器乃至编译器中，我们通常可以看到一些不同的换行符算法，有windows的\r\n，linux的\n，Mac用的\r等。将这些个换行符算法硬编码进我们使用的编辑器或者编译器软件中是不可取的。实际你也可以看到，基本所有的编辑器和编译器都有自己的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="策略模式">
+<meta property="og:url" content="https://tcww0.github.io/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="策略模式意图​	定义一系列的算法，将它们一个个封装起来，并且使得它们可以相互替换。策略模式使得算法可以独立使用与它的用户而变化。 举例 ​	在我们使用的许多编辑器乃至编译器中，我们通常可以看到一些不同的换行符算法，有windows的\r\n，linux的\n，Mac用的\r等。将这些个换行符算法硬编码进我们使用的编辑器或者编译器软件中是不可取的。实际你也可以看到，基本所有的编辑器和编译器都有自己的">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/735104bbfb7d801a684b9fc3fcd628b4.png">
+<meta property="article:published_time" content="2024-12-26T08:24:34.000Z">
+<meta property="article:modified_time" content="2024-12-27T02:41:38.428Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="行为型设计模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/735104bbfb7d801a684b9fc3fcd628b4.png">
+
+<link rel="canonical" href="https://tcww0.github.io/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>策略模式 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          策略模式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-12-26 16:24:34" itemprop="dateCreated datePublished" datetime="2024-12-26T16:24:34+08:00">2024-12-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-12-27 10:41:38" itemprop="dateModified" datetime="2024-12-27T10:41:38+08:00">2024-12-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>5.4k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>5 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="策略模式"><a href="#策略模式" class="headerlink" title="策略模式"></a>策略模式</h1><h2 id="意图"><a href="#意图" class="headerlink" title="意图"></a>意图</h2><p>​	定义一系列的算法，将它们一个个封装起来，并且使得它们可以相互替换。策略模式使得算法可以独立使用与它的用户而变化。</p>
+<h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><blockquote>
+<p>​	在我们使用的许多编辑器乃至编译器中，我们通常可以看到一些不同的换行符算法，有windows的\r\n，linux的\n，Mac用的\r等。将这些个换行符算法硬编码进我们使用的编辑器或者编译器软件中是不可取的。实际你也可以看到，基本所有的编辑器和编译器都有自己的切换换行符的功能。那么，原因是什么呢?</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h3><ol>
+<li><strong>复杂性增加</strong><ul>
+<li>如果将换行算法直接嵌入到需要换行功能的程序中，会导致代码臃肿且难以维护。</li>
+<li>支持多种换行算法的需求进一步加剧了这一问题。</li>
+</ul>
+</li>
+<li><strong>灵活性受限</strong><ul>
+<li>如果需要更改换行算法，不希望仍然支持之前的算法。例如，从 Windows 换行标准切换到 Linux 或 macOS 的标准，可能希望只支持新的规则。</li>
+<li>继续支持不需要的旧规则可能导致解析问题。</li>
+</ul>
+</li>
+<li><strong>扩展性受限</strong><ul>
+<li>当功能被硬编码后，添加新算法或修改现有算法变得十分困难。</li>
+</ul>
+</li>
+</ol>
+<p>​	</p>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>​	也就是说，我们策略模式出现的动机就是为了解决上诉这种硬编码会导致的缺陷。所谓<strong>策略</strong>，就是在一个人面对不同事情时选择的不同应对方法，就比如你在window平台上设计时需要去使用window的换行符，你在linux平台开发时需要去使用linux的换行符。这些都是一种策略模式的体现。</p>
+<p>​	也就是说，策略模式最本质的作用，就是通过一种策略来代替一种硬编码的步骤，使得用户能够自己选择当前要使用的方法，或者程序自己选择要使用的方法以取代全部的一种硬编码程序。也就是说，这是一种对于程序的进一步的解耦。</p>
+<blockquote>
+<p>通过<strong>解耦算法的选择与其具体实现</strong>来提高程序的灵活性和可维护性。</p>
+</blockquote>
+<p>​	就拿上面那个换行符算法举例，当我们使用策略模式来设计我们的编辑器后，我们能够在编辑器中去自由选择我们当前想要使用的换行符版本，这种动态选择提供了很高的灵活性，显著的提升了我们使用时的灵活性，将这个扩展到我们的类的设计中也是如此。</p>
+<p>​	而且我们在考虑一下，如果我们使用策略模式来设计我们的换行符算法，那就意味着如果我们后续还需要对这个换行符算法进行添加或者修改的话，我们只需要去修改对应的区域或者添加新的算法即可，不必去修改现有的选择模块，这也是一种策略模式下的原则遵守和优势。</p>
+<hr>
+<h2 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h2><p><img src="/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/735104bbfb7d801a684b9fc3fcd628b4.png" alt="img"></p>
+<blockquote>
+<p><strong>百闻不如一见，UML类图，启动</strong></p>
+</blockquote>
+<p>​	首先，策略模式的UML类图是相对简单的，毕竟从本质来看，它关注的其实主要就来个模块，一个模块时选择模块，另一个是算法模块，选择模块时面向用户层的接口，通过这个模块隔离了用户层与算法实现，同时提供了用户选择算法的方式。</p>
+<p>​	至于算法层，只需要关注自身的实现，关注与选择模块的接口对接即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">+----------------+         +----------------+</span><br><span class="line">|  Context       |         |   Strategy     |</span><br><span class="line">|----------------|         |----------------|</span><br><span class="line">| setStrategy()  |&lt;&gt;------&gt;| + execute()    |</span><br><span class="line">| execute()      |         |----------------|</span><br><span class="line">+----------------+         +----------------+</span><br><span class="line">        |</span><br><span class="line">        |-----------------------------------------+</span><br><span class="line">        |                                         |</span><br><span class="line">+------------------+                  +------------------+</span><br><span class="line">| ConcreteStrategyA|                  | ConcreteStrategyB|</span><br><span class="line">|------------------|                  |------------------|</span><br><span class="line">| + execute()      |                  | + execute()      |</span><br><span class="line">+------------------+                  +------------------+</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>​	更为简单的一个UML类图。虽然有点糙，凑活这看吧</p>
+<h3 id="类图要点："><a href="#类图要点：" class="headerlink" title="类图要点："></a><strong>类图要点：</strong></h3><ul>
+<li><code>Context</code>（选择模块）：持有 <code>Strategy</code> 的引用，用于调用具体算法。</li>
+<li><code>Strategy</code>（算法模块）：定义算法的统一接口，提供一个抽象的算法约束。</li>
+<li><code>ConcreteStrategyA</code>、<code>ConcreteStrategyB</code>（具体算法实现）：实现 <code>Strategy</code> 接口，分别提供具体的算法逻辑。</li>
+</ul>
+<p>​	在这里我们在选择模块中没有列出引用这个属性，但是我们使用这个聚合关系来表示了。不对，你都看到这里了，不应该不知道这个啊，我还写个蛋啊。</p>
+<p>​	在这个类图中其实没有显示出到底是一种什么个选择的逻辑，这个是等下我们的代码的工作。在这个类图中，我们主要来分析下我们设计的解耦性。</p>
+<h3 id="设计的解耦性"><a href="#设计的解耦性" class="headerlink" title="设计的解耦性"></a>设计的解耦性</h3><ul>
+<li><p><strong>对用户：</strong></p>
+<ul>
+<li><p>用户只需与 <code>Context</code> 交互，完全无需了解具体算法的实现逻辑。</p>
+</li>
+<li><p><code>Context</code> 提供了灵活的接口，让用户能够动态选择策略或依赖默认策略。这种灵活的选择可能是用户自己的选择也可能是程序自己的旋转，但是一般来说，这种选择都不是有if-else实现的，毕竟你策略模式的一种存在意义就是代替这种令人反感的长嵌套语句</p>
+<blockquote>
+<p><strong>你可能会疑惑那得怎么动态选择，别急，接着看</strong></p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p><strong>对算法：</strong></p>
+<ul>
+<li>各种算法被封装为独立类，彼此互不干扰。它们只需实现 <code>Strategy</code> 接口，与 <code>Context</code> 保持对接即可。</li>
+<li>新增算法时，只需增加一个新的具体策略类，无需修改 <code>Context</code> 和其他策略。</li>
+</ul>
+</li>
+</ul>
+<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><blockquote>
+<p><strong>实践才是检验真理的唯一方法</strong></p>
+</blockquote>
+<p>​	其实这里给的代码实例大部分还是为了写而写的，所以其实并没有什么实际应用的价值。而这些存在的意义是给你阐述这些的存在，并在实际的应用中去尝试使用，就比如，我学完策略模式将会把我课设中的数据模块再次进行解耦，将其分割为可以单步执行渲染和一直渲染到底的俩种策略模式，不过那都是后话了，我们先来看代码。</p>
+<h3 id="对比示例"><a href="#对比示例" class="headerlink" title="对比示例"></a>对比示例</h3><h4 id="使用-if-else-的实现（不推荐）"><a href="#使用-if-else-的实现（不推荐）" class="headerlink" title="使用 if-else 的实现（不推荐）"></a>使用 <code>if-else</code> 的实现（不推荐）</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TextEditor</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">printLineBreak</span><span class="params">(<span class="type">const</span> std::string&amp; os)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (os == <span class="string">&quot;Windows&quot;</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: \\r\\n&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (os == <span class="string">&quot;Linux&quot;</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: \\n&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (os == <span class="string">&quot;Mac&quot;</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: \\r&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Unknown OS!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    TextEditor editor;</span><br><span class="line">    editor.<span class="built_in">printLineBreak</span>(<span class="string">&quot;Linux&quot;</span>);  <span class="comment">// Output: Line break: \n</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>缺点：</p>
+<ul>
+<li><p><code>printLineBreak</code> 方法中耦合了换行逻辑的选择和实现，扩展性差,破坏了单一职责原则。</p>
+</li>
+<li><p>增加新的操作系统时，必须修改方法内部的条件分支，破坏了开放封闭原则。</p>
+</li>
+<li><p>我们在修改时必须对所有的算法都进行维护，可能需要进行全部的实例化占用空间，也可能会使用懒加载机制来复杂使用逻辑。</p>
+</li>
+</ul>
+<h4 id="使用策略模式的实现（推荐）"><a href="#使用策略模式的实现（推荐）" class="headerlink" title="使用策略模式的实现（推荐）"></a>使用策略模式的实现（推荐）</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 策略接口</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LineBreakStrategy</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">LineBreakStrategy</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 具体策略</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WindowsLineBreak</span> : <span class="keyword">public</span> LineBreakStrategy &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\\r\\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LinuxLineBreak</span> : <span class="keyword">public</span> LineBreakStrategy &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MacLineBreak</span> : <span class="keyword">public</span> LineBreakStrategy &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\\r&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 上下文类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TextEditor</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::unique_ptr&lt;LineBreakStrategy&gt; strategy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setStrategy</span><span class="params">(std::unique_ptr&lt;LineBreakStrategy&gt; newStrategy)</span> </span>&#123;</span><br><span class="line">        strategy = std::<span class="built_in">move</span>(newStrategy);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">printLineBreak</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (strategy) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: &quot;</span> &lt;&lt; strategy-&gt;formatLineBreak() &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;No strategy set!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    TextEditor editor;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 动态选择策略</span></span><br><span class="line">    editor.<span class="built_in">setStrategy</span>(std::<span class="built_in">make_unique</span>&lt;LinuxLineBreak&gt;());</span><br><span class="line">    editor.<span class="built_in">printLineBreak</span>();  <span class="comment">// Output: Line break: \n</span></span><br><span class="line"></span><br><span class="line">    editor.<span class="built_in">setStrategy</span>(std::<span class="built_in">make_unique</span>&lt;WindowsLineBreak&gt;());</span><br><span class="line">    editor.<span class="built_in">printLineBreak</span>();  <span class="comment">// Output: Line break: \r\n</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>优势：</p>
+<ol>
+<li>避免了 <code>if-else</code> 的分支判断，代码简洁清晰。</li>
+<li>新增策略只需添加新的策略类，无需修改现有代码。</li>
+<li>动态选择和切换策略，灵活性更强。</li>
+</ol>
+<p>​	</p>
+<blockquote>
+<p><strong>那么，代价是什么?</strong></p>
+</blockquote>
+<p>​	从上面来段代码我们其实可以看到最直观的一点就是，策略模式设计下的程序相对来说会存在更多的子类，这些子类都是对应的子算法类，这样会导致这个程序看起来很臃肿。</p>
+<p>​	同时，无论是使不使用策略模式下的设计，我们其实都会存在一种问题，就是我们如果要选择一种算法，我们就必须知道一种算法的存在，这个其实就跟我们平时使用的很多软件一样，特别是编译器这种集成度很高的软件。</p>
+<p>​	通常来说，为了集成到图形化界面上并提供一些多元化的选择，设计者会将功能的选择绑定到按钮上，而程序中的交互按钮又乱七八糟，很多按钮对很多用户来说只是个黑盒，这无疑还是会提高用户的使用难度。</p>
+<p>​	而且在很多情况下，我们可能会碰到一些策略算法类之间存在部分逻辑重叠的情况，这会导致代码的重复，不过这种也可以通过基类的方法提取来解决。</p>
+<p>​	我为什么提出这一点，其实是为了说明在我们提出一个模式的缺点后，我们应该做的不是去记住这些缺点然后接受它，而是应该通过我们已有的或者将来可能会有的知识来进行我们现有的缺点的一些个隐藏，这个才是举出缺点的意义。而不是，好，这个模式有这些缺点，那我就记住它，当我被问到这些时，我一五一十的去吧这些缺点说出来，这是没有意义的。</p>
+<p>​	</p>
+<blockquote>
+<p>​	但是，总的来说，策略模式的这种优化，还是利大于弊的。因为设计模式关注的过程大多还是程序开发的这个过程，策略模式的设计思想本质就是让每种策略自成一体，通过接口与上下文对接，从而取代臃肿的条件分支语句，使代码更加模块化、可扩展和易维护。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​	策略模式的核心思想是<strong>通过封装变化和动态选择策略，来提升代码的灵活性和可维护性</strong>。尽管它可能会增加类的数量和一定的设计复杂度，但其在算法扩展性和代码清晰度上的优势使得它在实际开发中广受欢迎。</p>
+<p>​	通过合理设计和优化，策略模式能够很好地实现<strong>高内聚、低耦合</strong>的设计目标，帮助我们构建更易维护、更具扩展性的系统。</p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/" title="策略模式">https://tcww0.github.io/2024/12/26/设计模式/18-策略模式/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 行为型设计模式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E8%AF%BE%E8%AE%BE%E4%B8%BE%E4%BE%8B/" rel="prev" title="设计模式课设举例">
+      <i class="fa fa-chevron-left"></i> 设计模式课设举例
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/12/27/QT%E6%8E%A7%E4%BB%B6/3-QT%E5%B8%83%E5%B1%80/" rel="next" title="QT布局">
+      QT布局 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">策略模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%84%8F%E5%9B%BE"><span class="nav-number">1.1.</span> <span class="nav-text">意图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B"><span class="nav-number">1.2.</span> <span class="nav-text">举例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.2.1.</span> <span class="nav-text">原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">1.2.2.</span> <span class="nav-text">分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UML%E7%B1%BB%E5%9B%BE"><span class="nav-number">1.3.</span> <span class="nav-text">UML类图</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%9B%BE%E8%A6%81%E7%82%B9%EF%BC%9A"><span class="nav-number">1.3.1.</span> <span class="nav-text">类图要点：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E7%9A%84%E8%A7%A3%E8%80%A6%E6%80%A7"><span class="nav-number">1.3.2.</span> <span class="nav-text">设计的解耦性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.4.</span> <span class="nav-text">代码实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%AF%94%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.4.1.</span> <span class="nav-text">对比示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-if-else-%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%88%E4%B8%8D%E6%8E%A8%E8%8D%90%EF%BC%89"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">使用 if-else 的实现（不推荐）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%88%E6%8E%A8%E8%8D%90%EF%BC%89"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">使用策略模式的实现（推荐）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.5.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">88k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">1:20</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : '1d58e584e80b528e17e177ac56195d53',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
