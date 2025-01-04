@@ -1821,4 +1821,70 @@
         <tag>课程设计</tag>
       </tags>
   </entry>
+  <entry>
+    <title>中介者模式</title>
+    <url>/2025/01/03/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/22-%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<h1 id="中介者模式"><a href="#中介者模式" class="headerlink" title="中介者模式"></a>中介者模式</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>​	用一个中介对象来封装一系列的对象交互。中介者使得各对象不需要显示的相互引用，从而是其耦合松散，而且可以独立地改变他们的交互。</p>
+<span id="more"></span>
+
+<h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><p>​	其实这个中介者模式也相对来说比较好理解。重点就是在<strong>中介者</strong>者三个字上。</p>
+<p>​	还是举现实中的例子进行分析，最直观的就是现实中的房产中介。通过房产中介，我们可以去看到一系列的房子的信息，即使我们并不了解这些个房子之后真正的售卖者。我们只需要通过这些个房产中介，就可以完成对于一个房产信息的了解，一个房子的购买等。总的来说，这个其实就是对于买房和卖房者这俩方之间的一处解耦合。这种解耦合的目的也十分明确，就是我们想让我们买房是不必依赖于卖房的一方。</p>
+<p>​	通过房产中介这一角色，卖房一方可以将其的信息交由中介来进行管理，只需要付出相应的代价即可。同时，买房的一方也不再需要去直接联系卖房的一方，省去了很多寻找的功夫，只需要去了解中介提供的统一接口即可。同时，对应的也需要付出相应的代价。在现实生活中，这些个代价一般都是钱，那么在程序设计中，这个代价对应的就是我们的类的一定的访问权限。</p>
+<p>​	如果我们对于这些角色间的关系使用连线来表示的话你应该就能够很清晰的了解这个关系的作用，在使用中介者模式之前，我们每个卖房者和买房者之间都有一条联系进行连接，这样的情况下双方角色一多就会出现一个非常复杂的关系网。如果改用中介者模式呢。在中介者模式下，我们在卖房者和买房者之间添加了一层缓冲，双方都可以通过这一层去进行与另一方的联系而不必要去直接联系，可以预见的是，在这种情况下，我们的结构图将会变得更加简洁明了。双方的联系只会连接到中介者这一端，有中介者这个节点进行各个连线之间的调度，控制连线之间的双边关系。</p>
+<p>​	在这种架构下，双方不需要去了解相互之间到底应该怎么进行沟通，只需要了解这个中介公司的要求即可，通过这个中介的接口，可以实现对于自身的一定程度上的委托，有这个中介来进行自身的一定的管理。</p>
+<h3 id="缺陷"><a href="#缺陷" class="headerlink" title="缺陷"></a>缺陷</h3><p>​	当然，这种架构本身也存在着一些缺陷，这个我们应该也能够简单的理解。就现实情况而言，当你想要通过一个中介想把自己的一定信息挂上，你需要考虑什么？最直接的就是我要做的手续吧，然后呢，就是我使用这个中介平台的代价吧。这个手续在程序中的直观体现就是我们实现中介功能的这个类吧。如果一个类绑定到对应的中介类中的步骤太麻烦，那么是否绑定就需要斟酌一下了。</p>
+<p>​	除此之外，还有什么？我们是否需要考虑一下我们使用这个中介类的代价，在程序中的体现就是我们这个中介类对于其所管理的类的访问权限，如果这个中介类需要的权限太多，那我们是否进行托管也需要考虑考虑吧。在程序设计中，这个的直观体现就是我们的中介类的设计复杂度，当我们的中介类包含了很多操作的时候，势必就需要使用对应的信息，但是是否暴露这些信息是由对应的角色决定的。</p>
+<p>​	总的来说，中介模式的使用，需要权衡当前需要的功能及对应的中介类的代价，选择符合自己当前需求的方案，当然，这句话说了就等于没说，自己用用才能体会。</p>
+<hr>
+<h2 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h2><p><img src="/2025/01/03/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/22-%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F/image-20250104095044211.png" alt="image-20250104095044211"></p>
+<p>这里的UML类图其实很清晰了，我们来进行一下简单的分析</p>
+<p>​	首先，我们需要明确一下再这个类图。在这个类图中，存在着俩个抽象基类，这俩个抽象基类代表的就是我们前面说过的使用中介的对象和作为中介的对象。这里的抽象Country就是我们的抽象使用者，而MediatorOrg就是我们的抽象中介者类对象。</p>
+<h3 id="抽象使用者Country类"><a href="#抽象使用者Country类" class="headerlink" title="抽象使用者Country类"></a>抽象使用者Country类</h3><p>​	这个类中其实很经典，主要就是定义了一些我们的具体使用者的一些接口，定义了一些接口规范，本质上其实也没有什么好说的。可以看到的是，在这个抽象对象中，保留了一个对于我们中介类的一个指针获取对应的中介类的接口使用权限(这里打错了，将就着看就行)。</p>
+<p>​	通过这个接口，我们可以去看到对应的中介者类给我们提供的行为，接下来就看这个类。</p>
+<h3 id="抽象中介者MediatorOrg类"><a href="#抽象中介者MediatorOrg类" class="headerlink" title="抽象中介者MediatorOrg类"></a>抽象中介者MediatorOrg类</h3><p>​	这个类也没什么好说的，主要就是包含了一个成员用于使用当前中介类的成员的注册，这个map包含了所有的成员相关信息，没什么好说的。这里主要的就是一个通知函数，但是在UML类图中去看一个函数的实现是不现实的，这个留到等下的代码实例中去分析。只需要注意的是，在这些个中介者类中，包含了一些用于连接的双方进行通信的一些方法。</p>
+<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><pre><code> 中介者模式的代码其实很简单，我也没有什么分析的欲望，自己看一遍也基本了解架构了，毕竟已经到了设计模式的相对后期了，一些简单的我就不想再进行一遍遍的分析了，之后碰到有意思的再来吧。
+</code></pre>
+<h3 id="抽象类"><a href="#抽象类" class="headerlink" title="抽象类"></a>抽象类</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 抽象中介者</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Mediator</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">sendMessage</span><span class="params">(<span class="type">const</span> string&amp; message, <span class="type">const</span> string&amp; sender)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">addUser</span><span class="params">(<span class="type">const</span> shared_ptr&lt;<span class="keyword">class</span> Colleague&gt;&amp; user)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Mediator</span>() = <span class="keyword">default</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 抽象同事类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Colleague</span> &#123;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    string name;</span><br><span class="line">    shared_ptr&lt;Mediator&gt; mediator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Colleague</span>(<span class="type">const</span> string&amp; name, shared_ptr&lt;Mediator&gt; mediator)</span><br><span class="line">        : <span class="built_in">name</span>(name), <span class="built_in">mediator</span>(std::<span class="built_in">move</span>(mediator)) &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">receiveMessage</span><span class="params">(<span class="type">const</span> string&amp; message, <span class="type">const</span> string&amp; sender)</span> </span>&#123;</span><br><span class="line">        cout &lt;&lt; name &lt;&lt; <span class="string">&quot; received message from &quot;</span> &lt;&lt; sender &lt;&lt; <span class="string">&quot;: &quot;</span> &lt;&lt; message &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">sendMessage</span><span class="params">(<span class="type">const</span> string&amp; message)</span> </span>&#123;</span><br><span class="line">        mediator-&gt;<span class="built_in">sendMessage</span>(message, name);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">string <span class="title">getName</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> <span class="keyword">this</span>-&gt;name;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Colleague</span>() = <span class="keyword">default</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>​	</p>
+<h3 id="具体类"><a href="#具体类" class="headerlink" title="具体类"></a>具体类</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 具体中介者</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ChatRoom</span> : <span class="keyword">public</span> Mediator &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    vector&lt;shared_ptr&lt;Colleague&gt;&gt; users;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">sendMessage</span><span class="params">(<span class="type">const</span> string&amp; message, <span class="type">const</span> string&amp; sender)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; user : users) &#123;</span><br><span class="line">            <span class="keyword">if</span> (user-&gt;<span class="built_in">getName</span>() != sender) &#123;  <span class="comment">// 消息不发回给发送者</span></span><br><span class="line">                user-&gt;<span class="built_in">receiveMessage</span>(message, sender);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">addUser</span><span class="params">(<span class="type">const</span> shared_ptr&lt;Colleague&gt;&amp; user)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        users.<span class="built_in">push_back</span>(user);</span><br><span class="line">        cout &lt;&lt; user-&gt;<span class="built_in">getName</span>() &lt;&lt; <span class="string">&quot; joined the chat room.&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 具体同事类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">User</span> : <span class="keyword">public</span> Colleague &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">User</span>(<span class="type">const</span> string&amp; name, shared_ptr&lt;Mediator&gt; mediator)</span><br><span class="line">        : <span class="built_in">Colleague</span>(name, mediator) &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">sendMessage</span><span class="params">(<span class="type">const</span> string&amp; message)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        cout &lt;&lt; name &lt;&lt; <span class="string">&quot; sends message: &quot;</span> &lt;&lt; message &lt;&lt; endl;</span><br><span class="line">        mediator-&gt;<span class="built_in">sendMessage</span>(message, name);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 客户端</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> chatRoom = <span class="built_in">make_shared</span>&lt;ChatRoom&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> alice = <span class="built_in">make_shared</span>&lt;User&gt;(<span class="string">&quot;Alice&quot;</span>, chatRoom);</span><br><span class="line">    <span class="keyword">auto</span> bob = <span class="built_in">make_shared</span>&lt;User&gt;(<span class="string">&quot;Bob&quot;</span>, chatRoom);</span><br><span class="line">    <span class="keyword">auto</span> charlie = <span class="built_in">make_shared</span>&lt;User&gt;(<span class="string">&quot;Charlie&quot;</span>, chatRoom);</span><br><span class="line"></span><br><span class="line">    chatRoom-&gt;<span class="built_in">addUser</span>(alice);</span><br><span class="line">    chatRoom-&gt;<span class="built_in">addUser</span>(bob);</span><br><span class="line">    chatRoom-&gt;<span class="built_in">addUser</span>(charlie);</span><br><span class="line"></span><br><span class="line">    alice-&gt;<span class="built_in">sendMessage</span>(<span class="string">&quot;Hi everyone!&quot;</span>);</span><br><span class="line">    bob-&gt;<span class="built_in">sendMessage</span>(<span class="string">&quot;Hello Alice!&quot;</span>);</span><br><span class="line">    charlie-&gt;<span class="built_in">sendMessage</span>(<span class="string">&quot;Hey folks!&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以看到其实真的是没有什么意思的，风紧扯呼，主要是很多的其实之前都有接触过，就不再赘述了。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><strong>中介者模式（Mediator Pattern）</strong> 是一种行为型设计模式，通过引入一个中介对象来封装多个对象之间的交互，从而降低对象之间的直接耦合性。对象不再直接引用或依赖彼此，而是通过中介者协调和管理它们的交互逻辑。</p>
+<h4 id="核心要点"><a href="#核心要点" class="headerlink" title="核心要点"></a><strong>核心要点</strong></h4><ul>
+<li><strong>解耦</strong>：中介者模式将对象间的交互集中到中介者，避免了对象之间的直接依赖。</li>
+<li><strong>灵活性</strong>：通过修改中介者，可以改变交互规则而不需要影响具体对象。</li>
+<li><strong>复杂性转移</strong>：系统交互的复杂性由对象转移到了中介者，中介者可能会变得复杂。</li>
+</ul>
+<h4 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a><strong>适用场景</strong></h4><ul>
+<li>系统中对象之间存在复杂的多对多交互。</li>
+<li>希望通过一个中心化的管理者来简化对象之间的关系。</li>
+</ul>
+<h4 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a><strong>优缺点</strong></h4><ul>
+<li>优点：<ul>
+<li>降低类间耦合，提升系统可维护性和可扩展性。</li>
+<li>将交互逻辑集中到中介者，便于管理。</li>
+</ul>
+</li>
+<li>缺点：<ul>
+<li>中介者可能变得复杂，容易成为“上帝对象”。</li>
+</ul>
+</li>
+</ul>
+<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a><strong>例子</strong></h4><ul>
+<li>聊天室（所有用户通过聊天室交流）。</li>
+<li>MVC 模式中，控制器作为中介者协调视图和模型的交互。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>行为型设计模式</tag>
+      </tags>
+  </entry>
 </search>
