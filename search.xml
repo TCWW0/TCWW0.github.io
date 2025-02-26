@@ -1,6 +1,252 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>函数对象</title>
+    <url>/2025/02/25/C++%E5%AD%A6%E4%B9%A0/%E5%87%BD%E6%95%B0%E5%AF%B9%E8%B1%A1/</url>
+    <content><![CDATA[<h1 id="函数对象"><a href="#函数对象" class="headerlink" title="函数对象"></a>函数对象</h1><p>​	函数对象其实本身并不神秘，简单来说，一个函数对象就是能够被以函数调用形式来进行调用的任意对象。可以想到，函数对象就应该包括函数名，函数指针以及重载了()运算符的类对象。</p>
+<h2 id="函数指针"><a href="#函数指针" class="headerlink" title="函数指针"></a>函数指针</h2><p>​	函数指针本身也是一个指针。需要知道的是，本质上看，函数其实跟普通的变量一样，都是一个符号，只是说这个符号的功能比较特殊。不必多说，我们先来看一下简单的函数指针的声明方式。</p>
+<p>​	一般来说，函数指针是一对一绑定的，这是因为函数指针本身的类型声明比较麻烦的原因。</p>
+<p>​	假设我们现在拥有这么一个函数</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	我们想要定义一个函数指针来指向这个函数，那么我们得先确定我们要使用的这个函数指针所要指向的函数形式来进行声明，简单来看，一个函数指针需要一下这些信息:(函数的返回类型，函数的所有参数类型)。并通过这样来进行声明。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">int</span> (*func_ptr)(<span class="type">int</span>, <span class="type">int</span>);  <span class="comment">// 定义一个函数指针</span></span><br></pre></td></tr></table></figure>
+
+<p>​	通过这种定义，我们就定义了一个能够指向返回类型为int,拥有俩个int参数的函数的函数指针。</p>
+<p>​	再用文字来重复一遍，一个函数指针的声明由(函数返回类型，(*函数指针符号名)(函数参数返回类型枚举))来组成。</p>
+<p>​	</p>
+<ul>
+<li><strong>函数指针的使用</strong></li>
+</ul>
+<p>​	函数指针相对于其他符号来说有点不同，重点就是他可以通过()来直接调用该函数指针指向的函数。</p>
+<p>​	来看一个小demo</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 定义函数指针并指向 add 函数</span></span><br><span class="line">    <span class="built_in">int</span> (*func_ptr)(<span class="type">int</span>, <span class="type">int</span>) = add;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 通过函数指针调用 add 函数</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Result: &quot;</span> &lt;&lt; <span class="built_in">func_ptr</span>(<span class="number">3</span>, <span class="number">4</span>) &lt;&lt; endl;  <span class="comment">// 输出 7</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>​	但其实这种使用情况是很少见的，毕竟你完全可以通过函数本身去进行调用，至于那些个类函数，那你更不应该通过函数指针来进行调用，更多的是将函数指针来作为函数参数的传递来实现更多的扩展。这个之后碰到再说。</p>
+<p>​	</p>
+<p>在stl中，函数符的概念已经被定义了，如下</p>
+<ul>
+<li>生成器是不用参数能直接调用的函数符</li>
+<li>一元函数是用一个参数就可以调用的函数符</li>
+<li>二元函数是用一个参数就可以调用的函数符</li>
+<li>返回bool值的一元函数是谓词</li>
+<li>返回bool值的二元函数是二元谓词</li>
+</ul>
+<p>​	来看一下最常用的stl库排序函数sort函数，这个函数前面俩个参数使用的是俩个迭代器，第三个参数时一个谓词(应该是一个二元谓词，毕竟需要将俩个数进行比较)</p>
+]]></content>
+      <categories>
+        <category>C++</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据库介绍</title>
+    <url>/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/0-%E4%BB%8B%E7%BB%8D/</url>
+    <content><![CDATA[<h1 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h1><p>​	在这一个分类中，将记录我的数据库学习过程，主要是个人在学习15-445网课的思考，敬请期待吧，没什么好说的，让我们开始吧。之后有什么要补充的将会在这篇文章中进行补充(如果没忘的话)。</p>
+<span id="more"></span>
+
+
+
+<p>​	首先，我需要对自己在modernSQL中体验到的一个感觉现说一下。</p>
+<p>​	在一开始时会有很多的概念，这种东西会很消耗你的激情。此时我们需要有些东西来进行补充，而我认为的最好的补充方法就是进行一些手操，最直接的，就是去使用mySQL的mySQL Workbranch去手搓一个，无论简单还是复杂。</p>
+<p>​	我体验下来的一个最直接感觉是，无论是什么数据库操作软件，命令行也好，图形化也好，最重要的其实是它底下的那个数据库，只要知道了对于的数据库。那么我们接下来进行的任何对这个数据库进行的查询，插入等等操作，都是一些对我们自己技能的进一步的封装，同时也是对于该软件的一步步api的了解罢了。正如QT框架一般。</p>
+<h2 id="15-445对应内容"><a href="#15-445对应内容" class="headerlink" title="15-445对应内容"></a>15-445对应内容</h2><p>《数据库系统概念》这本书是CMU 15-445课程的主要教材之一。该课程深入探讨数据库系统的设计与实现，涵盖从基础概念到高级主题的广泛内容。以下是课程大纲与书籍章节的对应关系：</p>
+<p><strong>1. 课程介绍与关系模型（Course Introduction &amp; Relational Model）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第1章（数据库系统概述）和第2章（关系数据模型）</li>
+<li><strong>课程内容</strong>: 介绍数据库系统的基本概念，关系模型的定义和特性。</li>
+</ul>
+<p><strong>2. 中级SQL（Intermediate SQL）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第3章（SQL的基础与高级查询）</li>
+<li><strong>课程内容</strong>: 深入学习SQL语言，包括复杂查询、连接、子查询等。</li>
+</ul>
+<p><strong>3. 数据库存储I（Database Storage I）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第5章（数据存储、文件和索引结构）</li>
+<li><strong>课程内容</strong>: 探讨数据在磁盘上的存储方式，文件组织和索引结构。</li>
+</ul>
+<p><strong>4. 数据库存储II（Database Storage II）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第6章（查询处理和优化）</li>
+<li><strong>课程内容</strong>: 介绍查询处理的基本概念和优化技术。</li>
+</ul>
+<p><strong>5. 缓冲池（Buffer Pools）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第7章（事务管理与并发控制）</li>
+<li><strong>课程内容</strong>: 讨论内存管理和缓冲池的设计与实现。</li>
+</ul>
+<p><strong>6. 哈希表（Hash Tables）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第8章（存储管理）</li>
+<li><strong>课程内容</strong>: 学习哈希表的实现和应用。</li>
+</ul>
+<p><strong>7. 树状索引（Tree Indexes）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第9章（查询处理和优化）</li>
+<li><strong>课程内容</strong>: 深入研究树状索引结构，如B树和B+树。</li>
+</ul>
+<p><strong>8. 索引并发控制（Index Concurrency Control）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第10章（事务管理与并发控制）</li>
+<li><strong>课程内容</strong>: 探讨索引的并发控制机制。</li>
+</ul>
+<p><strong>9. 排序与聚合（Sorting &amp; Aggregations）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第11章（查询处理和优化）</li>
+<li><strong>课程内容</strong>: 学习排序算法和聚合操作的实现。</li>
+</ul>
+<p><strong>10. 连接算法（Join Algorithms）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第12章（查询处理和优化）</li>
+<li><strong>课程内容</strong>: 研究不同的连接算法，如嵌套循环连接、排序-合并连接等。</li>
+</ul>
+<p><strong>11. 查询执行I（Query Execution I）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第13章（查询处理和优化）</li>
+<li><strong>课程内容</strong>: 介绍查询执行的基本概念和技术。</li>
+</ul>
+<p><strong>12. 查询执行II（Query Execution II）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第14章（查询处理和优化）</li>
+<li><strong>课程内容</strong>: 深入探讨查询执行的高级技术。</li>
+</ul>
+<p><strong>13. 查询计划与优化I（Query Planning &amp; Optimization I）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第15章（查询处理和优化）</li>
+<li><strong>课程内容</strong>: 学习查询计划的生成和优化策略。</li>
+</ul>
+<p><strong>14. 查询计划与优化II（Query Planning &amp; Optimization II）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第16章（查询处理和优化）</li>
+<li><strong>课程内容</strong>: 深入研究查询优化的高级技术。</li>
+</ul>
+<p><strong>15. 并发控制理论（Concurrency Control Theory）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第17章（事务管理与并发控制）</li>
+<li><strong>课程内容</strong>: 探讨并发控制的理论基础。</li>
+</ul>
+<p><strong>16. 两阶段锁定并发控制（Two-Phase Locking Concurrency Control）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第18章（事务管理与并发控制）</li>
+<li><strong>课程内容</strong>: 学习两阶段锁定协议的实现和应用。</li>
+</ul>
+<p><strong>17. 时间戳排序并发控制（Timestamp Ordering Concurrency Control）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第19章（事务管理与并发控制）</li>
+<li><strong>课程内容</strong>: 研究时间戳排序协议的机制。</li>
+</ul>
+<p><strong>18. 多版本并发控制（Multi-Version Concurrency Control）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第20章（事务管理与并发控制）</li>
+<li><strong>课程内容</strong>: 探讨多版本并发控制的实现方法。</li>
+</ul>
+<p><strong>19. 数据库日志（Database Logging）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第21章（事务管理与并发控制）</li>
+<li><strong>课程内容</strong>: 学习数据库日志的作用和实现。</li>
+</ul>
+<p><strong>20. 数据库恢复（Database Recovery）</strong></p>
+<ul>
+<li><strong>书籍章节</strong>: 第22章（事务管理与并发控制）</li>
+<li><strong>课程内容</strong>: 研究数据库恢复技术，确保数据一致</li>
+</ul>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Modern SQL</title>
+    <url>/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL-/</url>
+    <content><![CDATA[<h1 id="Modern-SQL"><a href="#Modern-SQL" class="headerlink" title="Modern SQL"></a>Modern SQL</h1><h2 id="数据库系统"><a href="#数据库系统" class="headerlink" title="数据库系统"></a>数据库系统</h2><p><img src="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL-/image-20250217233059625.png" alt="image-20250217233059625"></p>
+<span id="more"></span>	
+
+<p>​	需要注意的是，一个数据库系统中是存在着多个组件的，比较简单的理解的话。一个系统首先需要包括几个用来进行操作的语言。</p>
+<p>其中包括的几种语言有:**数据操作语言(DML)，数据定义语言(DDL)，数据控制语言(DCL)**。</p>
+<p>​	对于这三种语言，我们在这里进行一个相对简单的接触即可。</p>
+<ul>
+<li><strong>数据操作语言（DML）</strong>：用于操作数据库中的数据。常见的DML命令包括<code>SELECT</code>、<code>INSERT</code>、<code>UPDATE</code>和<code>DELETE</code>，这些命令帮助我们从数据库中查询数据、插入新数据、修改现有数据或删除数据。</li>
+<li><strong>数据定义语言（DDL）</strong>：用于定义和管理数据库中的结构，例如表、视图、索引等。常见的DDL命令包括<code>CREATE</code>、<code>ALTER</code>、<code>DROP</code>等，用来创建、修改或删除数据库的结构。</li>
+<li><strong>数据控制语言（DCL）</strong>：用于控制数据库的访问权限。常见的DCL命令有<code>GRANT</code>（授予权限）和<code>REVOKE</code>（撤销权限），它们允许数据库管理员控制哪些用户可以访问哪些数据。</li>
+</ul>
+<p>​	</p>
+<hr>
+<p>​	粗略来看，DML就是对于数据库中存在的数据可以进行的一些查询，修改等操作。是直接作用于数据层面的。而DDL是对于数据库中数据的架构的规划语言，是作用于结构层面的。而DCL直观来看其实就是对于来自不同请求的权限控制。</p>
+<blockquote>
+<p>加下来将会进入一些聚合操作，查询操作等的了解</p>
+</blockquote>
+<h2 id="聚合函数"><a href="#聚合函数" class="headerlink" title="聚合函数"></a>聚合函数</h2><p>​	在SQL中，存在着一些相对特殊的函数，这些函数以一系列的数据为输入，然后输出一个值。这些函数一般被称为聚合函数。</p>
+<p><img src="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL-/image-20250218000909195.png" alt="image-20250218000909195"></p>
+<p>​	上图中就是一些比较常用的聚合函数，函数的功能也比较简单，这里就没必要进行深入，等之后进入一些更加复杂的应用场景时可以来回顾一下。简单了解下这几个函数的功能即可。</p>
+<ul>
+<li>AVL(col)根据输入的值去计算平均值后返回，需要输入值能够被计算。</li>
+<li>MIN(col)根据输入的值去查找最小值并返回该值</li>
+<li>MAX(col)根据输入的值去查找最大值并返回该值</li>
+<li>SUM(col)根据输入的值去计算总和并返回</li>
+<li>COUNT(col)根据输入的值去返回这些值中非空值的个数</li>
+</ul>
+<blockquote>
+<p>在进入下一步之前，我们默认你已经了解最基本的数据库查询操作，即一个由selete子句，from子句，where子句组成的基本查询操作，如果不知道，还是先回去看书吧。</p>
+</blockquote>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><blockquote>
+<p>​	聚合函数还存在一些使用上的限制，或者说，一些特性需要了解</p>
+</blockquote>
+<p><img src="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL-/image-20250220192249828.png" alt="image-20250220192249828"></p>
+<h4 id="使用位置"><a href="#使用位置" class="headerlink" title="使用位置"></a>使用位置</h4><p>​	聚合函数只能在select子句中进行使用，并且使用聚合函数后select子句输出的内容将会是对应的聚合函数功能。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT COUNT(1+1+1) AS cnt </span><br><span class="line">FROM student </span><br><span class="line">WHERE login LIKE &#x27;%@cs&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>​	额外注意一下，这里的as关键字起到一个名称替换的效果。这里的like关键字起到字符串匹配的一个效果，具体的等下再讲。</p>
+<h4 id="去除重复项"><a href="#去除重复项" class="headerlink" title="去除重复项"></a>去除重复项</h4><p>​	部分聚合函数也可以使用关键字<strong>distinct</strong>来去除重复项</p>
+<p><img src="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL-/image-20250220193434153.png" alt="image-20250220193434153"></p>
+<p>​	使用方式也很简单，就是在对于的聚合函数里面加上<strong>distinct</strong>关键字，如上图中的使用。</p>
+<p>​	额外需要注意的是，正如上图中指出，不是所有的函数都支持<strong>distinct</strong>关键字的，毕竟有时候distinct关键字的含义与一些聚合函数的功能之间存在一些歧义，应该是在设计上就进行了这些的摒弃。</p>
+<h4 id="使用限制"><a href="#使用限制" class="headerlink" title="使用限制"></a>使用限制</h4><p>​	聚合函数中使用的参数也存在着一些限制。官方来说</p>
+<p>​	出现在<strong>select子句</strong>中但没有被聚合的属性只能是出现在<strong>group by子句</strong>中的属性。换句话说，任何没有出现在<strong>group by子句</strong>中的属性如果出现在<strong>select子句</strong>中，那么它只能作为聚合函数的参数作为使用。</p>
+<p>​	这句话应该配合实例来辅助理解。</p>
+<p>​	<img src="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL-/image-20250223174226964.png" alt="image-20250223174226964"></p>
+<p>​	</p>
+<p>​	首先，我们需要明白一个<strong>group by</strong>子句所能带来的作用。通过一个group子句，数据库可以吧对应的表根据子句中的元素列出为多组，其中每一组都是对应的子句中出现的元素。</p>
+<p>​	然后我们来看到select子句所能带来的作用，该子句能够将对应的表中的数据进行操作来输出一个新表。那么，我们前面已经通过group by子句将这些元组分为若干个组了，此时我们如果想要加上一个没有任何限制的元素在select子句中，那会出现什么。很自然想到的是，这个将会出现一系列的元素没有一个对应的元组给它匹配到，而这个是我们所不想看到的。这也是这么一种设计的原因。</p>
+<p>​	接下来我们再来看到这种设计中使用聚合函数将会出现的结果。当我们进行了group by子句进行分组后，我们如果想要正确的输出一个表，我们需要为每个分组后的新元组都提供对于的元素进行构建。也就是说，我们的select操作应该是基于分组后的各个子元组集合的。这也是为什么对于那些个没有出现在group by子句中的元素需要我们去进行聚合函数的原因，只有通过聚合，我们才能通过一组值来输出一个值用于一个元组的构建。</p>
+<p>​	也就是说，还是跟前面一样，我们的select子句中就是最后的新表中的目标元素的集合。一个查询语句中如果出现了group by子句，那么对应的select子句中没有使用聚合函数的元素就是我们分组的依据，其他的使用聚合函数的则是我们目标新组中需要的元素。</p>
+<p>我很喜欢GPT对于我这段话总结出来的几句话。</p>
+<p><img src="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL-/image-20250223175701845.png" alt="image-20250223175701845"></p>
+<hr>
+<h3 id="Having子句"><a href="#Having子句" class="headerlink" title="Having子句"></a>Having子句</h3><h4 id="生效时机"><a href="#生效时机" class="headerlink" title="生效时机"></a>生效时机</h4><p>​	接下来看到一个与聚合函数具有较强关联的一个语句，having子句。这个子句与where子句有点相像。都是对于已有元组的一种条件筛选。</p>
+<p>​	在之前的学习中，我们了解到where子句其实是对于整个查询操作中原始表的一个过滤。这个过滤操作是紧跟在from子句之后的。在这个过滤之后才会去进行接下来的一系列查询操作子句的进行。那么，这里就存在一个问题了，由于这个where语句的时机，所以我们其实是无法使用这个where子句去进行分组后的过滤的。毕竟，这个group by子句发生的时机是位于where子句之后的。</p>
+<p>​	但是对于这种分组后过滤的操作，这种操作映射到现实生活中是非常常见的。就比如，你希望知道一个初中学校7年级中平均分最高的班级。那么此时只有where子句是无法满足我们的要求的。此时设计者就引入了一个新的子句，having子句。这个子句的功能与where子句基本相同，区分他俩的主要特征就是俩者发生的时机。正如前文所说，一个having子句能够对于分组后的结果在进行筛选。不难推测having子句的发生时机就是位于group by子句之后。</p>
+<h4 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h4><p>假设你有一个销售表 <code>sales</code>，包含 <code>region</code>（地区）和 <code>sales_amount</code>（销售额）两列。如果你想按 <code>region</code> 分组并计算每个地区的总销售额，同时只返回总销售额大于 1000 的地区，查询可以这样写：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT region, SUM(sales_amount) AS total_sales</span><br><span class="line">FROM sales</span><br><span class="line">GROUP BY region</span><br><span class="line">HAVING SUM(sales_amount) &gt; 1000;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中：</p>
+<ul>
+<li><code>GROUP BY region</code> 将数据按地区分组。</li>
+<li><code>SUM(sales_amount)</code> 计算每个地区的总销售额。</li>
+<li><code>HAVING SUM(sales_amount) &gt; 1000</code> 对每个分组的总销售额进行筛选，只保留销售额大于 1000 的地区。</li>
+</ul>
+<h4 id="简单归纳"><a href="#简单归纳" class="headerlink" title="简单归纳"></a>简单归纳</h4><p><strong><code>HAVING</code> 子句</strong>：用来过滤 <strong>分组后的结果</strong>（在 <code>GROUP BY</code> 后），它针对分组后的数据进行筛选。换句话说，<code>HAVING</code> 过滤的是每个分组的聚合结果。</p>
+<p>​	在实际应用中，我们可以看到事实上基本全部的having子句中都是聚合函数的一些条件限制，这个其实很好理解。毕竟前面我们已经说过了having子句就是用来进行分组后的条件筛选的，而分组后的分组依赖项本来就不应该被用来进行筛选，我们应该筛选的是每个分组的对应属性，体现在查询语句中的就是对应的select子句中使用聚合函数中的系列项。因此，在Having子句中看到这些个聚合函数也就不奇怪，或者说，理所应当了。</p>
+<p>​	特别需要注意一点，对于having子句来说，其的执行顺序是位于select子句之后的。我们可以看到在上面的示例中我们在select子句中去对于sales_amount进行了一个as别名的替换。但是我们在having子句中没有进行使用，这个其实也很好理解。毕竟这个其实就是对于执行顺序的一个应用。此时的别名对于子句还是不可见的，因此自然无法使用。</p>
+<p>​	接下来贴一个查询语句中各个语句的执行顺序图</p>
+<p><img src="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL-/image-20250223203933254.png" alt="image-20250223203933254"></p>
+<p><img src="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL-/image-20250223203948918.png" alt="image-20250223203948918"></p>
+<p><img src="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL-/image-20250223204022012.png" alt="image-20250223204022012"></p>
+<p>未完待续，由于篇幅过长，分割放送，下一部分看字符串操作。</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>类常量</title>
     <url>/2024/12/28/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E5%B8%B8%E9%87%8F/</url>
     <content><![CDATA[<blockquote>
@@ -205,6 +451,330 @@
       </tags>
   </entry>
   <entry>
+    <title>Modern SQL-STRING</title>
+    <url>/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/</url>
+    <content><![CDATA[<h1 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h1><p>​	在SQL中，自然也存在字符串这种元素。一般来说，SQL使用单引号**’ ‘**来标识这是一个字符串，同时在SQL标准中，数据库对于字符串大小写应该是一个敏感的状态。但是，很多数据库系统中，包括但不限于MySQL和SQL Server中，对于这些个标准都是存在一些选择的。例如在MySQL中，其对于字符串的大小写就是不敏感的，当然，你可以在MySQL中去使用对于的标准设置语句去进行调整。不过种种这些，都是一些小玩意，在使用具体的数据库时去进行适当的调整即可，没必要去进行一个个的深入了解。</p>
+<span id="more"></span>
+
+<h2 id="函数使用"><a href="#函数使用" class="headerlink" title="函数使用"></a>函数使用</h2><p>​	SQL允许在字符串上使用多种函数。包括但不限于连接字符串(“||”),提取子串，计算字符串长度，大小写转换等函数。但是这些都只是一些实例的使用，具体的参考自己的数据库系统使用就行，不行就去问ai。</p>
+<p><img src="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/image-20250224074520213.png" alt="image-20250224074520213"></p>
+<p>​	对于字符串函数，使用起来其实跟普通语言的函数之间很相似，都存在着一定的输入参数，并默认这些字符串函数都返回一个字符串提供后续的操作。例如上图中的SUBSTRING和UPPER函数。</p>
+<p>​	可以注意到的是，这些函数在上图那个示例中都出现了不同的使用语句位置。不难想象，还可以存在多种使用位置。换句话说，字符串函数的使用位置与语句之间是弱耦合的，但是与它使用的数据类型是强耦合的，基本上必须存在着为字符的参数。所以理论上，所有可以出现字符串的地方，系列字符函数都能被使用。</p>
+<p>​	</p>
+<h2 id="模式匹配"><a href="#模式匹配" class="headerlink" title="模式匹配"></a>模式匹配</h2><p>​	在之前的几个文档中，我们其实不难看到有着like关键字的出现，这里对于这个关键字进行进一步的分析。</p>
+<p>​	like关键字是用来实现模式匹配的，通过like关键字，我们能够实现对于所需要的字符串的一定程度上的一些限制。</p>
+<p><img src="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/image-20250224073610584.png" alt="image-20250224073610584"></p>
+<p>​	正如上图中所说，’%’能够匹配任何子串(不限长度和内容，包括空串)，’_’只能够匹配任意一个字符，通过对于这俩个字符的排列组合，我们能够实现很大程度上的对于匹配字符串的限制。</p>
+<p>​	这里需要特别注意一下like关键字的使用环境。理论上说like可以出现在任意一个子句中，毕竟它并只是与字符串绑定，可以粗略理解为like就像其他字符串函数一样，输入一个字符串并返回一个字符串以供后续的系列操作。但是在实际中，like的使用位置一般是位于where子句中的，毕竟相对来说，这个位置上的like具有更强的逻辑抽象。</p>
+<h1 id="输出"><a href="#输出" class="headerlink" title="输出"></a>输出</h1><h3 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h3><p>​	在DBMS中，还存在着一系列的方法能够进行一些输出的重定向，就比如将输出重定向到一个新表中去生成一个新表。</p>
+<p><img src="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/image-20250224082830887.png" alt="image-20250224082830887"></p>
+<p>​	上图中的demo其实就已经简单的列出了这个重定向的一些特性。</p>
+<p>​	一个重定向需要使用一些输出作为输入，比如，这里的使用了select语句中的输出作为一个输入，并将这个作为输入去作为后续的INTO的输入。</p>
+<p>​	一个重定向的输入存在几个特点。重定向的表必须没有被彻底的限定，必须允许能够被插入新的属性并能够被插入新的元组。在重定向后，这个输入将被插入重定向的表中。上图中其实就是将一个属性重定向到新表中的demo。接下来看一个插入新元组的方法。</p>
+<p><img src="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/image-20250224084043297.png" alt="image-20250224084043297"></p>
+<p>​	额外需要注意的是，当我们重定向的输入是一系列元组时，我们这些输入元组必须与目标表的元组组成的一致，这个也能够理解。毕竟如果你的插入元组与目标元组组成不一致，那么这就违背了数据库对于数据组织的底层逻辑，这是我们所不想看到的。</p>
+<h3 id="输出排序"><a href="#输出排序" class="headerlink" title="输出排序"></a>输出排序</h3><p>​	在实际应用中，很多时候我们需要将输出的数据按照一定的次序进行排列，这个排列的时机有很多，这里考虑的是DBMS输出表数据的时候。这时候我们可以通过一个新的order by子句来进行一定程度上的排序。</p>
+<p><img src="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/image-20250224085039262.png" alt="image-20250224085039262"></p>
+<p>​	</p>
+<p>​	很多元素都可以使用order by进行升序和降序的排序。包括但不限于整形，浮点型和部分的字符型等(字典序排序)。</p>
+<p>​	在缺省情况下，order by子句是使用升序排序的。要说明order by子句中的排列顺序，可以使用des表示降序，或者使用asc使用升序。同时，在上面那个demo中没有体现的是，一个order by子句中可以存在多个用于排序的元素。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select *</span><br><span class="line">from instructor</span><br><span class="line">order by salary desc, name asc</span><br></pre></td></tr></table></figure>
+
+<p>​	该demo中的查询语句的含义是:从instruct表中去输出所有的元组并对于这些元组按照salary降序排列，按照name升序排列。</p>
+<p><img src="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/image-20250224092105897.png" alt="image-20250224092105897"></p>
+<p>​	在一些个order by子句中，我们可以看到一些数字，这些数字其实是一种别名，对应的则是在select子句中出现的第i个元素。</p>
+<h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><ul>
+<li>对于order by的排序，如果此间存在着多个用来排序的元素，那么在这之中存在着一定的排列顺序，就比如上面那个demo，先按照salary属性进行降序排序，再按照name进行升序排列，也就是说，order by子句是按照该子句中属性出现的次序来进行排序的。</li>
+<li>对于排序的结果，还是存在那个特殊值(NULL)可能导致的问题。在一般的DBMS中，NULL值一般都被视为一个最小值，但是这个不好说，具体参考各个DBMS的使用手册。</li>
+</ul>
+<h3 id="控制"><a href="#控制" class="headerlink" title="控制"></a>控制</h3><p>​	数据库系统还支持对于输出的一些数量和位置上的一些控制，具体是通过order by子句来实现的。相对来说跟之前的子句使用很相似，简单过一遍即可。</p>
+<p>​	<img src="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/image-20250224164339216.png" alt="image-20250224164339216"></p>
+<p>​	对于这个输出控制关键字，主要存在着俩个功能，第一个是对于输出的数量上面的限制，这个通过在limit之后再加上对应的数字就能够实现对于输出元组数的控制了。</p>
+<p>​	额外的，我们还可以在limit子句中去添加另外一个关键字offset来进行输出元组的偏移。通过在这个关键字之后添加上对应的数字，我们能够限定接下来的输出的其实元组位置。</p>
+<h5 id="demo"><a href="#demo" class="headerlink" title="demo"></a><strong>demo</strong></h5><ol>
+<li><p><strong>限制返回的记录数：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM employees</span><br><span class="line">LIMIT 5;</span><br></pre></td></tr></table></figure>
+
+<p>这个查询会返回 <code>employees</code> 表中的前 5 行数据。</p>
+</li>
+<li><p><strong>与 <code>OFFSET</code> 配合使用，进行分页：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM employees</span><br><span class="line">LIMIT 5 OFFSET 10;</span><br></pre></td></tr></table></figure>
+
+<p>这个查询会跳过前 10 行，返回从第 11 行开始的 5 行记录。<code>OFFSET</code> 表示跳过多少行数据。</p>
+</li>
+<li><p><strong>限制查询结果，并按特定顺序返回：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM employees</span><br><span class="line">ORDER BY hire_date DESC</span><br><span class="line">LIMIT 3;</span><br></pre></td></tr></table></figure>
+
+<p>这个查询会返回 <code>employees</code> 表中按 <code>hire_date</code> 降序排列的前 3 行记录。</p>
+</li>
+</ol>
+<p>​	需要注意的是，在一些数据库系统中，这个limit关键字被替换为了一些新的关键字，具体参照对应的使用手册即可。</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Modern SQL-NESTED</title>
+    <url>/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.2-modernSQL(nested)/</url>
+    <content><![CDATA[<h1 id="嵌套查询"><a href="#嵌套查询" class="headerlink" title="嵌套查询"></a>嵌套查询</h1><p>​	有一说一，modernSQL的内容是真的多，甚至于我都不想继续了，不过这些其实都还无所谓，毕竟现在也还只是停留在理论阶段，还没有开始真正的上手。</p>
+<p>​	在之前我们接触到的都是一些单个查询语句的情况，但是有时候这种单层的结构不能满足我们的需求。自然而然，多层也就是嵌套查询也就出现了。这种查询方式其实很好理解。就是将一个查询语句的输出作为另外一个查询语句的一个子句的输入。在格式上表现出来的其实就是一个查询中包含着另外的查询。通常情况下，这种架构下的查询语句很难优化。而且一般来说，这种嵌套查询，可以出现在任何一个子句中，只要你这样做存在着抽象价值。</p>
+<span id="more"></span>
+
+<h2 id="where子句嵌套"><a href="#where子句嵌套" class="headerlink" title="where子句嵌套"></a>where子句嵌套</h2><p>简单来看一个小demo</p>
+<p><img src="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.2-modernSQL(nested)/image-20250224170141170.png" alt="image-20250224170141170"></p>
+<p>​	这个并不是一个完整的嵌套查询语句。抽象来看现在这个查询语句其实存在了一个缺陷，就是你无法抽象出来你这里的父查询语句要怎么使用这个子查询语句的输出，这时就需要一些额外的关键字的使用来解决这个问题。</p>
+<p><img src="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.2-modernSQL(nested)/image-20250224171132491.png" alt="image-20250224171132491"></p>
+<p>​	你提到的这个问题非常经典，正是嵌套查询的核心挑战之一。在 SQL 中，嵌套查询的出现通常是为了处理一些复杂的需求，比如筛选符合条件的数据、关联不同的表等。但是，正如你说的，这种查询方式有时难以优化，且存在一些模糊的地方，比如如何将子查询的输出与父查询关联起来。</p>
+<h3 id="如何将子查询与父查询结合"><a href="#如何将子查询与父查询结合" class="headerlink" title="如何将子查询与父查询结合"></a>如何将子查询与父查询结合</h3><p>为了将子查询的结果作为父查询的输入，确实需要一些关键字，主要有以下几种常见的方式：</p>
+<h4 id="1-IN-关键字"><a href="#1-IN-关键字" class="headerlink" title="1. IN 关键字"></a>1. <strong><code>IN</code> 关键字</strong></h4><p><code>IN</code> 关键字可以将子查询的结果集作为父查询条件的一部分。</p>
+<ul>
+<li><p>示例：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> name</span><br><span class="line"><span class="keyword">FROM</span> student</span><br><span class="line"><span class="keyword">WHERE</span> sid <span class="keyword">IN</span> (<span class="keyword">SELECT</span> sid <span class="keyword">FROM</span> enrolled <span class="keyword">WHERE</span> cid <span class="operator">=</span> <span class="string">&#x27;15-445&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这里，子查询 </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT sid FROM enrolled WHERE cid = &#x27;15-445&#x27;</span><br></pre></td></tr></table></figure>
+
+<p> 会返回一组 </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sid</span><br></pre></td></tr></table></figure>
+
+<p>，然后父查询 </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT name FROM student</span><br></pre></td></tr></table></figure>
+
+<p> 会使用 <strong>IN</strong>关键字，筛选出 <strong>sid</strong>在这组返回结果中的学生名字。</p>
+</li>
+</ul>
+<h4 id="2-EXISTS-关键字"><a href="#2-EXISTS-关键字" class="headerlink" title="2. EXISTS 关键字"></a>2. <strong><code>EXISTS</code> 关键字</strong></h4><p><code>EXISTS</code> 用来测试子查询是否返回任何记录。如果返回了记录，<code>EXISTS</code> 就会返回 <code>TRUE</code>，否则返回 <code>FALSE</code>。通常用在<strong>子查询存在与否的判断</strong>上。</p>
+<ul>
+<li><p>示例：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> name</span><br><span class="line"><span class="keyword">FROM</span> student s</span><br><span class="line"><span class="keyword">WHERE</span> <span class="keyword">EXISTS</span> (<span class="keyword">SELECT</span> <span class="number">1</span> <span class="keyword">FROM</span> enrolled e <span class="keyword">WHERE</span> e.sid <span class="operator">=</span> s.sid <span class="keyword">AND</span> e.cid <span class="operator">=</span> <span class="string">&#x27;15-445&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这里，<strong>EXISTS</strong>子查询会检查是否存在与 <strong>student</strong> 表中 <strong>sid</strong>匹配的记录，并且这些记录的 <strong>cid</strong>是 ‘15-445’。如果存在这样一行，父查询就会返回该学生的名字。</p>
+</li>
+</ul>
+<h4 id="3-ANY-SOME-关键字"><a href="#3-ANY-SOME-关键字" class="headerlink" title="3. ANY &#x2F; SOME 关键字"></a>3. <strong><code>ANY</code> &#x2F; <code>SOME</code> 关键字</strong></h4><p><code>ANY</code> 和 <code>SOME</code> 都是用来比较父查询的某个值与子查询结果集中的任意一个值。如果与子查询的结果中的任意一个值符合条件，父查询会返回相应的记录。</p>
+<ul>
+<li><p>示例：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> name</span><br><span class="line"><span class="keyword">FROM</span> student</span><br><span class="line"><span class="keyword">WHERE</span> sid <span class="operator">=</span> <span class="keyword">ANY</span> (<span class="keyword">SELECT</span> sid <span class="keyword">FROM</span> enrolled <span class="keyword">WHERE</span> cid <span class="operator">=</span> <span class="string">&#x27;15-445&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这里，ANY检查 student表中的 sid是否与子查询 SELECT sid FROM enrolled WHERE cid &#x3D; ‘15-445’的结果集中的任意一个 sid匹配。</p>
+</li>
+</ul>
+<h4 id="4-ALL-关键字"><a href="#4-ALL-关键字" class="headerlink" title="4. ALL 关键字"></a>4. <strong><code>ALL</code> 关键字</strong></h4><p><code>ALL</code> 用来比较父查询的某个值与子查询结果集中的所有值。如果父查询的值与子查询结果集中的所有值都符合条件，才会返回结果。</p>
+<ul>
+<li><p>示例：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> name</span><br><span class="line"><span class="keyword">FROM</span> student</span><br><span class="line"><span class="keyword">WHERE</span> sid <span class="operator">&gt;</span> <span class="keyword">ALL</span> (<span class="keyword">SELECT</span> sid <span class="keyword">FROM</span> enrolled <span class="keyword">WHERE</span> cid <span class="operator">=</span> <span class="string">&#x27;15-445&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这个查询会返回 sid 大于子查询中所有 sid的学生。</p>
+</li>
+</ul>
+<h4 id="5-JOIN-子查询"><a href="#5-JOIN-子查询" class="headerlink" title="5. JOIN 子查询"></a>5. <strong><code>JOIN</code> 子查询</strong></h4><p>有时可以将子查询与 <code>JOIN</code> 结合，利用联接来简化查询结构，尤其是涉及到多表查询时。</p>
+<ul>
+<li><p>示例：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> s.name</span><br><span class="line"><span class="keyword">FROM</span> student s</span><br><span class="line"><span class="keyword">JOIN</span> enrolled e <span class="keyword">ON</span> s.sid <span class="operator">=</span> e.sid</span><br><span class="line"><span class="keyword">WHERE</span> e.cid <span class="operator">=</span> <span class="string">&#x27;15-445&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这种方式将子查询转化为一个连接操作，直接从 student和 enrolled表中联接出需要的数据。这里，e.cid &#x3D; ‘15-445’即是查询条件。</p>
+</li>
+</ul>
+<p>​	以上几个就是GPT给出的几个关键字的小demo，由于我不想再去对这几个进行深入，所以暂时就先这样。</p>
+<h2 id="from子句嵌套"><a href="#from子句嵌套" class="headerlink" title="from子句嵌套"></a>from子句嵌套</h2><p>​	简单来看几个子句的嵌套，其实可以发现一个现象，就是这种嵌套其实是基于一个接口规范来实现的。在我看来，部分子句的输入格式应该是关系，或者说元组的集合。那么，当我们查询语句的输出是一个关系时，那是否意味着我们能够使用这些个查询语句的输出作为另一个查询语句子句的输入。这里就是这样，from子句决定的是我们整个查询语句接下来所要操作的表。而一个查询语句的输出也正是一个规范格式的表。</p>
+<p>​	最直观的一个，我们直接将一个查询子句放于from子句中，这在逻辑上是一个成立的，就比如：我从xx中找出了一些人，我再在这些人当中筛选出一些人之类的。</p>
+<p>​	来看一个小demo</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT d.department_name, e.employee_count</span><br><span class="line">FROM departments d</span><br><span class="line">JOIN (</span><br><span class="line">    SELECT department_id, COUNT(*) AS employee_count</span><br><span class="line">    FROM employees</span><br><span class="line">    GROUP BY department_id</span><br><span class="line">) e ON d.department_id = e.department_id;</span><br></pre></td></tr></table></figure>
+
+<p>​	这里需要注意下join关键字，在这里先不考虑join关键字的深入用法。简单来说一下，join关键字就是将俩侧的表合并为一个表，至于更多的规则和限制，之后有遇到再说吧。</p>
+<p>​	</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select max(tot_salary)</span><br><span class="line">from (select dept_name, sum(salary)</span><br><span class="line">	  from instructor</span><br><span class="line">	  group by dept_name) as depe_total(dept_name,tot_salary);</span><br></pre></td></tr></table></figure>
+
+<p>​	可以看到这里的demo相对于上面那个存在了一个最大的区别，就是在子查询语句之后加上了一个更名关键字as，通过这个更名关键字，我们能够对于这个子查询产生的关系进行命名。这是一种规定，也很好理解，毕竟单纯的查询语句出来的关系其实是匿名的，通过这种更名操作，能够给后续的一些操作提供便利，毕竟在一些复杂的架构中是可能使用到这种子查询产生的表的。</p>
+<p>​	需要注意的是，在一些SQL实现(MySQL等)要求这种子查询都必须使用as关键字来进行子查询产生的关系的更名，即使这个关系没有被引用。还有一些实现(Oracle等)允许进行更名，但是不允许在这种更名语句中进行再更名，即对于select中的属性进行隐式的更名，就比如上面那个demo一般。因此，如果实在Oracle中，需要将select子句替换为</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select dept_name, sum(salary) as tot_salary</span><br></pre></td></tr></table></figure>
+
+<p>并将 <code>as depe_total(dept_name,tot_salary)</code>替换为<code>as depe_total</code></p>
+<h2 id="标量子查询"><a href="#标量子查询" class="headerlink" title="标量子查询"></a>标量子查询</h2><p>​	标量子查询的原理我们前面其实已经出现过了，就是通过输入和输出接口的统一来实现对于一个字查询语句的任意插入。</p>
+<p>​	官方点来说：SQL允许子查询出现在返回单个值的表达式能够出现的任何地方，只要该子查询只放返回一个包含单个属性的元组，这种子查询就是<strong>标量子查询</strong>。</p>
+<p>​	这个不难，简单看一个demo过了就行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select dept_name,</span><br><span class="line">	(select count(*)</span><br><span class="line">	 from instructor</span><br><span class="line">	  where department.dept_name=instructor.dept_name)</span><br><span class="line">	 as num_instructors</span><br><span class="line">	from department;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="不带from子句的标量"><a href="#不带from子句的标量" class="headerlink" title="不带from子句的标量"></a>不带from子句的标量</h2><p>​	在一些时候，我们需要对于数据库的一些数据计算后将这些数据用于一定的算数运算，有些时候，这种算数运算不需要再额外去指定from子句作为输入，就比如</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">(select count(*)from teachers)/(select count(*)from instructor);</span><br></pre></td></tr></table></figure>
+
+<p>​	这是使用俩个子句来组成的另一个运算语句，在部分DBMS中，这是合法的，但是更多时候这会使得DBMS系统报错无法计算，因为这个语句缺少from语句。此时数据库系统就给我们提供了一种预定义的关系来使用，这种关系时虚拟的，但是可以在from中去使用去屏蔽掉报错，但是你很少能从中去获取一些具体有效的信息，这个关系就是 dual。</p>
+<p>​	此时上面那个语句可以改为</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">(select count(*)from teachers)/(select count(*)from instructor)</span><br><span class="line">	from dual;</span><br></pre></td></tr></table></figure>
+
+<p>​	当然，这种显式指定from语句的规则可能不是每个DBMS都要求的，具体参考对于的使用手册即可。</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Modern SQL-Function</title>
+    <url>/2025/02/25/%E6%95%B0%E6%8D%AE%E5%BA%93/1.3-Modern%20SQL(function)/</url>
+    <content><![CDATA[<h1 id="窗口函数"><a href="#窗口函数" class="headerlink" title="窗口函数"></a>窗口函数</h1><p>​	接下来看一些DBMS中存在的一些窗口函数。</p>
+<p>![image-20250225092345760](.&#x2F;1.3-Modern SQL(function).assets&#x2F;image-20250225092345760.png)</p>
+<p>​	上面那句话其实就是说一个窗口函数是对于输出序列中的一个特定窗口范围内的数据进行操作的函数。这个函数于聚合函数相似，都是对于一系列的元组执行操作的函数，但是这个函数于聚合函数最大的不同就是窗口函数并不会对输出结果进行合并，而是每个输入元组都能获得一个窗口函数的一个输出属性。</p>
+<p>​	没意思，润</p>
+<span id="more"></span>]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Modern SQL-Modify</title>
+    <url>/2025/02/26/%E6%95%B0%E6%8D%AE%E5%BA%93/1.4-Modern%20SQL(modify)/</url>
+    <content><![CDATA[<h1 id="数据修改"><a href="#数据修改" class="headerlink" title="数据修改"></a>数据修改</h1><p>​	在此前的几个文档中，我们都专注于对于数据库数据的抽取，接下来可以进入对于数据库数据的增删改了。这也基本是modernSQL的尾声了。</p>
+<span id="more"></span>
+
+<h2 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h2><p>​	删除的关键字是delete关键字。这个关键字的使用与select使用的方式十分相似。需要注意的是，我们对于数据库数据的删除的基本单位是元组，我们不能对于一个元组中的一个或多个特定属性进行删除。</p>
+<p>​	这样规定的原因想必也十分明显，毕竟如果只对于部分属性进行删除那么首先其在数据的管理上就增加了难度，并且这还带来一系列的麻烦。</p>
+<p>​	删除语句的格式</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> r</span><br><span class="line"><span class="keyword">where</span> P;</span><br></pre></td></tr></table></figure>
+
+<p>​	这个格式的含义是对于r关系中的满足P谓词的所有元组进行删除。至于from与where子句之间的进阶使用，跟前面提到过的并无不同，这里就不再进行赘诉，接下来看一个小demo就过了。</p>
+<p>删除在Waston大楼里工作的所有教师元组。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> instructor</span><br><span class="line"><span class="keyword">where</span> dept_name <span class="keyword">in</span>( <span class="keyword">select</span> dept_name</span><br><span class="line">					<span class="keyword">from</span> department</span><br><span class="line">					<span class="keyword">where</span> building <span class="operator">=</span> <span class="string">&#x27;Waston&#x27;</span></span><br><span class="line">					);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<hr>
+<h2 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h2><p>插入的关键字是 <code>INSERT</code> 关键字。这个关键字的使用与 <code>SELECT</code> 使用的方式十分相似。需要注意的是，插入操作的基本单位是元组，我们不能仅插入一个元组中的一个或多个特定属性（列），而必须为所有列提供对应的值。</p>
+<p>这样规定的原因也十分明显，毕竟如果只插入部分属性，那么我们就无法保证数据的完整性和一致性，且这样会导致一些不必要的管理麻烦。</p>
+<p><strong>插入语句的格式</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">INSERT INTO</span> 表名 (列<span class="number">1</span>, 列<span class="number">2</span>, ..., 列N)</span><br><span class="line"><span class="keyword">VALUES</span> (值<span class="number">1</span>, 值<span class="number">2</span>, ..., 值N);</span><br></pre></td></tr></table></figure>
+
+<p>这个格式的含义是向 <code>表名</code> 表中插入一条新的记录，其中每个列的值由 <code>VALUES</code> 子句提供。列名和对应的值按顺序匹配，确保每一列都有相应的值。至于列和值的详细使用，与前面提到的 <code>SELECT</code> 子句并无不同，这里就不再赘述。接下来看一个简单的插入示例。</p>
+<p><strong>插入一条新的教师记录</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">INSERT INTO</span> instructor (instructor_id, name, dept_name, salary)</span><br><span class="line"><span class="keyword">VALUES</span> (<span class="number">1001</span>, <span class="string">&#x27;John Doe&#x27;</span>, <span class="string">&#x27;Computer Science&#x27;</span>, <span class="number">85000</span>);</span><br></pre></td></tr></table></figure>
+
+<p>在这个示例中，我们向 <code>instructor</code> 表中插入一条新记录，包含了 <code>instructor_id</code>、<code>name</code>、<code>dept_name</code> 和 <code>salary</code> 四个属性的值。</p>
+<hr>
+<h2 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h2><p>更新的关键字是 <code>UPDATE</code> 关键字。这个关键字的使用与 <code>SELECT</code> 和 <code>DELETE</code> 使用的方式十分相似。需要注意的是，更新操作的基本单位是元组，也就是说，我们对一个元组中的某些属性进行更新，而不是对单个属性进行删除或插入。</p>
+<p>这样规定的原因同样十分明显，毕竟如果仅更新一个属性而不明确其它属性的状态，可能会导致数据的不一致或丢失。因此，更新操作通常涉及某些特定条件的筛选。</p>
+<p><strong>更新语句的格式</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> 表名</span><br><span class="line"><span class="keyword">SET</span> 列<span class="number">1</span> <span class="operator">=</span> 值<span class="number">1</span>, 列<span class="number">2</span> <span class="operator">=</span> 值<span class="number">2</span>, ..., 列N <span class="operator">=</span> 值N</span><br><span class="line"><span class="keyword">WHERE</span> 条件;</span><br></pre></td></tr></table></figure>
+
+<p>这个格式的含义是更新 <code>表名</code> 表中满足 <code>WHERE</code> 条件的所有记录，将它们的某些列的值更新为新值。<code>SET</code> 子句用于指定更新的列及其新值，<code>WHERE</code> 子句用于筛选需要更新的记录。需要注意的是，<code>WHERE</code> 子句的使用至关重要，因为如果没有指定条件，表中所有记录都会被更新。</p>
+<p><strong>更新在 Waston 大楼的所有教师的薪水</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> instructor</span><br><span class="line"><span class="keyword">SET</span> salary <span class="operator">=</span> salary <span class="operator">*</span> <span class="number">1.1</span></span><br><span class="line"><span class="keyword">WHERE</span> dept_name <span class="keyword">IN</span> (</span><br><span class="line">    <span class="keyword">SELECT</span> dept_name</span><br><span class="line">    <span class="keyword">FROM</span> department</span><br><span class="line">    <span class="keyword">WHERE</span> building <span class="operator">=</span> <span class="string">&#x27;Waston&#x27;</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>在这个示例中，我们将所有在 ‘Waston’ 大楼工作的教师的薪水增加 10%。子查询 <code>(SELECT dept_name FROM department WHERE building = &#39;Waston&#39;)</code> 返回所有在 ‘Waston’ 大楼工作的系的名称，然后主查询更新这些系的所有教师薪水。</p>
+<p>​	简单过一遍语法，得开始去实践一下了。</p>
+]]></content>
+      <categories>
+        <category>数据库</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QT对话框</title>
+    <url>/2024/12/20/QT%E6%8E%A7%E4%BB%B6/2-QTDialog/</url>
+    <content><![CDATA[<p>​	<em><strong>在该博文中，我们将会进行一些QT对话框的了解</strong></em></p>
+<p>​	<em>在本文中，将基于QT的api进行简单的了解，不会进行深入</em></p>
+<h1 id="颜色对话框"><a href="#颜色对话框" class="headerlink" title="颜色对话框"></a>颜色对话框</h1><p>​	<img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/2-QTDialog/colorDialog.png" alt="colorDialog"></p>
+<span id="more"></span>
+
+<p>​	上面这个对话框就是我们QT控件中自带的颜色对话框样式。</p>
+<h4 id="对话框类名-QColorDialog"><a href="#对话框类名-QColorDialog" class="headerlink" title="对话框类名:	QColorDialog"></a>对话框类名:	<code>QColorDialog</code></h4><h4 id="构造函数所需参数"><a href="#构造函数所需参数" class="headerlink" title="构造函数所需参数:"></a>构造函数所需参数:</h4><p>​		1~<em>QColor颜色宏</em>	使用任意一个颜色宏以指定打开对话框时的默认颜色</p>
+<p>​		2~<em>QWidget</em>指针*	使用任意一个<em>QWidget</em>类型类对象，将颜色对话框挂载到该窗口</p>
+<h4 id="一些简单性质："><a href="#一些简单性质：" class="headerlink" title="一些简单性质："></a>一些简单性质：</h4><blockquote>
+<p>​		<em>对于这个对话框，右下角会有俩个默认的和[Cancel]按钮。对于这俩个按钮，当	我们选择完或者自定义完我们的颜色并按下按钮后，这个颜色对话框将会被关闭，在默认	情况下，只有你站在最后关闭窗口是使用按钮，最后窗口的颜色属性都会被保存。否	则，还是只会保存上一次设定的颜色值，没有就是默认的颜色属性。</em></p>
+<p>​		<em>我们可以使用QColorDialog类的currentColor方法进行获取这个颜色的属性，当然可	能看不懂它的输出。</em></p>
+</blockquote>
+<p>​		</p>
+]]></content>
+      <categories>
+        <category>QT</category>
+      </categories>
+      <tags>
+        <tag>QT</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QLineEdit</title>
+    <url>/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/</url>
+    <content><![CDATA[<p><em>该文档进行QT中的QLineEdit控件的介绍</em></p>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a><strong>简介</strong></h1><p>QLineEdit属于QT中一种常用的输入控件，用于用户层与数据层之间的交互</p>
+<span id="more"></span>
+
+<h2 id="掩码"><a href="#掩码" class="headerlink" title="掩码"></a>掩码</h2><p><em>在QLineEdit中，允许我们对于输入格式进行规定，其中一种很经典的模式就是掩码</em></p>
+<p>其中存在着几种模式，简单介绍下</p>
+<blockquote>
+<p>QLineEdit属于输入插件，用来实现单行录入。支持几种录入模式。</p>
+<p>Normal表示正常录入,录入的信息会显示在QLineEdit上。</p>
+<p>Password表示密码录入的方式，录入的信息不显示QLineEdit，只是通过黑色圆点显示。</p>
+<p>NoEcho 表示不显示录入信息，类似于Linux输入密码时，显示的是一片空白。</p>
+<p>PasswordEchoOnEdit 表示在输入的一刹那可以看到字符，但是立刻变为不可见的黑色圆点显示。</p>
+</blockquote>
+<p>位于QT的官方英文文档可以自行查看，这里给出GPT的中文翻译掩码文档</p>
+<img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/rules.png" alt="rules" style="zoom:80%;">
+
+<p><img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/moreRules.png" alt="moreRules"></p>
+<p>我们可以使用这些字符的多种排列组合来进行我们掩码的设计</p>
+<p>对于GPT给出的语言，有些地方可能有点疑惑，我们来进行一下分析：</p>
+<blockquote>
+<ol>
+<li><h5 id="必须输入"><a href="#必须输入" class="headerlink" title="必须输入"></a>必须输入</h5><p>​	这个没什么好说的，就是这个掩码在的位置上必须输入对应要求的字符</p>
+</li>
+<li><p><strong>允许使用但不要求使用</strong></p>
+<p>​	这个指的是这个位置上可以输入数据也可以不输入数据。但是如果你要输入数据，</p>
+<p>那么你输入的这个数据就必须是我们要求的数据。就比如<strong>a</strong>,对于这个占位符在的地方，</p>
+<p>要么直接略过，要么就输入A-Z,a-z的字母。</p>
+</li>
+</ol>
+</blockquote>
+<p>​	</p>
+<p>由上面，我们来举出一个例子，不进行赘述了，自行搓码</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">QString ip=<span class="built_in">QString</span>(<span class="string">&quot;000.000.000.000;_&quot;</span>);</span><br><span class="line">   QString mac=<span class="built_in">QString</span>(<span class="string">&quot;HH:HH:HH:HH:HH:HH&quot;</span>);</span><br><span class="line">   ui-&gt;ipEdit-&gt;<span class="built_in">setInputMask</span>(ip);</span><br><span class="line">   ui-&gt;macEdit-&gt;<span class="built_in">setInputMask</span>(mac);</span><br></pre></td></tr></table></figure>
+
+<p><em>题外话，QT的官方英文文档确实多且杂，还好现在有大模型可以减轻这方面的阅读压力啊</em></p>
+<p>除了限定我们的输入格式之外，QLineEdit还提供了我们输入时的显示格式等一系列功能</p>
+<p>这里我们只说明下对应的输入显示功能</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">//ui-&gt;pwdEdit-&gt;setEchoMode(QLineEdit::Password);</span></span><br><span class="line">   <span class="comment">//ui-&gt;pwdEdit-&gt;setEchoMode(QLineEdit::PasswordEchoOnEdit);</span></span><br><span class="line">   <span class="comment">//ui-&gt;pwdEdit-&gt;setEchoMode(QLineEdit::Normal);</span></span><br><span class="line">   ui-&gt;pwdEdit-&gt;<span class="built_in">setEchoMode</span>(QLineEdit::NoEcho);</span><br></pre></td></tr></table></figure>
+
+<p>QT中提供了4种输入格式，分别就是上面的四个宏，都可以在对应的帮助文档中查询到，这里不进行赘述</p>
+<p>直接给出GPT的翻译，简单看一下功能即可</p>
+<p><img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/editRules.png" alt="editRules"></p>
+<h2 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h2><blockquote>
+<p><em>回过头来看，使用掩码来直接规定输入格式其实在一定程序上限制了程序</em></p>
+<p><em>因此，我们需要考虑一种具有更强的扩展性又很规范的格式来规定我们的输入</em></p>
+<p><em>在QT中，正则表达式就是其中的一种</em></p>
+</blockquote>
+<p>在这里，我们并不深入去了解正则表达式的格式，我直接贴出GPT翻译后的规则</p>
+<p>其实，正则表达式这种具有严格规定的模式设计起来很麻烦，</p>
+<p>但是现在我们可以直接使用GPT去为我们生成对应的正则表达式，所以啊，善用工具吧</p>
+<p><img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/regularRule.png" alt="regularRule"></p>
+<p><img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/regularRule2.png" alt="regularRule2"></p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">QRegularExpression <span class="title">regex</span><span class="params">(<span class="string">&quot;^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]&#123;2,&#125;$&quot;</span>)</span></span>;</span><br><span class="line">QRegularExpressionValidator* validator=<span class="keyword">new</span> <span class="built_in">QRegularExpressionValidator</span>(regex,ui-&gt;emailEdit);</span><br><span class="line">ui-&gt;emailEdit-&gt;<span class="built_in">setValidator</span>(validator);</span><br></pre></td></tr></table></figure>
+
+<p>如上，这就是一个GPT辅助生成的正则表达式，我只要理解了这些个到底是一个怎么个使用情况，</p>
+<p>对于生成正则表达式这种吃力不讨好的工作就可以交给大模型来完成。</p>
+<p><em><strong>话毕，溜溜球</strong></em></p>
+]]></content>
+      <categories>
+        <category>QT</category>
+      </categories>
+      <tags>
+        <tag>QT</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>QT布局</title>
     <url>/2024/12/27/QT%E6%8E%A7%E4%BB%B6/3-QT%E5%B8%83%E5%B1%80/</url>
     <content><![CDATA[<h1 id="QT布局"><a href="#QT布局" class="headerlink" title="QT布局"></a>QT布局</h1><p>​	QT中的大部分都是都是api，基本只要只要这东西的基本功能，再去用个几次，就能够比较熟练的运用了。至于布局，QT中的布局中存在三种方式，<strong>水平布局，垂直布局，栅格布局</strong>。</p>
@@ -230,30 +800,6 @@
 <p>​	坏了，对于这种面向api编程的东西，我烂尾了，我暂时不会再写这一类的东西了，毕竟这些实在是太无聊了，之后我看看视频跟着过一遍然后自己理解就行了，大家自求多福吧。</p>
 </blockquote>
 <h2 id="溜溜球"><a href="#溜溜球" class="headerlink" title="溜溜球"></a><strong>溜溜球</strong></h2>]]></content>
-      <categories>
-        <category>QT</category>
-      </categories>
-      <tags>
-        <tag>QT</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QT对话框</title>
-    <url>/2024/12/20/QT%E6%8E%A7%E4%BB%B6/2-QTDialog/</url>
-    <content><![CDATA[<p>​	<em><strong>在该博文中，我们将会进行一些QT对话框的了解</strong></em></p>
-<p>​	<em>在本文中，将基于QT的api进行简单的了解，不会进行深入</em></p>
-<h1 id="颜色对话框"><a href="#颜色对话框" class="headerlink" title="颜色对话框"></a>颜色对话框</h1><p>​	<img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/2-QTDialog/colorDialog.png" alt="colorDialog"></p>
-<span id="more"></span>
-
-<p>​	上面这个对话框就是我们QT控件中自带的颜色对话框样式。</p>
-<h4 id="对话框类名-QColorDialog"><a href="#对话框类名-QColorDialog" class="headerlink" title="对话框类名:	QColorDialog"></a>对话框类名:	<code>QColorDialog</code></h4><h4 id="构造函数所需参数"><a href="#构造函数所需参数" class="headerlink" title="构造函数所需参数:"></a>构造函数所需参数:</h4><p>​		1~<em>QColor颜色宏</em>	使用任意一个颜色宏以指定打开对话框时的默认颜色</p>
-<p>​		2~<em>QWidget</em>指针*	使用任意一个<em>QWidget</em>类型类对象，将颜色对话框挂载到该窗口</p>
-<h4 id="一些简单性质："><a href="#一些简单性质：" class="headerlink" title="一些简单性质："></a>一些简单性质：</h4><blockquote>
-<p>​		<em>对于这个对话框，右下角会有俩个默认的和[Cancel]按钮。对于这俩个按钮，当	我们选择完或者自定义完我们的颜色并按下按钮后，这个颜色对话框将会被关闭，在默认	情况下，只有你站在最后关闭窗口是使用按钮，最后窗口的颜色属性都会被保存。否	则，还是只会保存上一次设定的颜色值，没有就是默认的颜色属性。</em></p>
-<p>​		<em>我们可以使用QColorDialog类的currentColor方法进行获取这个颜色的属性，当然可	能看不懂它的输出。</em></p>
-</blockquote>
-<p>​		</p>
-]]></content>
       <categories>
         <category>QT</category>
       </categories>
@@ -423,83 +969,54 @@
       </tags>
   </entry>
   <entry>
-    <title>QLineEdit</title>
-    <url>/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/</url>
-    <content><![CDATA[<p><em>该文档进行QT中的QLineEdit控件的介绍</em></p>
-<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a><strong>简介</strong></h1><p>QLineEdit属于QT中一种常用的输入控件，用于用户层与数据层之间的交互</p>
-<span id="more"></span>
-
-<h2 id="掩码"><a href="#掩码" class="headerlink" title="掩码"></a>掩码</h2><p><em>在QLineEdit中，允许我们对于输入格式进行规定，其中一种很经典的模式就是掩码</em></p>
-<p>其中存在着几种模式，简单介绍下</p>
+    <title>迭代器与部分类回顾</title>
+    <url>/2025/02/15/C++%E5%AD%A6%E4%B9%A0/%E8%BF%AD%E4%BB%A3%E5%99%A8/</url>
+    <content><![CDATA[<p>该篇是在对于std标准库的迭代器初步接触时所写，只是一些基本的常识以及对于部分类知识的回顾</p>
+<h1 id="迭代器"><a href="#迭代器" class="headerlink" title="迭代器"></a>迭代器</h1><h2 id="初步了解"><a href="#初步了解" class="headerlink" title="初步了解"></a>初步了解</h2><p>​	迭代器本身其实并没有什么特殊的，我们需要先从它存在的意义开始了解，对于一个迭代器，其的存在意义就是为一系列的容器提供一个通用的接口。通过这个接口，我们能够实现一系列的操作。</p>
+<h3 id="基础作用"><a href="#基础作用" class="headerlink" title="基础作用"></a>基础作用</h3><p>​	既然是迭代器，那我我们势必要了解这个<strong>迭代</strong>到底是针对谁的迭代。在std库中，这个迭代就是针对于数据元素的迭代。简单来说，一个迭代器的基本作用就是实现对于一些数据的访问，至于这些数据到底是什么，相对来说迭代器本身不是多么的关注。也就是说，迭代器其实可以看做是一个相对独立的数据访问机制。其于数据组织结构之间是一种弱耦合的状态的。</p>
+<p>​	通过使用迭代器，我们应该能够实现对于一定数据的访问操作。</p>
+<h3 id="出现契机"><a href="#出现契机" class="headerlink" title="出现契机"></a>出现契机</h3><p>​	对于迭代器的出现原因进行一定的了解可以更加方便我们熟悉这个东西。</p>
+<p>​	个人感觉迭代器的出现与设计模式的出现契机有点相似。都是为了对于一系列经验的总结后自然而然出现的东西。由前文知道，我们创建一个迭代器的目的就是为了去进行一个数据的查询，修改等操作，可以预料到这些操作都是相当常见的，如果我们使用常规的设计，我们需要在一个类中去定制特定的数据处理操作。这样其实就是把底层数据组织模块与操作模块进行了一次的强耦合绑定，这种绑定可以预料到时非常难看的。而且复用性很差。</p>
+<p>​	自然而然，我们就需要一种工具来独立进行这种数据操作，通过将数据组织模块和数据处理模块之间的解耦，提高代码复用性的同时减少了在设计时的复杂度，其实也可以看做是一种结构性设计模式。</p>
 <blockquote>
-<p>QLineEdit属于输入插件，用来实现单行录入。支持几种录入模式。</p>
-<p>Normal表示正常录入,录入的信息会显示在QLineEdit上。</p>
-<p>Password表示密码录入的方式，录入的信息不显示QLineEdit，只是通过黑色圆点显示。</p>
-<p>NoEcho 表示不显示录入信息，类似于Linux输入密码时，显示的是一片空白。</p>
-<p>PasswordEchoOnEdit 表示在输入的一刹那可以看到字符，但是立刻变为不可见的黑色圆点显示。</p>
+<p>​	至此，我们知道了对于迭代器到底应该以怎么样的。同时，我们应该能够理解一些迭代器所应该具有的一些性质。</p>
 </blockquote>
-<p>位于QT的官方英文文档可以自行查看，这里给出GPT的中文翻译掩码文档</p>
-<img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/rules.png" alt="rules" style="zoom:80%;">
+<h2 id="迭代器实现"><a href="#迭代器实现" class="headerlink" title="迭代器实现"></a>迭代器实现</h2><p>​	到现在，我们还不知道一个迭代器到底是什么。我们直接进入正题。</p>
+<h3 id="裸指针"><a href="#裸指针" class="headerlink" title="裸指针"></a>裸指针</h3><p>​	由前面知道，迭代器的基础功能是完成数据的查询，修改等操作。那么根据这些属性，我们最先能够想到的基本数据类型是什么，其实就是裸指针。回想一下，通过对指针进行解引用以及各种运算符的操作，我们是不是能够操作这个指针指向的内存中存在的数据，而且通过对指针本身进行一些操作符的运算，我们能够实现通过一个指针访问到一块数据。</p>
+<p>​	这些个性质其实都是一个迭代器所应该具有的性质，接下来，我们需要进行的就是对于这个裸指针进行2扩展。毕竟，你知道的，裸指针这东西往往是无法满足我们自己的需求的。</p>
+<h3 id="类"><a href="#类" class="headerlink" title="类"></a>类</h3><p>​	相对来说，使用一个类作为迭代器来在实际应用中更加常见，先来看一个demo</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyVector</span>&#123;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        T* data;</span><br><span class="line">        <span class="type">size_t</span> size;        <span class="comment">//容器当前的大小</span></span><br><span class="line">        <span class="type">size_t</span> capacity;    <span class="comment">//容器的最大容量</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="built_in">MyVector</span>():<span class="built_in">size</span>(<span class="number">0</span>),<span class="built_in">capacity</span>(<span class="number">10</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            data=<span class="keyword">new</span> <span class="type">size_t</span>[capacity];;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">MyVector</span>(<span class="type">size_t</span> s):<span class="built_in">size</span>(<span class="number">0</span>),<span class="built_in">capacity</span>(s)</span><br><span class="line">        &#123;</span><br><span class="line">            data=<span class="keyword">new</span> <span class="type">size_t</span>[capacity];;</span><br><span class="line">        &#125;</span><br><span class="line">        ~<span class="built_in">MyVector</span>()</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">delete</span>[] data;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="function"><span class="type">void</span> <span class="title">push_back</span><span class="params">(<span class="type">const</span> T&amp; value)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (size &gt;= capacity) &#123;</span><br><span class="line">                capacity *= <span class="number">2</span>;</span><br><span class="line">                T* new_data = <span class="keyword">new</span> T[capacity];</span><br><span class="line">                <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; size; ++i) &#123;</span><br><span class="line">                    new_data[i] = data[i];</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">delete</span>[] data;</span><br><span class="line">                data = new_data;</span><br><span class="line">            &#125;</span><br><span class="line">            data[size++] = value;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        <span class="function"><span class="type">size_t</span> <span class="title">get_size</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> size;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        <span class="comment">// 迭代器内部实现</span></span><br><span class="line">        <span class="keyword">class</span> <span class="title class_">Iterator</span> &#123;</span><br><span class="line">        <span class="keyword">private</span>:</span><br><span class="line">            T* ptr;</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">public</span>:</span><br><span class="line">            <span class="built_in">Iterator</span>(T* ptr) : <span class="built_in">ptr</span>(ptr) &#123;&#125;</span><br><span class="line">    </span><br><span class="line">            <span class="comment">// 解引用操作符，返回迭代器指向的元素</span></span><br><span class="line">            T&amp; <span class="keyword">operator</span>*() &#123;</span><br><span class="line">                <span class="keyword">return</span> *ptr;</span><br><span class="line">            &#125;</span><br><span class="line">    </span><br><span class="line">            <span class="comment">// 前进操作符，返回迭代器指向的下一个元素</span></span><br><span class="line">            Iterator&amp; <span class="keyword">operator</span>++() &#123;</span><br><span class="line">                ++ptr;</span><br><span class="line">                <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">            &#125;</span><br><span class="line">    </span><br><span class="line">            <span class="comment">// 比较操作符，用于判断迭代器是否相等</span></span><br><span class="line">            <span class="type">bool</span> <span class="keyword">operator</span>!=(<span class="type">const</span> Iterator&amp; other) <span class="type">const</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> ptr != other.ptr;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    </span><br><span class="line">        <span class="comment">// 返回一个指向容器第一个元素的迭代器</span></span><br><span class="line">        <span class="function">Iterator <span class="title">begin</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Iterator</span>(data);</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        <span class="comment">// 返回一个指向容器末尾之后位置的迭代器</span></span><br><span class="line">        <span class="function">Iterator <span class="title">end</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Iterator</span>(data + size);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/moreRules.png" alt="moreRules"></p>
-<p>我们可以使用这些字符的多种排列组合来进行我们掩码的设计</p>
-<p>对于GPT给出的语言，有些地方可能有点疑惑，我们来进行一下分析：</p>
-<blockquote>
-<ol>
-<li><h5 id="必须输入"><a href="#必须输入" class="headerlink" title="必须输入"></a>必须输入</h5><p>​	这个没什么好说的，就是这个掩码在的位置上必须输入对应要求的字符</p>
-</li>
-<li><p><strong>允许使用但不要求使用</strong></p>
-<p>​	这个指的是这个位置上可以输入数据也可以不输入数据。但是如果你要输入数据，</p>
-<p>那么你输入的这个数据就必须是我们要求的数据。就比如<strong>a</strong>,对于这个占位符在的地方，</p>
-<p>要么直接略过，要么就输入A-Z,a-z的字母。</p>
-</li>
+<p>​	从此间可以看到，一个迭代器其实并不神秘，就是一个类中类，在这个类中类中，又有着对应的类型指针。这个类型指针又有着一系列的方法。在一些书中，可以看到很多的迭代器类型，这些本质上其实就是一些基于类提供的不同方法所进行的分类。再简单点，就是通过重载方法的不同实现以及所带来的不同功能所进行的分类。</p>
+<p>​	在此时先不用去了解各个类型的迭代器的具体，先来简单过一遍概念即可。</p>
+<h2 id="迭代器类型"><a href="#迭代器类型" class="headerlink" title="迭代器类型"></a>迭代器类型</h2><ol>
+<li><strong>输入迭代器</strong></li>
 </ol>
-</blockquote>
-<p>​	</p>
-<p>由上面，我们来举出一个例子，不进行赘述了，自行搓码</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">QString ip=<span class="built_in">QString</span>(<span class="string">&quot;000.000.000.000;_&quot;</span>);</span><br><span class="line">   QString mac=<span class="built_in">QString</span>(<span class="string">&quot;HH:HH:HH:HH:HH:HH&quot;</span>);</span><br><span class="line">   ui-&gt;ipEdit-&gt;<span class="built_in">setInputMask</span>(ip);</span><br><span class="line">   ui-&gt;macEdit-&gt;<span class="built_in">setInputMask</span>(mac);</span><br></pre></td></tr></table></figure>
-
-<p><em>题外话，QT的官方英文文档确实多且杂，还好现在有大模型可以减轻这方面的阅读压力啊</em></p>
-<p>除了限定我们的输入格式之外，QLineEdit还提供了我们输入时的显示格式等一系列功能</p>
-<p>这里我们只说明下对应的输入显示功能</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">//ui-&gt;pwdEdit-&gt;setEchoMode(QLineEdit::Password);</span></span><br><span class="line">   <span class="comment">//ui-&gt;pwdEdit-&gt;setEchoMode(QLineEdit::PasswordEchoOnEdit);</span></span><br><span class="line">   <span class="comment">//ui-&gt;pwdEdit-&gt;setEchoMode(QLineEdit::Normal);</span></span><br><span class="line">   ui-&gt;pwdEdit-&gt;<span class="built_in">setEchoMode</span>(QLineEdit::NoEcho);</span><br></pre></td></tr></table></figure>
-
-<p>QT中提供了4种输入格式，分别就是上面的四个宏，都可以在对应的帮助文档中查询到，这里不进行赘述</p>
-<p>直接给出GPT的翻译，简单看一下功能即可</p>
-<p><img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/editRules.png" alt="editRules"></p>
-<h2 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h2><blockquote>
-<p><em>回过头来看，使用掩码来直接规定输入格式其实在一定程序上限制了程序</em></p>
-<p><em>因此，我们需要考虑一种具有更强的扩展性又很规范的格式来规定我们的输入</em></p>
-<p><em>在QT中，正则表达式就是其中的一种</em></p>
-</blockquote>
-<p>在这里，我们并不深入去了解正则表达式的格式，我直接贴出GPT翻译后的规则</p>
-<p>其实，正则表达式这种具有严格规定的模式设计起来很麻烦，</p>
-<p>但是现在我们可以直接使用GPT去为我们生成对应的正则表达式，所以啊，善用工具吧</p>
-<p><img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/regularRule.png" alt="regularRule"></p>
-<p><img src="/2024/12/20/QT%E6%8E%A7%E4%BB%B6/1-QLineEdit/regularRule2.png" alt="regularRule2"></p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">QRegularExpression <span class="title">regex</span><span class="params">(<span class="string">&quot;^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]&#123;2,&#125;$&quot;</span>)</span></span>;</span><br><span class="line">QRegularExpressionValidator* validator=<span class="keyword">new</span> <span class="built_in">QRegularExpressionValidator</span>(regex,ui-&gt;emailEdit);</span><br><span class="line">ui-&gt;emailEdit-&gt;<span class="built_in">setValidator</span>(validator);</span><br></pre></td></tr></table></figure>
-
-<p>如上，这就是一个GPT辅助生成的正则表达式，我只要理解了这些个到底是一个怎么个使用情况，</p>
-<p>对于生成正则表达式这种吃力不讨好的工作就可以交给大模型来完成。</p>
-<p><em><strong>话毕，溜溜球</strong></em></p>
+<p>​	输入是相对于程序来说的。不难推的，一个输入迭代器必须能够使得程序能够读取由这个输入迭代器管理着的数据。</p>
+<p>​	这个体现在迭代器类中的设计中则是解引用符(*)的重载，通过对于这个迭代器进行解引用，程序能够实现对应数据的读取，这也是该迭代器被加上<strong>输入</strong>这一前缀的原因。</p>
+<p>​	同时，为了单一职责原则以及对于数据的保护，输入迭代器不应该有对于数据的修改权限，这个则是通过不实现对应的修改数据方法实现的。</p>
+<ol start="2">
+<li><strong>输出迭代器</strong></li>
+</ol>
+<p>​	有了上面那个的初了解，我们应该也粗略知道了这个输出所应该的含义。通过这个输出迭代器，我们能够使用容器中的数据作为输出提供给其他需要的地方。跟输入迭代器一样，这里也应该对于迭代器处理数据的权限做一些限制。</p>
+<p>​	对应的是，输出迭代器应该具有数据的修改权限而不具备数据的读取权限，这个的实现也很简单，略。</p>
+<ol start="3">
+<li><strong>正向迭代器</strong></li>
+</ol>
+<p>​	该迭代器与前面俩个迭代器一致，都使用++重载来进行容器的遍历，需要注意的是，这个迭代器类型应该能够是的先前的迭代器能够被保存，同时，这个迭代器还存在着一些对于数据的访问控制。但是这个正向迭代器不像之前的俩个迭代器有统一的规定。你可以根据自己的需求去进行修改。</p>
+<ol start="4">
+<li><strong>双向迭代器</strong></li>
+</ol>
+<p>​	这个就不进行赘诉了，跟正向迭代器都是大同小异的。主要就是相对于来说需要额外添加一个反向的重载运算符。没什么意思就不进行深入了。</p>
+<p>​    5. <strong>随机访问迭代器</strong></p>
+<p>​	这个迭代器具有双向迭代器的所有性质，除此之外，还支持能够进行随机访问。实际上就是对于[]的重载，毕竟指针的[]使用就是我们常用的一种随机访问，通过这种统一能够具有更好的扩展性。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>​	简单来看，上面5种迭代器其实形成了一种比较直观的层次结构。以输入和输出迭代器为基础。在上面包裹了一层正向迭代器，在正向迭代器的基础上进行扩展产生了双向迭代器。最后再对双向迭代器进行包装实现了随机访问迭代器。这种架构下的每一层的实现难度逐渐递增，同时功能也逐渐强大，带来的代价也成正比增加。因此，我们可以根据自己的需求去选择自己需要的迭代器种类去平衡性能与损耗之间的关系。</p>
 ]]></content>
       <categories>
-        <category>QT</category>
+        <category>C++</category>
       </categories>
       <tags>
-        <tag>QT</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>看前须知</title>
-    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/0.0-%E7%9C%8B%E5%89%8D%E9%A1%BB%E7%9F%A5/</url>
-    <content><![CDATA[<p>由于一些原因，这里0-12的所有文档的排版都很垃圾<br>实际上就是我懒得再重新排版了，这是我直接从我之前写的文档转换来的<br>重新排版太麻烦了，所以我就摆了，凑活着看吧</p>
-]]></content>
-      <categories>
-        <category>设计模式</category>
-      </categories>
-      <tags>
-        <tag>设计模式基础</tag>
+        <tag>C++</tag>
       </tags>
   </entry>
   <entry>
@@ -520,14 +1037,32 @@
       </tags>
   </entry>
   <entry>
-    <title>面向对象</title>
-    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/1-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/</url>
-    <content><![CDATA[<p>用一个简单的示例来进行面向过程和面向对象的俩种特性之间的区分</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/1-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/Aspose.Words.0ed437a4-543a-4af4-8349-d84cfd143b73.001.jpeg" alt="Aspose.Words.0ed437a4-543a-4af4-8349-d84cfd143b73.001"></p>
+    <title>组合模式</title>
+    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/12-%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F-/</url>
+    <content><![CDATA[<p>接下来我们进入<strong>组合模式</strong>。</p>
+<p>给出<strong>定义</strong>：组合多个对象形成树形结构以表示”部分-整体”的结构层次。组合模式对单个对象(即叶子对象)和组合对象(即树这只鸟容器对象)的使用具有一致性。组合模式又可以称为”部分-整体”模式，属于对象的结构模式，将对象组织到树形结构中去，可以用来描述整体与部分间的关系。</p>
 <span id="more"></span>
-<p>这是一个经典的问题。将大象装进冰箱里分几步。不难看到，我们可以先把冰箱打开，然后我们把大象放到冰箱里面去，再之后将冰箱关上。这是一个简单的三步流程。在这三步中，我们可以观察到，执行操作的对象是谁，是<strong>我们</strong>。也就是说，这一系列的操作都是由我们去触发的。而这就跟面向过程的核心很接近了。	在面向过程的设计中，我们充当的是一个动作的执行者与一个动作的对象提供者。或者说，我们要做的就是调用一个函数并且为它提供对应的参数。这里的打开冰箱就是我们一个函数调用所需要实现的功能，而<strong>打开</strong>的这个实现是由函数封装的。冰箱这个对象是由我们提供给函数的。从此中我们可以看到，面向对象，是要求调用者明确其调用的功能，和被传递给调用的方法的对象的。</p>
-<p>与此同时，我们来从另外一个视角来看这个问题。在这其中，我们如果认为没有人这个个体呢？我们可以把这个过程看做。冰箱打开了自己，大象走进了一个地方，这个地方是一个冰箱，冰箱本身容纳了一个物体，这个物体是一个大象，冰箱本身关闭了。整个过程看下来，我们发现，我们并没有用到一个额外的人物来帮我我们实现这三个步骤。而是仅仅局限于大象和冰箱这俩个对象来实现我们的功能。而这个就是面向对象的一种思想。</p>
-<p>在这里我们将大象和冰箱都抽象为一个对象。冰箱拥有打开，关闭，容纳功能，大象拥有被容纳的功能。通过这样，我们实现了对一个对象的设计。在这种设计下，我们只需要知道一个对象所拥有的功能我们就可以实现对应的操作。</p>
+
+
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/12-%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F-/1.png" alt="1"></p>
+<p>我们先来分析一个组合模式下的UML类图，其实都很简单。在接下来中，我们将会使用树的术语进行分析。</p>
+<p>其实组合模式抽象理解起来很简单，就是将一系列具有相似属性的类使用树的数据结构给它管理起来。在这种设计下，我们的UML类图中存在一个抽象基类，这个基类其实就是我们建树中常用的节点类。在这个抽象基类中，包含了一系列类似于树的方法以及在实际中我们这个类所扩展出来的属性。</p>
+<p>在这些方法中，为了实现组合模式，其中的关键就是那个自身抽象类的指针。这个指针的作用我们也很熟悉，就是我们建树中常用的那个边。这里我们一般不考虑使用左右孩子的俩个指针设计，毕竟这样更耗费空间，也可能导致我们后续在设计时出现混乱。所以我们使用父亲节点这个在多叉树中每个节点唯一的属性进行连接。</p>
+<p>在这个抽象基类的简单派生中，我们可以看到它派生出了俩个子类，其中一个是一个叶子节点类，并没有什么特殊的。另一个是管理节点类。好，这里我们对整颗组合模式将要组成的树进行下分析和分类。在这一整颗树中，我们将最底层的节点(即没有子节点的节点)分类为叶子节点。在叶子节点之上的，统一分类为中间节点，或者说管理节点(因为这些个节点在逻辑上都有着自己的孩子)。在这些个管理节点中，除没有父亲的根节点外，其他的都大致一样。</p>
+<p>总的来说，组合模式就是一颗专门用于管理类的树。在这个模式中，每个在这颗树中的节点都有着指针指向它的父亲(当然可能存在设计使得使用孩子指针，不给不太可能就是了)。在这种层次设计下，使得同一层次下的节点往往具有相同或相似的属性，而位于不同分支下的节点，由于深度的加深，各自的属性可能会逐渐的发生差异化，但是总的来说还是会符合整颗树的设计规范的。而且，只要在这颗树中，无论你是位于哪里，只要你遵守了抽象层，也就是抽象节点的接口设计规范，那么所有的节点都可以为外部使用统一的接口进行调用。</p>
+<p>对了，既然是一颗树，那么对于这颗树的有效遍历，将会是这颗树无法逃脱的命题，而一个节点值保留其的父节点地址显然是无法实现遍历的。所以这个就需要我们去进行一些额外的设计，在我们的管理节点类中，我们需要去添加一个额外的成员变量来储存我们当前节点所连接的所有的子节点的地址。通过这个成员变量，我们才能够从整颗树的根节点去不断的向下遍历，知道遍历完整颗树。</p>
+]]></content>
+      <categories>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>结构型设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>看前须知</title>
+    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/0.0-%E7%9C%8B%E5%89%8D%E9%A1%BB%E7%9F%A5/</url>
+    <content><![CDATA[<p>由于一些原因，这里0-12的所有文档的排版都很垃圾<br>实际上就是我懒得再重新排版了，这是我直接从我之前写的文档转换来的<br>重新排版太麻烦了，所以我就摆了，凑活着看吧</p>
 ]]></content>
       <categories>
         <category>设计模式</category>
@@ -537,40 +1072,96 @@
       </tags>
   </entry>
   <entry>
-    <title>适配器模式</title>
-    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<p>前面我们看完了最后一种创建型模式:原型模式。接下来我们要进入到设计模式的第二大类:<strong>结构性模式</strong>。</p>
-<span id="more"></span>
-<p>需要注意的是，在创建型模性模式中就不同了，其注重的是侧重于如何将类或对象组合在一起形成更大的结构，以实现系统的高效协作和更好的扩展性。它们主要关注如何组织和组合类或对象，处理不同类之间的关系和交互，使得系统更灵活、可维护。也就是说在这个模式中一个相对重要的原则是<strong>开放封闭原则</strong>。</p>
-<p>还有一个也很重要的原则:合成复用原则</p>
-<p>来看一下第一个要学的结构性模式：<strong>适配器模式</strong>。</p>
-<p>首先来说一下适配器模式起的作用。人如其名，适配器存在的目的就是起到一个适配的作用。在显示生活中，如果我们离开中国大陆，我们需要使用当地的电的话，我们通常需要一个适配器，就比如香港等地，你是无法使用你现有的接口去使用当地的插口的。你需要去购买一个能够接通俩头的适配器去转换电压或者提供插口之类的。</p>
-<p>适配器的作用也是如此。就比如我们的程序中有着多个独立的类，当我们想要在一个类中去使用另一个类时，我们会先去考虑我们要使用的这个类有没有接口可以提供别的类使用，有自然就简单，但如果没有呢。没有的话我们有多种做法，最直接的就是去给这个被使用的类添加一个可供目标类使用的接口。但是这违背了开放封闭原则，所以我们需要考虑一些别的方法，这时候适配器模式就出现了。</p>
-<p>还是那个问题，只说还是很抽象，上代码。</p>
-<p>我们重新来分析下适配器模式下需要的几个层次。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/1.jpeg" alt="1"></p>
-<p>在适配器模式中，存在的一个非常核心的概念就是包装，我们期望中的一个适配器是一个能够将想要整合进现有代码的外部类包装成我们能够直接使用现有的统一接口的类。</p>
-<p>就比如把，我们在设计中规定了我们所有的渲染函数都必须是draw名，无论你是渲染矩形，圆形还是什么。现在我们想要在现有代码中去引入一个外部已经实现好的类，但是这个类的接口名不是draw，如果我们不包装直接使用，那么我们就需要时刻去注意我们编写的代码，这是很麻烦的。所以，我们考虑使用一层包装将这个外部类包装成跟我们现有的类在外部看起来一样的，我们只举最简单的例子，就比如我们只是包装它的函数名。那么我们就需要在这个适配器类中去构建我们现在的外部库向我们现有代码中兼容的装换原则。在这里可以见到视作是在外部用一个统一的函数名来包装调用我们实际的函数名。</p>
-<p>好了，接下来我们来看一下适配器类中我们需要了解的层次。最底层就是我们的源接口，就是我们现在想要引入程序的代码，这个接口是不符合我们用户端当前使用的接口规范的。</p>
-<p>在往上就是一个适配器的层次，在这个层次中，其规定了我们的源接口项目标接口转换的方法。这里我们对前面的简单情况进行扩展，我们前面只是说了只用变换名字调用函数的情况。让我们复杂一点，在类的设计中，由于我们期望的设计都应该是遵守设计模式三原则的，所以我们引入的这个类也是一个应该遵守开放封闭原则的类，所以我们的适配方法不应该是去修改我们的源接口中的实现的。</p>
-<p>而在一般情况下，我们的这个适配器接收的参数是由用户层提供的，也就是我们装换后的接口提供的，那么，我们想要实现这俩者之间的适配，我们就得考虑我们当前目标层的接口之间与源接口之间需要来进行怎么样的对接。这个其实就是我们的电压适配器中那个物理原理(那个电压转换原理)。而这个就是我们的适配器类中所要注意的核心了，通过一个适配器提供的转换方法，我们将一个用户层接口所能提供的信息给进行一系列的加工，转换成了能够调用出来源接口的一系列信息。然后我们的适配器会去调用我们的源接口，这个就是我们适配器模式的核心。</p>
-<p>重新回到我们那个最简单的模式来看一下，假设我们俩段的接口调用都不用传递或处理任何参数，那么我们这里的这个适配器接口将不用处理任何的细节，只需要在现有的封装接口中去调用我们的源接口即可，无需考虑参数间的处理。</p>
-<p>然后我们再往上去进行探索，再往上其实就是我们用户接触的接口了。其实这个接口一般在设计中都是有一套接口规范来定义的。就比如你的渲染模块的渲染接口应该是什么名字，应该传递什么参数等等。这个接口是用户是直接调用的接口，直接屏蔽了用户与底层的交互。</p>
-<p>最上层就是我们的用户层了，这一层没什么好说的，其实就是根据接口规范去找到对应的接口并进行调用的层次。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/3.jpeg" alt="3"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/4.jpeg" alt="4"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/5.jpeg" alt="5"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/6.jpeg" alt="6"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/7.jpeg" alt="7"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/8.jpeg" alt="8"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/2.jpeg" alt="2"></p>
-<p>由于截屏问题，有些代码无法看到，自行脑补</p>
+    <title>类模版</title>
+    <url>/2025/02/16/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E6%A8%A1%E7%89%88/</url>
+    <content><![CDATA[<h1 id="模版"><a href="#模版" class="headerlink" title="模版"></a>模版</h1><p>​	模版是C++中一个相对重要的特性了，直接来吧</p>
+<h2 id="类模版"><a href="#类模版" class="headerlink" title="类模版"></a>类模版</h2><p>​	由于这种东西还是得上手去敲，所以我们在这里对很多内容将会进行简化。</p>
+<p>​	模版这种东西最直观的作用就是进行方法与所使用的数据类型之间的解耦，使得在设计方法时能够更加专注于特定功能的方法的构建而不必要去关注所使用的数据类型。</p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>​	一个模版的声明，无论是类模版，还是函数模版，都是基本一致的。通过template关键字来进行</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;		||		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br></pre></td></tr></table></figure>
+
+<p>​	这样就完成了一个模版的创建，但仅仅声明一个模版是没有意义的，我们需要去使用这个模版。</p>
+<p>​	总的来说，通过关键字<strong>template</strong>和尖括号的组合，我们能够创建出一个模版，这个模版中，可以去使用class关键字或者typename关键字，俩者等效，主要是习惯上的差别。接着，在class&#x2F;typename之后会跟上一个变量名，这一个就是我们模版的一个符号，我们在接下来的作用域中使用模版的直观体现，就是使用这里的符号。</p>
+<blockquote>
+<p>在使用前，我们需要了解一些简单的模板所具有的性质</p>
+</blockquote>
+<h4 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h4><p>​	一个模版的作用域是有限的，简单的说，其只会在距离其最近的一个作用域中生效，并且在离开改作用域时，其他作用域中不可见。特别需要注意的是，在部分的模版使用中，可以看到系列的嵌套模版，这些的作用域可以用局部自动变量来进行类比，这里就不进行赘诉了。</p>
+<h2 id="代码举例"><a href="#代码举例" class="headerlink" title="代码举例"></a>代码举例</h2><p>​	接下来通过一个简单的demo来了解一下简单的类模版</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">stack</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="keyword">enum</span> &#123;MAX=<span class="number">10</span>&#125;;</span><br><span class="line">    T data[MAX];</span><br><span class="line">    <span class="type">int</span> top;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">stack</span>()&#123;top=<span class="number">0</span>;&#125;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">isempty</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">isfull</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">push</span><span class="params">(<span class="type">const</span> T&amp; item)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">pop</span><span class="params">(T&amp; item)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="type">bool</span> stack&lt;T&gt;::<span class="built_in">isempty</span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> top==<span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="type">bool</span> stack&lt;T&gt;::<span class="built_in">isfull</span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> top==MAX;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="type">bool</span> stack&lt;T&gt;::<span class="built_in">push</span>(<span class="type">const</span> T&amp; item)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span>(!<span class="built_in">isfull</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        data[top++]=item;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="type">bool</span> stack&lt;T&gt;::<span class="built_in">pop</span>(T&amp; item)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">isempty</span>())<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    item=data[--top];</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>​	从上面可以了解到几点，一个template是一个独立的模版的声明。在这个关键字声明的模版之后紧邻的一个作用域中，该模版一直可见，直到出去了该作用域，该模版失效。</p>
+<p>​	除此之外，我们还需要看到一点的是，模版类的一些特殊性质。</p>
+<hr>
+<h3 id="模版类"><a href="#模版类" class="headerlink" title="模版类"></a>模版类</h3><h4 id="实例时机"><a href="#实例时机" class="headerlink" title="实例时机"></a>实例时机</h4><p>​	对于一个使用模版的类来说，这个类其实并不是一个严格意义上实例的类，换句话说，这个类其实是不存在的，因为我们现在并没有一个实际的类声明可以供给我们去进行类的实例化。这是模版的设计上导致的。毕竟模版的性质就导致了程序能够根据不同的数据类型来进行对于的数据类型的类进行创建。</p>
+<p>​	正如那句经典的话:不要为不需要的特性去浪费时间，这里其实也利用了一种类似于懒加载的机制。程序并不会在一开始就进行所有的类型的模版类的实例创建。具体的等下再继续阐述。</p>
+<p>​	总的来说，现在需要知道的就是一个模版类在编写阶段其实是一种虚的阶段，在编译器层面不会存在任何模版类这种东西，毕竟带入实际的数据类型一个模版类才有存在的价值。</p>
+<h4 id="模版类方法"><a href="#模版类方法" class="headerlink" title="模版类方法"></a>模版类方法</h4><p>​	可以观察到，在我们进行类方法的补充时，如果我们的定义是在类内进行的，其实跟普通的没什么区别。但是当我们需要再类外去进行类内方法的定义时，这里有几个需要注意的点。</p>
+<p>​	首先，我们知道我们如果想要在类外去进行类方法的定义，那么我们需要再对于的方法前去加上类解析符(<strong>类名::</strong>)。在模版类中也是如此，但是前面说过了，一个模版类stack其本身不是一个完整的类，并不存在一个实际上的类声明表示这个类。模版类的正确解析符则是在类名之后加上我们的模版参数，通过这样，之后的各种方法，才能够被绑定到创建的各种模版类实例中去。就比如**stack&lt; int &gt;**就代表着一种使用int数据类型进行填充的stack类，这样的类在编译器层面才会生成对于的类定义，也就才有意义。</p>
+<p>​	那我们这里再来观察下模版在类内的使用，前面我们已经知道创建的模版会以对于的声明的typename&#x2F;class后面的符号名来进行使用。在类内的体现就是**T data[MAX];**可以看到的是，一个模版的使用，其实就是跟一个基本数据类型的使用别无二致，我们只需要记住这个模版在未来会被替换为具体的数据类型来进行类的声明即可。</p>
+<blockquote>
+<p>​	除了这种模版的基础使用之外，还有俩种比较常用的模版使用。</p>
+</blockquote>
+<h4 id="多功能"><a href="#多功能" class="headerlink" title="多功能"></a>多功能</h4><h5 id="多参数模版"><a href="#多参数模版" class="headerlink" title="多参数模版"></a>多参数模版</h5><p>​	一个template能够承载多个参数，这个其实没有什么好说的，就是一个使用的扩展。例如</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T1</span>,<span class="keyword">class</span> <span class="title class_">T2</span>&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>​	这样的模版声明就是一个多参数模版的构建，通过这样的声明，我们能在接下来的作用域中，去使用这俩个模版参数。这来个模版参数的使用与一个模版参数的使用并没有什么显著的区别。</p>
+<h5 id="递归使用模版"><a href="#递归使用模版" class="headerlink" title="递归使用模版"></a>递归使用模版</h5><p>​	其实上面那个代码实例就是一个递归使用模版的例子。我们需要知道的是string其实是一个模版实例化后再进行一个名称转换后的产物，就是一个basic_string&lt;char*&gt;模版。</p>
+<p>​	要了解这种递归的使用会产生什么效果，我们需要去观察到这里模版类生成的最后的具体的类声明到底是一个什么样的，理解了这个，我们接下来的很多关于类的使用都能减轻负担。</p>
+<h2 id="模版具体化"><a href="#模版具体化" class="headerlink" title="模版具体化"></a>模版具体化</h2><p>​	前面已经提到过了，一个模版类不是一个真正的类，只有在一个模版类被指定特定的模版参数时，它才可能进行对应的模版类的构建，具体的表现就是使用对于的类型参数去替换对于的模版类中的模版参数，只有在进行了替换之后，这个生成的类才是一个真正意义上的类。这个阶段通常是由编译器在编译阶段自动执行的。</p>
+<blockquote>
+<p>​	模版的具体化存在着多种情况，一种种来进行分析。</p>
+</blockquote>
+<h3 id="隐式实例化"><a href="#隐式实例化" class="headerlink" title="隐式实例化"></a>隐式实例化</h3><p>​	这是我们最常见的一种形式，也是我们前面所说的，通过编译器自动判断我们传递给模版类的类型参数来进行对于的类定义的生成的方式。例如</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">ArrayTP&lt;<span class="type">int</span>,<span class="number">100</span>&gt; stuff;</span><br></pre></td></tr></table></figure>
+
+<p>​	需要注意的是，编译器在生成对于的类的时候，采取一种类似于懒加载的机制，只有在需要一个真正的被创建出来的类实例的时候，才会进行特定的类定义的生成。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">ArrayTP&lt;<span class="type">double</span>, <span class="number">30</span>&gt;* pt;		<span class="comment">//只是一个指针，不会导致对象的创建</span></span><br><span class="line">pt=<span class="keyword">new</span> ArrayTP&lt;<span class="type">double</span>, <span class="number">30</span>&gt;;		<span class="comment">//使用了new，需要调用构造函数去创建，因此会生辰对于的类定义</span></span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>额外需要注意的是，对于模版类来说，不只是其的类定义是一种懒加载的机制，其的方法也可以看做是一种懒加载的机制，只有在使用到对于的类方法时，才会进行对于的类方法的实例化构建。</p>
+</blockquote>
+<h3 id="显式实例化"><a href="#显式实例化" class="headerlink" title="显式实例化"></a>显式实例化</h3><p>​	对应于隐式实例化的还有一种显式实例化。顾名思义，就是显式的指出编译器需要去进行这种模版类的构建，这种方法的使用也很简单，就是在给模版类提供类型参数时前面加上一个<strong>template</strong>关键字。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span> <span class="keyword">class</span> <span class="title class_">ArrayTP</span>&lt;<span class="type">double</span>,<span class="number">100</span>&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>​	通过加上这个关键字，在编译器识别到这行语句时，会直接进行对应的类定义的构建。</p>
+<hr>
+<p>​	</p>
+<blockquote>
+<p>这里我们在对实例化的时机进行一下剖析，熟悉的从一个简单的东西突然发散然后给我感到想这想那，虽然浪费了一些时间，不过对于一些东西的理解也加深了，寒假末期也得逐渐找回状态了。</p>
+</blockquote>
+<h3 id="实例化时机"><a href="#实例化时机" class="headerlink" title="实例化时机"></a>实例化时机</h3><p>​	无论是显式还是隐式的实例化，它的实例化都是在编译阶段进行的，也就是说，即使是你在运行阶段完全没有涉及到部分模版类的使用，这些个模版类还是会在编译阶段被实例化。那么，隐式实例化相对于显式实例化的意义到底在哪呢？</p>
+<p>​	这里我们就需要对于隐式实例化的实例时机来分析了，就现在我所了解到的，隐式实例化是在编译器识别到代码进行了特定的模版类的使用时进行的实例化。简单来说，编译器会进行一个全部文件代码的阅读，在这其中，我们可以简单的省略所有的判断条件，只要出现了特定的模版类使用(包括但不限于一个模版类对象的创建，类方法的使用)，那么这对应的类定义以及类方法定义都会被实例化。</p>
+<p>​	知道了上面这点后，我们对于隐式实例化与显式实例化之间的区别应该有所了解了。一个隐式实例化相对于显式实例化能够更加节省编译器的资源，能够减少对于的类原型以及方法构建所需要的时间以及空间。那么，显式构建的优势在哪呢？</p>
+<p>​	其实一直到现在，由于我还没有对于模版进行比较深入的使用与了解，对于提到的显式实例化的优势，我也是有点怀疑的，不过假设我已经知道了这一块的。或者说，假定这个隐式实例化会导致一定的多余定义。那么显式实例化能够起到的作用其实很明显，就是通知编译器去生成一个对于的完整的类，包括类声明以及对于的方法定义。在这种情况下只要使用到这个被显式实例化的模版类，编译器不会再尝试去生成一个相同的类，这样能避免一些编译层面可能存在的问题。</p>
+<p>​	我们简单的使用链接性来进行隐式实例化与显式实例化之间存在的区别，</p>
+<p>​	简单来说，隐式实例化生成的符号(类以及对应的方法)等都只是一个局部链接性。当我们想要在多个文件这种去使用这个模版类去进行相同的类型实例化时，将会导致每个文件都产生对应的相同符号并编入到符号表中，在最后的符号表中，会存在符号重复的情况。虽然说编译器一般会对这些重复的符号进行合并。但是，这种生成是一种花销，这种合并也是一种花销。为了减少这种花销，提高性能，因此，出现了显式实例化这种功能。</p>
+<p>​	而显式实例化产生的类是一个全局链接性的，无论是在那个文件中，只要引用了对应的使用了显式实例的文件，那么这个显示实例产生的类就是全局可见的，再进行使用时，编译器不会再去进行对应的声明。这样就避免了一个相同的模版类被多次实例化。</p>
+<blockquote>
+<p>好了，上面耗费的时间有点多了，我们进入下一个具体化</p>
+</blockquote>
+<h3 id="模版具体化-1"><a href="#模版具体化-1" class="headerlink" title="模版具体化"></a>模版具体化</h3><p>​	很多时候，一个通用的模版其实是不够的，这些模版可能需要存在一些特例，在这些特例中，可能存在着一些与通用模版所不一致的行为，这时就需要使用显式具体化来实现了。通过显式具体化，我们能够定制一系列的在特定模版参数下的模版类。</p>
+<p>​	模版具体化，或者说，模版特化允许开发者为特定类型或特定条件提供定制化的实现，从而在保持代码泛化的同时，针对特定情况进行优化或调整。模板特化主要分为两种形式：<strong>全特化</strong>（Full Specialization）和<strong>偏特化</strong>（Partial Specialization）。</p>
+<h4 id="1-全特化（Full-Specialization）"><a href="#1-全特化（Full-Specialization）" class="headerlink" title="1. 全特化（Full Specialization）"></a>1. 全特化（Full Specialization）</h4><p>全特化是指为模板的所有参数提供具体的类型或值，从而完全指定模板的行为。</p>
+<p><strong>示例：</strong></p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">cpp复制编辑<span class="comment">// 通用模板</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTemplate</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 通用实现</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// int 类型的全特化</span></span><br><span class="line"><span class="keyword">template</span> &lt;&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTemplate</span>&lt;<span class="type">int</span>&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 针对 int 类型的特化实现</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在上述示例中，<code>MyTemplate&lt;int&gt;</code> 是 <code>MyTemplate</code> 的全特化版本，专门为 <code>int</code> 类型提供了特定的实现。</p>
+<h4 id="2-偏特化（Partial-Specialization）"><a href="#2-偏特化（Partial-Specialization）" class="headerlink" title="2. 偏特化（Partial Specialization）"></a>2. 偏特化（Partial Specialization）</h4><p>偏特化是指只为模板的部分参数提供具体的类型或值，保留其他参数为泛型。</p>
+<p><strong>示例：</strong></p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> U&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTemplate</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 通用实现</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第一个类型为 int 的偏特化</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> U&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTemplate</span>&lt;<span class="type">int</span>, U&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 第一个类型为 int 的特化实现</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第二个类型为 int 的偏特化</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTemplate</span>&lt;T, <span class="type">int</span>&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 第二个类型为 int 的特化实现</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在上述示例中，<code>MyTemplate&lt;int, U&gt;</code> 和 <code>MyTemplate&lt;T, int&gt;</code> 分别是 <code>MyTemplate</code> 的偏特化版本，针对第一个或第二个类型为 <code>int</code> 的情况提供了特定的实现。</p>
+<blockquote>
+<p>关于模版的特性还有很多，但是由于我的动力已经在这里消失了，所以我将不会继续这一块，之后哪里遇到了感兴趣的模版的东西再回来更新吧。</p>
+</blockquote>
 ]]></content>
       <categories>
-        <category>设计模式</category>
+        <category>C++</category>
       </categories>
       <tags>
-        <tag>结构型设计模式</tag>
+        <tag>C++</tag>
       </tags>
   </entry>
   <entry>
@@ -602,54 +1193,6 @@
 <blockquote>
 <p>差不多了，风紧扯呼~~~</p>
 </blockquote>
-]]></content>
-      <categories>
-        <category>设计模式</category>
-      </categories>
-      <tags>
-        <tag>结构型设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>桥接模式</title>
-    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/11-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<p>接下来进入<strong>桥接模式</strong></p>
-<p>首先来看到给出的定义：将抽象部分与它的实现部分分离，使得它们都可以独立的进行扩展变化。</p>
-<span id="more"></span>
-<p>我们来看到一个简单的例子。我们电脑上常用的绘图软件，我们可以使用其绘制各种各样的图像，矩形，圆型等。如果要我们来设计的话，我们将会把这些图形抽象为一个个类，这些类的具体示例就是我们画布上的具体图形。</p>
-<p>在这基础之上，我们还可以为这些个图形指定不同的颜色，就比如黄色，紫色，白色等等。那么我们如果想为我们绘制的图形也加上指定的颜色呢？在底层设计中，我们有多种做法，最简单的就是为每一个图形类都去派生出对应颜色的子类吧，这样当我们要创建一个特定颜色的矩形时，我们只需要去创建对应的对象即可了。但是吧，你应该也能感觉到这个设计上的巨大缺陷，当我们存在11个图形，11个颜色的时候，我们如果要列出所有可能的图像，我们总共需要创建121个类，这个是不可接受的。那么我们就需要一个优化的方法。</p>
-<p>这个方法其实在现实生活中也有体现，就比如你在画画的时候，你一般是什么，你一般都是先考虑画什么图形，然后再考虑里面需要填充什么颜色。这个想法中，我们考虑画什么图形的这一步可以抽象为抽象部分，后面的填充颜色可以视为实现部分，毕竟这部分意味着你将会画出一个实际的图形出来。</p>
-<p>接下来，我们再将这个想法建模到我们的设计中去。我们前面的做法是通过一个类去完整的标识我们需要的图像的形状，颜色等属性。但是我们这里把它们分离开来，把这些固定了组合的类给他拆分成形状类和颜色类。这就是桥接模式的核心，将一个类中可拆分的部分且不拆分会导致设计复杂的部分给他拆分出来，用前面的术语其实就是将抽象部分与实现部分给他拆分成俩个单独的类。</p>
-<p>让我们来看看这样做的好处，在这种设计下，我们的形状类和颜色类都由一个独立的抽象类进行管理。那么我们需要怎么去实现一个具体颜色的矩形的创建呢。这时候就需要我们<strong>桥接模式</strong>的<strong>桥接</strong>俩字提供作用了。我们创建一个具体的实例类，就比如紫色矩形。这个类中应该至少保留着一个形状指针和一个颜色指针。我们前面已经提到，那个抽象部分和实现部分都应该被管理。在实际设计中，其实就是各自隶属于一个抽象类下。在我们的这一个实例类中，这写个部分一般都以一种聚合关系连接，毕竟你想，即使你这些个实例对象不见了，你的矩形属性，颜色属性，这些都应该是还存在的吧。</p>
-<p>也就是说，桥接模式的核心，就是把一个复杂的类，甚至于不用说复杂，只要这个类中存在相对联系比较松散的属性，我们可以将这些属性给它分离开来，类中只保存这些类的一个单独实例。且这些类之间通过聚合关系联系。通过这样的设计。类间关系进行了进一步的解耦，当我们需要进行扩展时，我们不再需要对这个类进行一系列的派生。而这样在需要特定的属性类时去创建一个唯一的示例类即可，大大减少了设计的复杂度。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/11-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/1.png" alt="1"></p>
-<p>上面是一个桥接模式UML类图的举例。</p>
-<p>让我们来分析下桥接模式的UML类图，其实在这其中，最关键的其实是其关联关系的几个类。这些个关联关系的类定义了整个桥接模式下的类的基本性质。</p>
-<p>在整个桥接模式设计中，各个职责不强关联的类都被分离开来并一般都由一个抽象类进行管理。然后这一系列的抽象类间将会通过组合关系或者聚合关系进行互相通信。这种通信定义了我们最后看到的类的属性，就比如红色的矩形之类。</p>
-<p>在桥接模式要表示的一个最后的对象中，一般就是我们这些个关联关系的属性的集合即各个抽象类的单个实例。在这些个抽象类中，能够派生出一系列的子类，但是最后的对象有且只有使用了这些个类的一个。在这里其实可以联想到我们的抽象工厂模式中的一个产品的构建，很相似。不过我们的抽象工厂模式服务的对象是一个产品的构建，其实吧，这里也是一个产品的构建，但是这个产品的构建是由其他相对来说比较大的产品来构建的，也可以看做是抽象工厂模式的产品层者一层的。</p>
-]]></content>
-      <categories>
-        <category>设计模式</category>
-      </categories>
-      <tags>
-        <tag>结构型设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>组合模式</title>
-    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/12-%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F-/</url>
-    <content><![CDATA[<p>接下来我们进入<strong>组合模式</strong>。</p>
-<p>给出<strong>定义</strong>：组合多个对象形成树形结构以表示”部分-整体”的结构层次。组合模式对单个对象(即叶子对象)和组合对象(即树这只鸟容器对象)的使用具有一致性。组合模式又可以称为”部分-整体”模式，属于对象的结构模式，将对象组织到树形结构中去，可以用来描述整体与部分间的关系。</p>
-<span id="more"></span>
-
-
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/12-%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F-/1.png" alt="1"></p>
-<p>我们先来分析一个组合模式下的UML类图，其实都很简单。在接下来中，我们将会使用树的术语进行分析。</p>
-<p>其实组合模式抽象理解起来很简单，就是将一系列具有相似属性的类使用树的数据结构给它管理起来。在这种设计下，我们的UML类图中存在一个抽象基类，这个基类其实就是我们建树中常用的节点类。在这个抽象基类中，包含了一系列类似于树的方法以及在实际中我们这个类所扩展出来的属性。</p>
-<p>在这些方法中，为了实现组合模式，其中的关键就是那个自身抽象类的指针。这个指针的作用我们也很熟悉，就是我们建树中常用的那个边。这里我们一般不考虑使用左右孩子的俩个指针设计，毕竟这样更耗费空间，也可能导致我们后续在设计时出现混乱。所以我们使用父亲节点这个在多叉树中每个节点唯一的属性进行连接。</p>
-<p>在这个抽象基类的简单派生中，我们可以看到它派生出了俩个子类，其中一个是一个叶子节点类，并没有什么特殊的。另一个是管理节点类。好，这里我们对整颗组合模式将要组成的树进行下分析和分类。在这一整颗树中，我们将最底层的节点(即没有子节点的节点)分类为叶子节点。在叶子节点之上的，统一分类为中间节点，或者说管理节点(因为这些个节点在逻辑上都有着自己的孩子)。在这些个管理节点中，除没有父亲的根节点外，其他的都大致一样。</p>
-<p>总的来说，组合模式就是一颗专门用于管理类的树。在这个模式中，每个在这颗树中的节点都有着指针指向它的父亲(当然可能存在设计使得使用孩子指针，不给不太可能就是了)。在这种层次设计下，使得同一层次下的节点往往具有相同或相似的属性，而位于不同分支下的节点，由于深度的加深，各自的属性可能会逐渐的发生差异化，但是总的来说还是会符合整颗树的设计规范的。而且，只要在这颗树中，无论你是位于哪里，只要你遵守了抽象层，也就是抽象节点的接口设计规范，那么所有的节点都可以为外部使用统一的接口进行调用。</p>
-<p>对了，既然是一颗树，那么对于这颗树的有效遍历，将会是这颗树无法逃脱的命题，而一个节点值保留其的父节点地址显然是无法实现遍历的。所以这个就需要我们去进行一些额外的设计，在我们的管理节点类中，我们需要去添加一个额外的成员变量来储存我们当前节点所连接的所有的子节点的地址。通过这个成员变量，我们才能够从整颗树的根节点去不断的向下遍历，知道遍历完整颗树。</p>
 ]]></content>
       <categories>
         <category>设计模式</category>
@@ -760,146 +1303,6 @@
       </categories>
       <tags>
         <tag>结构型设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>策略模式</title>
-    <url>/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<h1 id="策略模式"><a href="#策略模式" class="headerlink" title="策略模式"></a>策略模式</h1><h2 id="意图"><a href="#意图" class="headerlink" title="意图"></a>意图</h2><p>​	定义一系列的算法，将它们一个个封装起来，并且使得它们可以相互替换。策略模式使得算法可以独立使用与它的用户而变化。</p>
-<h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><blockquote>
-<p>​	在我们使用的许多编辑器乃至编译器中，我们通常可以看到一些不同的换行符算法，有windows的\r\n，linux的\n，Mac用的\r等。将这些个换行符算法硬编码进我们使用的编辑器或者编译器软件中是不可取的。实际你也可以看到，基本所有的编辑器和编译器都有自己的切换换行符的功能。那么，原因是什么呢?</p>
-</blockquote>
-<span id="more"></span>
-
-<h3 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h3><ol>
-<li><strong>复杂性增加</strong><ul>
-<li>如果将换行算法直接嵌入到需要换行功能的程序中，会导致代码臃肿且难以维护。</li>
-<li>支持多种换行算法的需求进一步加剧了这一问题。</li>
-</ul>
-</li>
-<li><strong>灵活性受限</strong><ul>
-<li>如果需要更改换行算法，不希望仍然支持之前的算法。例如，从 Windows 换行标准切换到 Linux 或 macOS 的标准，可能希望只支持新的规则。</li>
-<li>继续支持不需要的旧规则可能导致解析问题。</li>
-</ul>
-</li>
-<li><strong>扩展性受限</strong><ul>
-<li>当功能被硬编码后，添加新算法或修改现有算法变得十分困难。</li>
-</ul>
-</li>
-</ol>
-<p>​	</p>
-<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>​	也就是说，我们策略模式出现的动机就是为了解决上诉这种硬编码会导致的缺陷。所谓<strong>策略</strong>，就是在一个人面对不同事情时选择的不同应对方法，就比如你在window平台上设计时需要去使用window的换行符，你在linux平台开发时需要去使用linux的换行符。这些都是一种策略模式的体现。</p>
-<p>​	也就是说，策略模式最本质的作用，就是通过一种策略来代替一种硬编码的步骤，使得用户能够自己选择当前要使用的方法，或者程序自己选择要使用的方法以取代全部的一种硬编码程序。也就是说，这是一种对于程序的进一步的解耦。</p>
-<blockquote>
-<p>通过<strong>解耦算法的选择与其具体实现</strong>来提高程序的灵活性和可维护性。</p>
-</blockquote>
-<p>​	就拿上面那个换行符算法举例，当我们使用策略模式来设计我们的编辑器后，我们能够在编辑器中去自由选择我们当前想要使用的换行符版本，这种动态选择提供了很高的灵活性，显著的提升了我们使用时的灵活性，将这个扩展到我们的类的设计中也是如此。</p>
-<p>​	而且我们在考虑一下，如果我们使用策略模式来设计我们的换行符算法，那就意味着如果我们后续还需要对这个换行符算法进行添加或者修改的话，我们只需要去修改对应的区域或者添加新的算法即可，不必去修改现有的选择模块，这也是一种策略模式下的原则遵守和优势。</p>
-<hr>
-<h2 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h2><p><img src="/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/735104bbfb7d801a684b9fc3fcd628b4.png" alt="img"></p>
-<blockquote>
-<p><strong>百闻不如一见，UML类图，启动</strong></p>
-</blockquote>
-<p>​	首先，策略模式的UML类图是相对简单的，毕竟从本质来看，它关注的其实主要就来个模块，一个模块时选择模块，另一个是算法模块，选择模块时面向用户层的接口，通过这个模块隔离了用户层与算法实现，同时提供了用户选择算法的方式。</p>
-<p>​	至于算法层，只需要关注自身的实现，关注与选择模块的接口对接即可。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">+----------------+         +----------------+</span><br><span class="line">|  Context       |         |   Strategy     |</span><br><span class="line">|----------------|         |----------------|</span><br><span class="line">| setStrategy()  |&lt;&gt;------&gt;| + execute()    |</span><br><span class="line">| execute()      |         |----------------|</span><br><span class="line">+----------------+         +----------------+</span><br><span class="line">        |</span><br><span class="line">        |-----------------------------------------+</span><br><span class="line">        |                                         |</span><br><span class="line">+------------------+                  +------------------+</span><br><span class="line">| ConcreteStrategyA|                  | ConcreteStrategyB|</span><br><span class="line">|------------------|                  |------------------|</span><br><span class="line">| + execute()      |                  | + execute()      |</span><br><span class="line">+------------------+                  +------------------+</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>​	更为简单的一个UML类图。虽然有点糙，凑活这看吧</p>
-<h3 id="类图要点："><a href="#类图要点：" class="headerlink" title="类图要点："></a><strong>类图要点：</strong></h3><ul>
-<li><code>Context</code>（选择模块）：持有 <code>Strategy</code> 的引用，用于调用具体算法。</li>
-<li><code>Strategy</code>（算法模块）：定义算法的统一接口，提供一个抽象的算法约束。</li>
-<li><code>ConcreteStrategyA</code>、<code>ConcreteStrategyB</code>（具体算法实现）：实现 <code>Strategy</code> 接口，分别提供具体的算法逻辑。</li>
-</ul>
-<p>​	在这里我们在选择模块中没有列出引用这个属性，但是我们使用这个聚合关系来表示了。不对，你都看到这里了，不应该不知道这个啊，我还写个蛋啊。</p>
-<p>​	在这个类图中其实没有显示出到底是一种什么个选择的逻辑，这个是等下我们的代码的工作。在这个类图中，我们主要来分析下我们设计的解耦性。</p>
-<h3 id="设计的解耦性"><a href="#设计的解耦性" class="headerlink" title="设计的解耦性"></a>设计的解耦性</h3><ul>
-<li><p><strong>对用户：</strong></p>
-<ul>
-<li><p>用户只需与 <code>Context</code> 交互，完全无需了解具体算法的实现逻辑。</p>
-</li>
-<li><p><code>Context</code> 提供了灵活的接口，让用户能够动态选择策略或依赖默认策略。这种灵活的选择可能是用户自己的选择也可能是程序自己的旋转，但是一般来说，这种选择都不是有if-else实现的，毕竟你策略模式的一种存在意义就是代替这种令人反感的长嵌套语句</p>
-<blockquote>
-<p><strong>你可能会疑惑那得怎么动态选择，别急，接着看</strong></p>
-</blockquote>
-</li>
-</ul>
-</li>
-<li><p><strong>对算法：</strong></p>
-<ul>
-<li>各种算法被封装为独立类，彼此互不干扰。它们只需实现 <code>Strategy</code> 接口，与 <code>Context</code> 保持对接即可。</li>
-<li>新增算法时，只需增加一个新的具体策略类，无需修改 <code>Context</code> 和其他策略。</li>
-</ul>
-</li>
-</ul>
-<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><blockquote>
-<p><strong>实践才是检验真理的唯一方法</strong></p>
-</blockquote>
-<p>​	其实这里给的代码实例大部分还是为了写而写的，所以其实并没有什么实际应用的价值。而这些存在的意义是给你阐述这些的存在，并在实际的应用中去尝试使用，就比如，我学完策略模式将会把我课设中的数据模块再次进行解耦，将其分割为可以单步执行渲染和一直渲染到底的俩种策略模式，不过那都是后话了，我们先来看代码。</p>
-<h3 id="对比示例"><a href="#对比示例" class="headerlink" title="对比示例"></a>对比示例</h3><h4 id="使用-if-else-的实现（不推荐）"><a href="#使用-if-else-的实现（不推荐）" class="headerlink" title="使用 if-else 的实现（不推荐）"></a>使用 <code>if-else</code> 的实现（不推荐）</h4><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TextEditor</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">printLineBreak</span><span class="params">(<span class="type">const</span> std::string&amp; os)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (os == <span class="string">&quot;Windows&quot;</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: \\r\\n&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (os == <span class="string">&quot;Linux&quot;</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: \\n&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (os == <span class="string">&quot;Mac&quot;</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: \\r&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Unknown OS!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    TextEditor editor;</span><br><span class="line">    editor.<span class="built_in">printLineBreak</span>(<span class="string">&quot;Linux&quot;</span>);  <span class="comment">// Output: Line break: \n</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>缺点：</p>
-<ul>
-<li><p><code>printLineBreak</code> 方法中耦合了换行逻辑的选择和实现，扩展性差,破坏了单一职责原则。</p>
-</li>
-<li><p>增加新的操作系统时，必须修改方法内部的条件分支，破坏了开放封闭原则。</p>
-</li>
-<li><p>我们在修改时必须对所有的算法都进行维护，可能需要进行全部的实例化占用空间，也可能会使用懒加载机制来复杂使用逻辑。</p>
-</li>
-</ul>
-<h4 id="使用策略模式的实现（推荐）"><a href="#使用策略模式的实现（推荐）" class="headerlink" title="使用策略模式的实现（推荐）"></a>使用策略模式的实现（推荐）</h4><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 策略接口</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LineBreakStrategy</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">LineBreakStrategy</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 具体策略</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WindowsLineBreak</span> : <span class="keyword">public</span> LineBreakStrategy &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\\r\\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LinuxLineBreak</span> : <span class="keyword">public</span> LineBreakStrategy &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MacLineBreak</span> : <span class="keyword">public</span> LineBreakStrategy &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\\r&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 上下文类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TextEditor</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::unique_ptr&lt;LineBreakStrategy&gt; strategy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setStrategy</span><span class="params">(std::unique_ptr&lt;LineBreakStrategy&gt; newStrategy)</span> </span>&#123;</span><br><span class="line">        strategy = std::<span class="built_in">move</span>(newStrategy);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">printLineBreak</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (strategy) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: &quot;</span> &lt;&lt; strategy-&gt;formatLineBreak() &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;No strategy set!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    TextEditor editor;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 动态选择策略</span></span><br><span class="line">    editor.<span class="built_in">setStrategy</span>(std::<span class="built_in">make_unique</span>&lt;LinuxLineBreak&gt;());</span><br><span class="line">    editor.<span class="built_in">printLineBreak</span>();  <span class="comment">// Output: Line break: \n</span></span><br><span class="line"></span><br><span class="line">    editor.<span class="built_in">setStrategy</span>(std::<span class="built_in">make_unique</span>&lt;WindowsLineBreak&gt;());</span><br><span class="line">    editor.<span class="built_in">printLineBreak</span>();  <span class="comment">// Output: Line break: \r\n</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>优势：</p>
-<ol>
-<li>避免了 <code>if-else</code> 的分支判断，代码简洁清晰。</li>
-<li>新增策略只需添加新的策略类，无需修改现有代码。</li>
-<li>动态选择和切换策略，灵活性更强。</li>
-</ol>
-<p>​	</p>
-<blockquote>
-<p><strong>那么，代价是什么?</strong></p>
-</blockquote>
-<p>​	从上面来段代码我们其实可以看到最直观的一点就是，策略模式设计下的程序相对来说会存在更多的子类，这些子类都是对应的子算法类，这样会导致这个程序看起来很臃肿。</p>
-<p>​	同时，无论是使不使用策略模式下的设计，我们其实都会存在一种问题，就是我们如果要选择一种算法，我们就必须知道一种算法的存在，这个其实就跟我们平时使用的很多软件一样，特别是编译器这种集成度很高的软件。</p>
-<p>​	通常来说，为了集成到图形化界面上并提供一些多元化的选择，设计者会将功能的选择绑定到按钮上，而程序中的交互按钮又乱七八糟，很多按钮对很多用户来说只是个黑盒，这无疑还是会提高用户的使用难度。</p>
-<p>​	而且在很多情况下，我们可能会碰到一些策略算法类之间存在部分逻辑重叠的情况，这会导致代码的重复，不过这种也可以通过基类的方法提取来解决。</p>
-<p>​	我为什么提出这一点，其实是为了说明在我们提出一个模式的缺点后，我们应该做的不是去记住这些缺点然后接受它，而是应该通过我们已有的或者将来可能会有的知识来进行我们现有的缺点的一些个隐藏，这个才是举出缺点的意义。而不是，好，这个模式有这些缺点，那我就记住它，当我被问到这些时，我一五一十的去吧这些缺点说出来，这是没有意义的。</p>
-<p>​	</p>
-<blockquote>
-<p>​	但是，总的来说，策略模式的这种优化，还是利大于弊的。因为设计模式关注的过程大多还是程序开发的这个过程，策略模式的设计思想本质就是让每种策略自成一体，通过接口与上下文对接，从而取代臃肿的条件分支语句，使代码更加模块化、可扩展和易维护。</p>
-</blockquote>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​	策略模式的核心思想是<strong>通过封装变化和动态选择策略，来提升代码的灵活性和可维护性</strong>。尽管它可能会增加类的数量和一定的设计复杂度，但其在算法扩展性和代码清晰度上的优势使得它在实际开发中广受欢迎。</p>
-<p>​	通过合理设计和优化，策略模式能够很好地实现<strong>高内聚、低耦合</strong>的设计目标，帮助我们构建更易维护、更具扩展性的系统。</p>
-]]></content>
-      <categories>
-        <category>设计模式</category>
-      </categories>
-      <tags>
-        <tag>行为型设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>UML类图</title>
-    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2-UML%E7%B1%BB%E5%9B%BE/</url>
-    <content><![CDATA[<p>UML类图是一个常用于面向对象程序设计的工具。用于图形化描述类的基本属性和类与类之间的关系。</p>
-<p>类与类之间存在着5种关系。</p>
-<span id="more"></span>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2-UML%E7%B1%BB%E5%9B%BE/1.jpeg" alt="1"></p>
-<p>对于一个类的类图构造，有几个规则，直接上例子吧。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2-UML%E7%B1%BB%E5%9B%BE/2.jpeg" alt="2"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2-UML%E7%B1%BB%E5%9B%BE/3.jpeg" alt="3"></p>
-<p>如图。首先，整个类图分为3块。</p>
-<p>最上面一块为类名。这一块规则不多。如果你的类是一个可实例化的类，那么这个类名应该是正体字。相反，如果是一个虚类，那么这个类名就应该是一个斜体字。</p>
-<p>第二块是类成员的区域。这一块有着一定的规范，一行的数据应该由(访问权限|成员名|:|类型名)组成。特殊的是，如果这个类成员是一个默认初始化的成员，那么需要在之后加上一个&#x3D;和对应的初始化对象。特殊的是，如果这个类成员是一个静态类成员，那么需要在这个成员处加上下划线进行标识。</p>
-<p>来看一下我们访问权限的符号定义。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2-UML%E7%B1%BB%E5%9B%BE/4.jpeg" alt="4"></p>
-<p>接下来进入第三个区域。这个区域是用于类成员函数的标识。基本组成结构是(访问权限|函数名|函数参数列表|:|函数返回值类型)。对于参数列表内部的组成，如果为空，那么()为空即可。若不为空，按照(参数名|参数类型)并按(,)分割的格式进行制作。特殊的是，如果这个成员函数是一个静态成员函数，那么需要加上一个下划线进行标识。如果是一个虚函数，那么需要写成斜体字，如果还是一个纯虚函数，那么需要在末尾加上一个&#x3D;0进行标识。</p>
-]]></content>
-      <categories>
-        <category>设计模式</category>
-        <category>UML类图</category>
-      </categories>
-      <tags>
-        <tag>设计模式基础</tag>
       </tags>
   </entry>
   <entry>
@@ -1165,6 +1568,86 @@
       </tags>
   </entry>
   <entry>
+    <title>面向对象</title>
+    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/1-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/</url>
+    <content><![CDATA[<p>用一个简单的示例来进行面向过程和面向对象的俩种特性之间的区分</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/1-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/Aspose.Words.0ed437a4-543a-4af4-8349-d84cfd143b73.001.jpeg" alt="Aspose.Words.0ed437a4-543a-4af4-8349-d84cfd143b73.001"></p>
+<span id="more"></span>
+<p>这是一个经典的问题。将大象装进冰箱里分几步。不难看到，我们可以先把冰箱打开，然后我们把大象放到冰箱里面去，再之后将冰箱关上。这是一个简单的三步流程。在这三步中，我们可以观察到，执行操作的对象是谁，是<strong>我们</strong>。也就是说，这一系列的操作都是由我们去触发的。而这就跟面向过程的核心很接近了。	在面向过程的设计中，我们充当的是一个动作的执行者与一个动作的对象提供者。或者说，我们要做的就是调用一个函数并且为它提供对应的参数。这里的打开冰箱就是我们一个函数调用所需要实现的功能，而<strong>打开</strong>的这个实现是由函数封装的。冰箱这个对象是由我们提供给函数的。从此中我们可以看到，面向对象，是要求调用者明确其调用的功能，和被传递给调用的方法的对象的。</p>
+<p>与此同时，我们来从另外一个视角来看这个问题。在这其中，我们如果认为没有人这个个体呢？我们可以把这个过程看做。冰箱打开了自己，大象走进了一个地方，这个地方是一个冰箱，冰箱本身容纳了一个物体，这个物体是一个大象，冰箱本身关闭了。整个过程看下来，我们发现，我们并没有用到一个额外的人物来帮我我们实现这三个步骤。而是仅仅局限于大象和冰箱这俩个对象来实现我们的功能。而这个就是面向对象的一种思想。</p>
+<p>在这里我们将大象和冰箱都抽象为一个对象。冰箱拥有打开，关闭，容纳功能，大象拥有被容纳的功能。通过这样，我们实现了对一个对象的设计。在这种设计下，我们只需要知道一个对象所拥有的功能我们就可以实现对应的操作。</p>
+]]></content>
+      <categories>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>设计模式基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>观察者模式</title>
+    <url>/2024/12/25/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/17-%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<h1 id="观察者模式"><a href="#观察者模式" class="headerlink" title="观察者模式"></a>观察者模式</h1><blockquote>
+<p>由于一些原因，我需要先学观察者模式，其实就是我需要这个模式去进行课设()</p>
+</blockquote>
+<hr>
+<h2 id="感悟"><a href="#感悟" class="headerlink" title="感悟"></a>感悟</h2><blockquote>
+<p>​	其实所有的设计模式如果只是在看的阶段去过一遍你的感触其实不会很深。相反，如果你在设计中因为一些设计导致出现了一些问题，需要一些设计模式来进行弥补的话，这种学习将会是很深刻的。当然啦，你如果一点设计模式都没有学过，你其实都不会意识到你需要这些设计模式。</p>
+<p>​	所以，在我的设想中，一个设计模式好的学习流程应该是先去系统的学一学一些设计模式，就比如创建型设计模式中的几种，然后去进行使用，在使用的阶段你其实不时就会发现你的创建型设计模式和结构型设计模式通常会出现一些问题。或者吧，也可以先依照设计模式的三原则去进行设计架构，然后你一定会发现使用三原则的话会导致的一些疑惑的。</p>
+<p>​	就比如我的课设，我在进行重构，想要重新规范下三原则中的单一职责原则时，我想要进行数据模块和渲染模块间的解耦，然后发现这种解耦会导致我的渲染操作不知道在哪里调用，这时我就回来看设计模式，发现这种问题可以通过行为模式中的观察者模式来解决，然后我就自我驱动的去学了，这才是一个学习的正反馈过程啊。</p>
+</blockquote>
+<hr>
+<span id="more"></span>
+
+<h2 id="存在意图"><a href="#存在意图" class="headerlink" title="存在意图"></a>存在意图</h2><blockquote>
+<p>​	定义对象建一种一对多的依赖关系，当一个对象的状态发生转变事，所有依赖于它的对象都得到通知并且自动更新。</p>
+</blockquote>
+<p>​	</p>
+<h2 id="使用的动机"><a href="#使用的动机" class="headerlink" title="使用的动机"></a>使用的动机</h2><p>​	在实际的设计过程中，我们常常会遇到一个问题。就是当我们对于一个系统进行解耦的时候，我们把它分割为了一系列的模块。就比如，你在原本的设计中设计了一个可以自己实现数据处理和结构渲染的类。现在你要对这个类进行进一步的解耦，我们先不考虑它是怎么解耦的。</p>
+<p>​	我们目前需要看的是，这种解耦会出现的副作用，其中最明显的就是在我们解耦过后，我们原本代码中合作的数据处理模块和渲染模块之间无法协调工作了，这是由于类的特殊性导致的，如果使用嵌套类来实现这只新的模块分割倒也是一种解决方案，但是这种设计又违反了我们的开放封闭原则。所以我们需要一种机制来实现这种独立出来的类的联动。当然，是有其他的一些应用场景的，但是我还没碰到过。</p>
+<h3 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h3><p>​	就比如我们的数据模块和渲染模块间的联动，我们期望的是当我们数据发生变动时我们能够实时的去反应出这种变化。这在我们原有的一个系统中只需要去在数据变更时去进行对应的渲染代码执行即可。但是我们现在已经不能够直接去调用渲染代码了，但是我们还是需要这个功能。此时就需要一种机制去进行通知对应的渲染模块去进行工作，而观察者模式恰恰好能够充当这个角色。</p>
+<p>​	说了这么多其实还是实际项目中的应用情况。我们来举几个生活中的例子。</p>
+<p>​	在现实生活中，我们在任何一个视频网站上，通常都有关注这个功能，当我们关注之后，这个博主只要一更新内容，我们如果有对应的设置的话，我们就能收到对应的通知。同时，一个博主可能存在着许多粉丝，相应的，所有这些粉丝都能够收到对应的推送。这就是一种<strong>发布-订阅模式</strong>。在这种模式中，博主和用户这俩个账号是相对独立的。其中是存在着一种机制来进行实时的通知的。正是由观察着模式来实现这种功能。</p>
+<hr>
+<h2 id="简单概括"><a href="#简单概括" class="headerlink" title="简单概括"></a>简单概括</h2><p>​	在观察者模式中，一般存在着俩种角色。一个是<strong>订阅者</strong>，一个是<strong>发布者</strong>。一个发布者可能有着多个订阅者。但是一般来说一个订阅者对于发布者是一对一的的。当然实际中，你可能会说一个人可以订阅多个博主，但是这也是不冲突的。这用文字是不好进行阐述的，但是你应该能够理解。</p>
+<p>​	通过进行观察者模式，我们实现了一种通知机制，在发布者发布一些信息之后，所有的订阅者应该都能够收到对应的信息。至于订阅者收到这个信息后会进行一个什么样的处理，这个是观察者模式中不关注的。</p>
+<blockquote>
+<p>​	在观察者模式中，最重要的就是通知机制。这个会在接下来的UML类图中去进行分析。</p>
+</blockquote>
+<hr>
+<h2 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h2><p><img src="/2024/12/25/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/17-%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F/eb9aece31234e8ef95f7e2e0399e5915.png" alt="img"></p>
+<blockquote>
+<p>观察者模式的UML类图是需要重点分析的，需要重点理解的就是观察者模式中的通知机制。</p>
+</blockquote>
+<p>​	这里我们将只进行抽象发布者类和抽象订阅者类的分析，其他的子类都不是很重要。</p>
+<p>​	首先可以看到在途中ConcreteObserver和ConcreteSubject是一个互相聚合的关系。我们就是通过这种互相聚合来实现通知机制的。</p>
+<p>​	</p>
+<h3 id="ConcreteObserver类"><a href="#ConcreteObserver类" class="headerlink" title="ConcreteObserver类"></a>ConcreteObserver类</h3><p>​	这个类就是我们对应的观察者类。这个设计中使用了一个name作为信息的接收。当然，这个成员也可以是订阅者的名字，不过这个不重要。主要是看到另外的一个成员，一个指针链表，在这个指针链表中，储存的是当前观察者对应的发布者的指针。也就是说，在订阅者的属性中，是存在一个成员用于管理发布者的信息的。其实你应该很可以理解这个存在的意义，就比如你社交软件中关注的博主。这个其实就是你对应的发布者。订阅者可以通过这个list链表去找到其的订阅者信息并以此进行通知操作。</p>
+<p>​	这个其实就是一个对于前面一对多的扩展，实现了一个人可以同时关注多个博主的功能。当然，这里的信息处理事很薄弱的。</p>
+<blockquote>
+<p>​	还需要来进行着下面的系列成员函数的分析。</p>
+</blockquote>
+<h4 id="addSubject函数"><a href="#addSubject函数" class="headerlink" title="addSubject函数"></a>addSubject函数</h4><p>​	这个函数的作用其实就写在明面上了，就是添加我们的订阅者，通过一个指针去实现对于发布者的添加，实际上就是添加到自己的发布者链表中去进行管理。</p>
+<h4 id="deleteSubject函数"><a href="#deleteSubject函数" class="headerlink" title="deleteSubject函数"></a>deleteSubject函数</h4><p>​	这个函数同样很好理解，就是简单的吧我们指定的一个发布者从我们的成员链表中去移除。没什么好说的。</p>
+<h4 id="update函数"><a href="#update函数" class="headerlink" title="update函数"></a>update函数</h4><p>​	这个是整个类的核心，用于进行事件的通知，在这UML类图中是体现不出它到底是怎么进行一个通知的，简单来说一下吧，这其实是一个被调用的函数，而且调用对象一般是对应的发布者，发布者能够通过这个接口来进行信息的传递。</p>
+<hr>
+<h4 id="ConcreteObsertver类"><a href="#ConcreteObsertver类" class="headerlink" title="ConcreteObsertver类"></a>ConcreteObsertver类</h4><p>​	这个类就是我们的发布者基类了，在这个基类中，很多属性都跟订阅者很相似，我们这里就不加以赘述了。这里主要看到一个函数。就是这里的send函数</p>
+<h4 id="send函数"><a href="#send函数" class="headerlink" title="send函数"></a>send函数</h4><p>​	这个函数的作用已经写的很明白了，就是发送信息。它的参数就是它的信息。但是UML类图是体现不出发送这种操作的，还是得等等下的代码分析，不过可以简单的说一下，这里的发布信息就是通过对应的成员链表去进行通知，去进行一次链表的遍历，并依次调用每个成员对应的接收信息的方法去进行推送。</p>
+<hr>
+<p>​	</p>
+<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><p>​	在观察者模式中，最重要看的是它的代码，毕竟相对于其他模式，观察者模式在其的UML类图中暴露的信息有限，但是我并不想再进行分析了，我要回去搓我的课设了，所以我要挖一个我可能永远也不会填的坑了。</p>
+<p>​	自己分析去吧</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 抽象观察者（订阅者）</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Observer</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Observer</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">update</span><span class="params">(<span class="type">const</span> std::string &amp;message)</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 具体观察者（订阅者）</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Subscriber</span> : <span class="keyword">public</span> Observer &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::string name;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">Subscriber</span><span class="params">(<span class="type">const</span> std::string &amp;name)</span> : name(name) &#123;</span>&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">update</span><span class="params">(<span class="type">const</span> std::string &amp;message)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Subscriber &quot;</span> &lt;&lt; name &lt;&lt; <span class="string">&quot; received message: &quot;</span> &lt;&lt; message &lt;&lt; std::endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">std::string <span class="title">getName</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> name; &#125; <span class="comment">// 用于识别订阅者</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 抽象发布者</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Publisher</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Publisher</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">subscribe</span><span class="params">(std::shared_ptr&lt;Observer&gt; observer)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">unsubscribe</span><span class="params">(<span class="type">const</span> std::string &amp;observerName)</span> </span>= <span class="number">0</span>; <span class="comment">// 通过标识符移除</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">notify</span><span class="params">(<span class="type">const</span> std::string &amp;message)</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 具体发布者</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">NewsPublisher</span> : <span class="keyword">public</span> Publisher &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::vector&lt;std::shared_ptr&lt;Observer&gt;&gt; subscribers; <span class="comment">// 订阅者列表</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">subscribe</span><span class="params">(std::shared_ptr&lt;Observer&gt; observer)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        subscribers.<span class="built_in">push_back</span>(observer);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">unsubscribe</span><span class="params">(<span class="type">const</span> std::string &amp;observerName)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        subscribers.<span class="built_in">erase</span>(</span><br><span class="line">            std::<span class="built_in">remove_if</span>(subscribers.<span class="built_in">begin</span>(), subscribers.<span class="built_in">end</span>(),</span><br><span class="line">                           [&amp;observerName](<span class="type">const</span> std::shared_ptr&lt;Observer&gt; &amp;subscriber) &#123;</span><br><span class="line">                               <span class="keyword">auto</span> concreteSubscriber = std::<span class="built_in">dynamic_pointer_cast</span>&lt;Subscriber&gt;(subscriber);</span><br><span class="line">                               <span class="keyword">return</span> concreteSubscriber &amp;&amp; concreteSubscriber-&gt;<span class="built_in">getName</span>() == observerName;</span><br><span class="line">                           &#125;),</span><br><span class="line">            subscribers.<span class="built_in">end</span>()</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">notify</span><span class="params">(<span class="type">const</span> std::string &amp;message)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span> &amp;subscriber : subscribers) &#123;</span><br><span class="line">            subscriber-&gt;<span class="built_in">update</span>(message);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 创建发布者</span></span><br><span class="line">    <span class="keyword">auto</span> publisher = std::<span class="built_in">make_shared</span>&lt;NewsPublisher&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建订阅者</span></span><br><span class="line">    <span class="keyword">auto</span> subscriber1 = std::<span class="built_in">make_shared</span>&lt;Subscriber&gt;(<span class="string">&quot;Alice&quot;</span>);</span><br><span class="line">    <span class="keyword">auto</span> subscriber2 = std::<span class="built_in">make_shared</span>&lt;Subscriber&gt;(<span class="string">&quot;Bob&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 订阅新闻</span></span><br><span class="line">    publisher-&gt;<span class="built_in">subscribe</span>(subscriber1);</span><br><span class="line">    publisher-&gt;<span class="built_in">subscribe</span>(subscriber2);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 发布新闻</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Publishing news...&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    publisher-&gt;<span class="built_in">notify</span>(<span class="string">&quot;Breaking News: Observer Pattern in Action!&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 取消订阅</span></span><br><span class="line">    publisher-&gt;<span class="built_in">unsubscribe</span>(<span class="string">&quot;Alice&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 再次发布新闻</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;\nPublishing more news...&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    publisher-&gt;<span class="built_in">notify</span>(<span class="string">&quot;Update: Observer Pattern Still Relevant!&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>行为型设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>责任链模式</title>
     <url>/2024/12/28/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/19-%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="责任链模式"><a href="#责任链模式" class="headerlink" title="责任链模式"></a>责任链模式</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>​	为请求创建一个接收者对象的链。该模式使多个对象都有机会处理请求，从而避免请求的发送者和接收者之间的耦合关系。将这些对象连接成一条链，并沿着这条链传递请求，直到有一个对象处理它为止。</p>
@@ -1297,6 +1780,208 @@
       </tags>
   </entry>
   <entry>
+    <title>适配器模式</title>
+    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p>前面我们看完了最后一种创建型模式:原型模式。接下来我们要进入到设计模式的第二大类:<strong>结构性模式</strong>。</p>
+<span id="more"></span>
+<p>需要注意的是，在创建型模性模式中就不同了，其注重的是侧重于如何将类或对象组合在一起形成更大的结构，以实现系统的高效协作和更好的扩展性。它们主要关注如何组织和组合类或对象，处理不同类之间的关系和交互，使得系统更灵活、可维护。也就是说在这个模式中一个相对重要的原则是<strong>开放封闭原则</strong>。</p>
+<p>还有一个也很重要的原则:合成复用原则</p>
+<p>来看一下第一个要学的结构性模式：<strong>适配器模式</strong>。</p>
+<p>首先来说一下适配器模式起的作用。人如其名，适配器存在的目的就是起到一个适配的作用。在显示生活中，如果我们离开中国大陆，我们需要使用当地的电的话，我们通常需要一个适配器，就比如香港等地，你是无法使用你现有的接口去使用当地的插口的。你需要去购买一个能够接通俩头的适配器去转换电压或者提供插口之类的。</p>
+<p>适配器的作用也是如此。就比如我们的程序中有着多个独立的类，当我们想要在一个类中去使用另一个类时，我们会先去考虑我们要使用的这个类有没有接口可以提供别的类使用，有自然就简单，但如果没有呢。没有的话我们有多种做法，最直接的就是去给这个被使用的类添加一个可供目标类使用的接口。但是这违背了开放封闭原则，所以我们需要考虑一些别的方法，这时候适配器模式就出现了。</p>
+<p>还是那个问题，只说还是很抽象，上代码。</p>
+<p>我们重新来分析下适配器模式下需要的几个层次。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/1.jpeg" alt="1"></p>
+<p>在适配器模式中，存在的一个非常核心的概念就是包装，我们期望中的一个适配器是一个能够将想要整合进现有代码的外部类包装成我们能够直接使用现有的统一接口的类。</p>
+<p>就比如把，我们在设计中规定了我们所有的渲染函数都必须是draw名，无论你是渲染矩形，圆形还是什么。现在我们想要在现有代码中去引入一个外部已经实现好的类，但是这个类的接口名不是draw，如果我们不包装直接使用，那么我们就需要时刻去注意我们编写的代码，这是很麻烦的。所以，我们考虑使用一层包装将这个外部类包装成跟我们现有的类在外部看起来一样的，我们只举最简单的例子，就比如我们只是包装它的函数名。那么我们就需要在这个适配器类中去构建我们现在的外部库向我们现有代码中兼容的装换原则。在这里可以见到视作是在外部用一个统一的函数名来包装调用我们实际的函数名。</p>
+<p>好了，接下来我们来看一下适配器类中我们需要了解的层次。最底层就是我们的源接口，就是我们现在想要引入程序的代码，这个接口是不符合我们用户端当前使用的接口规范的。</p>
+<p>在往上就是一个适配器的层次，在这个层次中，其规定了我们的源接口项目标接口转换的方法。这里我们对前面的简单情况进行扩展，我们前面只是说了只用变换名字调用函数的情况。让我们复杂一点，在类的设计中，由于我们期望的设计都应该是遵守设计模式三原则的，所以我们引入的这个类也是一个应该遵守开放封闭原则的类，所以我们的适配方法不应该是去修改我们的源接口中的实现的。</p>
+<p>而在一般情况下，我们的这个适配器接收的参数是由用户层提供的，也就是我们装换后的接口提供的，那么，我们想要实现这俩者之间的适配，我们就得考虑我们当前目标层的接口之间与源接口之间需要来进行怎么样的对接。这个其实就是我们的电压适配器中那个物理原理(那个电压转换原理)。而这个就是我们的适配器类中所要注意的核心了，通过一个适配器提供的转换方法，我们将一个用户层接口所能提供的信息给进行一系列的加工，转换成了能够调用出来源接口的一系列信息。然后我们的适配器会去调用我们的源接口，这个就是我们适配器模式的核心。</p>
+<p>重新回到我们那个最简单的模式来看一下，假设我们俩段的接口调用都不用传递或处理任何参数，那么我们这里的这个适配器接口将不用处理任何的细节，只需要在现有的封装接口中去调用我们的源接口即可，无需考虑参数间的处理。</p>
+<p>然后我们再往上去进行探索，再往上其实就是我们用户接触的接口了。其实这个接口一般在设计中都是有一套接口规范来定义的。就比如你的渲染模块的渲染接口应该是什么名字，应该传递什么参数等等。这个接口是用户是直接调用的接口，直接屏蔽了用户与底层的交互。</p>
+<p>最上层就是我们的用户层了，这一层没什么好说的，其实就是根据接口规范去找到对应的接口并进行调用的层次。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/3.jpeg" alt="3"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/4.jpeg" alt="4"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/5.jpeg" alt="5"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/6.jpeg" alt="6"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/7.jpeg" alt="7"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/8.jpeg" alt="8"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/10-%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/2.jpeg" alt="2"></p>
+<p>由于截屏问题，有些代码无法看到，自行脑补</p>
+]]></content>
+      <categories>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>结构型设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>桥接模式</title>
+    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/11-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p>接下来进入<strong>桥接模式</strong></p>
+<p>首先来看到给出的定义：将抽象部分与它的实现部分分离，使得它们都可以独立的进行扩展变化。</p>
+<span id="more"></span>
+<p>我们来看到一个简单的例子。我们电脑上常用的绘图软件，我们可以使用其绘制各种各样的图像，矩形，圆型等。如果要我们来设计的话，我们将会把这些图形抽象为一个个类，这些类的具体示例就是我们画布上的具体图形。</p>
+<p>在这基础之上，我们还可以为这些个图形指定不同的颜色，就比如黄色，紫色，白色等等。那么我们如果想为我们绘制的图形也加上指定的颜色呢？在底层设计中，我们有多种做法，最简单的就是为每一个图形类都去派生出对应颜色的子类吧，这样当我们要创建一个特定颜色的矩形时，我们只需要去创建对应的对象即可了。但是吧，你应该也能感觉到这个设计上的巨大缺陷，当我们存在11个图形，11个颜色的时候，我们如果要列出所有可能的图像，我们总共需要创建121个类，这个是不可接受的。那么我们就需要一个优化的方法。</p>
+<p>这个方法其实在现实生活中也有体现，就比如你在画画的时候，你一般是什么，你一般都是先考虑画什么图形，然后再考虑里面需要填充什么颜色。这个想法中，我们考虑画什么图形的这一步可以抽象为抽象部分，后面的填充颜色可以视为实现部分，毕竟这部分意味着你将会画出一个实际的图形出来。</p>
+<p>接下来，我们再将这个想法建模到我们的设计中去。我们前面的做法是通过一个类去完整的标识我们需要的图像的形状，颜色等属性。但是我们这里把它们分离开来，把这些固定了组合的类给他拆分成形状类和颜色类。这就是桥接模式的核心，将一个类中可拆分的部分且不拆分会导致设计复杂的部分给他拆分出来，用前面的术语其实就是将抽象部分与实现部分给他拆分成俩个单独的类。</p>
+<p>让我们来看看这样做的好处，在这种设计下，我们的形状类和颜色类都由一个独立的抽象类进行管理。那么我们需要怎么去实现一个具体颜色的矩形的创建呢。这时候就需要我们<strong>桥接模式</strong>的<strong>桥接</strong>俩字提供作用了。我们创建一个具体的实例类，就比如紫色矩形。这个类中应该至少保留着一个形状指针和一个颜色指针。我们前面已经提到，那个抽象部分和实现部分都应该被管理。在实际设计中，其实就是各自隶属于一个抽象类下。在我们的这一个实例类中，这写个部分一般都以一种聚合关系连接，毕竟你想，即使你这些个实例对象不见了，你的矩形属性，颜色属性，这些都应该是还存在的吧。</p>
+<p>也就是说，桥接模式的核心，就是把一个复杂的类，甚至于不用说复杂，只要这个类中存在相对联系比较松散的属性，我们可以将这些属性给它分离开来，类中只保存这些类的一个单独实例。且这些类之间通过聚合关系联系。通过这样的设计。类间关系进行了进一步的解耦，当我们需要进行扩展时，我们不再需要对这个类进行一系列的派生。而这样在需要特定的属性类时去创建一个唯一的示例类即可，大大减少了设计的复杂度。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/11-%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/1.png" alt="1"></p>
+<p>上面是一个桥接模式UML类图的举例。</p>
+<p>让我们来分析下桥接模式的UML类图，其实在这其中，最关键的其实是其关联关系的几个类。这些个关联关系的类定义了整个桥接模式下的类的基本性质。</p>
+<p>在整个桥接模式设计中，各个职责不强关联的类都被分离开来并一般都由一个抽象类进行管理。然后这一系列的抽象类间将会通过组合关系或者聚合关系进行互相通信。这种通信定义了我们最后看到的类的属性，就比如红色的矩形之类。</p>
+<p>在桥接模式要表示的一个最后的对象中，一般就是我们这些个关联关系的属性的集合即各个抽象类的单个实例。在这些个抽象类中，能够派生出一系列的子类，但是最后的对象有且只有使用了这些个类的一个。在这里其实可以联想到我们的抽象工厂模式中的一个产品的构建，很相似。不过我们的抽象工厂模式服务的对象是一个产品的构建，其实吧，这里也是一个产品的构建，但是这个产品的构建是由其他相对来说比较大的产品来构建的，也可以看做是抽象工厂模式的产品层者一层的。</p>
+]]></content>
+      <categories>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>结构型设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>策略模式</title>
+    <url>/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<h1 id="策略模式"><a href="#策略模式" class="headerlink" title="策略模式"></a>策略模式</h1><h2 id="意图"><a href="#意图" class="headerlink" title="意图"></a>意图</h2><p>​	定义一系列的算法，将它们一个个封装起来，并且使得它们可以相互替换。策略模式使得算法可以独立使用与它的用户而变化。</p>
+<h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><blockquote>
+<p>​	在我们使用的许多编辑器乃至编译器中，我们通常可以看到一些不同的换行符算法，有windows的\r\n，linux的\n，Mac用的\r等。将这些个换行符算法硬编码进我们使用的编辑器或者编译器软件中是不可取的。实际你也可以看到，基本所有的编辑器和编译器都有自己的切换换行符的功能。那么，原因是什么呢?</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h3><ol>
+<li><strong>复杂性增加</strong><ul>
+<li>如果将换行算法直接嵌入到需要换行功能的程序中，会导致代码臃肿且难以维护。</li>
+<li>支持多种换行算法的需求进一步加剧了这一问题。</li>
+</ul>
+</li>
+<li><strong>灵活性受限</strong><ul>
+<li>如果需要更改换行算法，不希望仍然支持之前的算法。例如，从 Windows 换行标准切换到 Linux 或 macOS 的标准，可能希望只支持新的规则。</li>
+<li>继续支持不需要的旧规则可能导致解析问题。</li>
+</ul>
+</li>
+<li><strong>扩展性受限</strong><ul>
+<li>当功能被硬编码后，添加新算法或修改现有算法变得十分困难。</li>
+</ul>
+</li>
+</ol>
+<p>​	</p>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>​	也就是说，我们策略模式出现的动机就是为了解决上诉这种硬编码会导致的缺陷。所谓<strong>策略</strong>，就是在一个人面对不同事情时选择的不同应对方法，就比如你在window平台上设计时需要去使用window的换行符，你在linux平台开发时需要去使用linux的换行符。这些都是一种策略模式的体现。</p>
+<p>​	也就是说，策略模式最本质的作用，就是通过一种策略来代替一种硬编码的步骤，使得用户能够自己选择当前要使用的方法，或者程序自己选择要使用的方法以取代全部的一种硬编码程序。也就是说，这是一种对于程序的进一步的解耦。</p>
+<blockquote>
+<p>通过<strong>解耦算法的选择与其具体实现</strong>来提高程序的灵活性和可维护性。</p>
+</blockquote>
+<p>​	就拿上面那个换行符算法举例，当我们使用策略模式来设计我们的编辑器后，我们能够在编辑器中去自由选择我们当前想要使用的换行符版本，这种动态选择提供了很高的灵活性，显著的提升了我们使用时的灵活性，将这个扩展到我们的类的设计中也是如此。</p>
+<p>​	而且我们在考虑一下，如果我们使用策略模式来设计我们的换行符算法，那就意味着如果我们后续还需要对这个换行符算法进行添加或者修改的话，我们只需要去修改对应的区域或者添加新的算法即可，不必去修改现有的选择模块，这也是一种策略模式下的原则遵守和优势。</p>
+<hr>
+<h2 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h2><p><img src="/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/18-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/735104bbfb7d801a684b9fc3fcd628b4.png" alt="img"></p>
+<blockquote>
+<p><strong>百闻不如一见，UML类图，启动</strong></p>
+</blockquote>
+<p>​	首先，策略模式的UML类图是相对简单的，毕竟从本质来看，它关注的其实主要就来个模块，一个模块时选择模块，另一个是算法模块，选择模块时面向用户层的接口，通过这个模块隔离了用户层与算法实现，同时提供了用户选择算法的方式。</p>
+<p>​	至于算法层，只需要关注自身的实现，关注与选择模块的接口对接即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">+----------------+         +----------------+</span><br><span class="line">|  Context       |         |   Strategy     |</span><br><span class="line">|----------------|         |----------------|</span><br><span class="line">| setStrategy()  |&lt;&gt;------&gt;| + execute()    |</span><br><span class="line">| execute()      |         |----------------|</span><br><span class="line">+----------------+         +----------------+</span><br><span class="line">        |</span><br><span class="line">        |-----------------------------------------+</span><br><span class="line">        |                                         |</span><br><span class="line">+------------------+                  +------------------+</span><br><span class="line">| ConcreteStrategyA|                  | ConcreteStrategyB|</span><br><span class="line">|------------------|                  |------------------|</span><br><span class="line">| + execute()      |                  | + execute()      |</span><br><span class="line">+------------------+                  +------------------+</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>​	更为简单的一个UML类图。虽然有点糙，凑活这看吧</p>
+<h3 id="类图要点："><a href="#类图要点：" class="headerlink" title="类图要点："></a><strong>类图要点：</strong></h3><ul>
+<li><code>Context</code>（选择模块）：持有 <code>Strategy</code> 的引用，用于调用具体算法。</li>
+<li><code>Strategy</code>（算法模块）：定义算法的统一接口，提供一个抽象的算法约束。</li>
+<li><code>ConcreteStrategyA</code>、<code>ConcreteStrategyB</code>（具体算法实现）：实现 <code>Strategy</code> 接口，分别提供具体的算法逻辑。</li>
+</ul>
+<p>​	在这里我们在选择模块中没有列出引用这个属性，但是我们使用这个聚合关系来表示了。不对，你都看到这里了，不应该不知道这个啊，我还写个蛋啊。</p>
+<p>​	在这个类图中其实没有显示出到底是一种什么个选择的逻辑，这个是等下我们的代码的工作。在这个类图中，我们主要来分析下我们设计的解耦性。</p>
+<h3 id="设计的解耦性"><a href="#设计的解耦性" class="headerlink" title="设计的解耦性"></a>设计的解耦性</h3><ul>
+<li><p><strong>对用户：</strong></p>
+<ul>
+<li><p>用户只需与 <code>Context</code> 交互，完全无需了解具体算法的实现逻辑。</p>
+</li>
+<li><p><code>Context</code> 提供了灵活的接口，让用户能够动态选择策略或依赖默认策略。这种灵活的选择可能是用户自己的选择也可能是程序自己的旋转，但是一般来说，这种选择都不是有if-else实现的，毕竟你策略模式的一种存在意义就是代替这种令人反感的长嵌套语句</p>
+<blockquote>
+<p><strong>你可能会疑惑那得怎么动态选择，别急，接着看</strong></p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p><strong>对算法：</strong></p>
+<ul>
+<li>各种算法被封装为独立类，彼此互不干扰。它们只需实现 <code>Strategy</code> 接口，与 <code>Context</code> 保持对接即可。</li>
+<li>新增算法时，只需增加一个新的具体策略类，无需修改 <code>Context</code> 和其他策略。</li>
+</ul>
+</li>
+</ul>
+<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><blockquote>
+<p><strong>实践才是检验真理的唯一方法</strong></p>
+</blockquote>
+<p>​	其实这里给的代码实例大部分还是为了写而写的，所以其实并没有什么实际应用的价值。而这些存在的意义是给你阐述这些的存在，并在实际的应用中去尝试使用，就比如，我学完策略模式将会把我课设中的数据模块再次进行解耦，将其分割为可以单步执行渲染和一直渲染到底的俩种策略模式，不过那都是后话了，我们先来看代码。</p>
+<h3 id="对比示例"><a href="#对比示例" class="headerlink" title="对比示例"></a>对比示例</h3><h4 id="使用-if-else-的实现（不推荐）"><a href="#使用-if-else-的实现（不推荐）" class="headerlink" title="使用 if-else 的实现（不推荐）"></a>使用 <code>if-else</code> 的实现（不推荐）</h4><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TextEditor</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">printLineBreak</span><span class="params">(<span class="type">const</span> std::string&amp; os)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (os == <span class="string">&quot;Windows&quot;</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: \\r\\n&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (os == <span class="string">&quot;Linux&quot;</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: \\n&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (os == <span class="string">&quot;Mac&quot;</span>) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: \\r&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Unknown OS!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    TextEditor editor;</span><br><span class="line">    editor.<span class="built_in">printLineBreak</span>(<span class="string">&quot;Linux&quot;</span>);  <span class="comment">// Output: Line break: \n</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>缺点：</p>
+<ul>
+<li><p><code>printLineBreak</code> 方法中耦合了换行逻辑的选择和实现，扩展性差,破坏了单一职责原则。</p>
+</li>
+<li><p>增加新的操作系统时，必须修改方法内部的条件分支，破坏了开放封闭原则。</p>
+</li>
+<li><p>我们在修改时必须对所有的算法都进行维护，可能需要进行全部的实例化占用空间，也可能会使用懒加载机制来复杂使用逻辑。</p>
+</li>
+</ul>
+<h4 id="使用策略模式的实现（推荐）"><a href="#使用策略模式的实现（推荐）" class="headerlink" title="使用策略模式的实现（推荐）"></a>使用策略模式的实现（推荐）</h4><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 策略接口</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LineBreakStrategy</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">LineBreakStrategy</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 具体策略</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WindowsLineBreak</span> : <span class="keyword">public</span> LineBreakStrategy &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\\r\\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LinuxLineBreak</span> : <span class="keyword">public</span> LineBreakStrategy &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MacLineBreak</span> : <span class="keyword">public</span> LineBreakStrategy &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">std::string <span class="title">formatLineBreak</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;\\r&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 上下文类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TextEditor</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::unique_ptr&lt;LineBreakStrategy&gt; strategy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setStrategy</span><span class="params">(std::unique_ptr&lt;LineBreakStrategy&gt; newStrategy)</span> </span>&#123;</span><br><span class="line">        strategy = std::<span class="built_in">move</span>(newStrategy);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">printLineBreak</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (strategy) &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;Line break: &quot;</span> &lt;&lt; strategy-&gt;formatLineBreak() &lt;&lt; std::endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;No strategy set!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    TextEditor editor;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 动态选择策略</span></span><br><span class="line">    editor.<span class="built_in">setStrategy</span>(std::<span class="built_in">make_unique</span>&lt;LinuxLineBreak&gt;());</span><br><span class="line">    editor.<span class="built_in">printLineBreak</span>();  <span class="comment">// Output: Line break: \n</span></span><br><span class="line"></span><br><span class="line">    editor.<span class="built_in">setStrategy</span>(std::<span class="built_in">make_unique</span>&lt;WindowsLineBreak&gt;());</span><br><span class="line">    editor.<span class="built_in">printLineBreak</span>();  <span class="comment">// Output: Line break: \r\n</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>优势：</p>
+<ol>
+<li>避免了 <code>if-else</code> 的分支判断，代码简洁清晰。</li>
+<li>新增策略只需添加新的策略类，无需修改现有代码。</li>
+<li>动态选择和切换策略，灵活性更强。</li>
+</ol>
+<p>​	</p>
+<blockquote>
+<p><strong>那么，代价是什么?</strong></p>
+</blockquote>
+<p>​	从上面来段代码我们其实可以看到最直观的一点就是，策略模式设计下的程序相对来说会存在更多的子类，这些子类都是对应的子算法类，这样会导致这个程序看起来很臃肿。</p>
+<p>​	同时，无论是使不使用策略模式下的设计，我们其实都会存在一种问题，就是我们如果要选择一种算法，我们就必须知道一种算法的存在，这个其实就跟我们平时使用的很多软件一样，特别是编译器这种集成度很高的软件。</p>
+<p>​	通常来说，为了集成到图形化界面上并提供一些多元化的选择，设计者会将功能的选择绑定到按钮上，而程序中的交互按钮又乱七八糟，很多按钮对很多用户来说只是个黑盒，这无疑还是会提高用户的使用难度。</p>
+<p>​	而且在很多情况下，我们可能会碰到一些策略算法类之间存在部分逻辑重叠的情况，这会导致代码的重复，不过这种也可以通过基类的方法提取来解决。</p>
+<p>​	我为什么提出这一点，其实是为了说明在我们提出一个模式的缺点后，我们应该做的不是去记住这些缺点然后接受它，而是应该通过我们已有的或者将来可能会有的知识来进行我们现有的缺点的一些个隐藏，这个才是举出缺点的意义。而不是，好，这个模式有这些缺点，那我就记住它，当我被问到这些时，我一五一十的去吧这些缺点说出来，这是没有意义的。</p>
+<p>​	</p>
+<blockquote>
+<p>​	但是，总的来说，策略模式的这种优化，还是利大于弊的。因为设计模式关注的过程大多还是程序开发的这个过程，策略模式的设计思想本质就是让每种策略自成一体，通过接口与上下文对接，从而取代臃肿的条件分支语句，使代码更加模块化、可扩展和易维护。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​	策略模式的核心思想是<strong>通过封装变化和动态选择策略，来提升代码的灵活性和可维护性</strong>。尽管它可能会增加类的数量和一定的设计复杂度，但其在算法扩展性和代码清晰度上的优势使得它在实际开发中广受欢迎。</p>
+<p>​	通过合理设计和优化，策略模式能够很好地实现<strong>高内聚、低耦合</strong>的设计目标，帮助我们构建更易维护、更具扩展性的系统。</p>
+]]></content>
+      <categories>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>行为型设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>UML类图</title>
+    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2-UML%E7%B1%BB%E5%9B%BE/</url>
+    <content><![CDATA[<p>UML类图是一个常用于面向对象程序设计的工具。用于图形化描述类的基本属性和类与类之间的关系。</p>
+<p>类与类之间存在着5种关系。</p>
+<span id="more"></span>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2-UML%E7%B1%BB%E5%9B%BE/1.jpeg" alt="1"></p>
+<p>对于一个类的类图构造，有几个规则，直接上例子吧。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2-UML%E7%B1%BB%E5%9B%BE/2.jpeg" alt="2"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2-UML%E7%B1%BB%E5%9B%BE/3.jpeg" alt="3"></p>
+<p>如图。首先，整个类图分为3块。</p>
+<p>最上面一块为类名。这一块规则不多。如果你的类是一个可实例化的类，那么这个类名应该是正体字。相反，如果是一个虚类，那么这个类名就应该是一个斜体字。</p>
+<p>第二块是类成员的区域。这一块有着一定的规范，一行的数据应该由(访问权限|成员名|:|类型名)组成。特殊的是，如果这个类成员是一个默认初始化的成员，那么需要在之后加上一个&#x3D;和对应的初始化对象。特殊的是，如果这个类成员是一个静态类成员，那么需要在这个成员处加上下划线进行标识。</p>
+<p>来看一下我们访问权限的符号定义。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2-UML%E7%B1%BB%E5%9B%BE/4.jpeg" alt="4"></p>
+<p>接下来进入第三个区域。这个区域是用于类成员函数的标识。基本组成结构是(访问权限|函数名|函数参数列表|:|函数返回值类型)。对于参数列表内部的组成，如果为空，那么()为空即可。若不为空，按照(参数名|参数类型)并按(,)分割的格式进行制作。特殊的是，如果这个成员函数是一个静态成员函数，那么需要加上一个下划线进行标识。如果是一个虚函数，那么需要写成斜体字，如果还是一个纯虚函数，那么需要在末尾加上一个&#x3D;0进行标识。</p>
+]]></content>
+      <categories>
+        <category>设计模式</category>
+        <category>UML类图</category>
+      </categories>
+      <tags>
+        <tag>设计模式基础</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>迭代器模式</title>
     <url>/2025/01/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="迭代器模式"><a href="#迭代器模式" class="headerlink" title="迭代器模式"></a>迭代器模式</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>​	提供一个方法顺序·访问一个聚合对象中的各个元素，而又不需要暴露该对象的内部表示。</p>
@@ -1388,6 +2073,65 @@
       </tags>
   </entry>
   <entry>
+    <title>三个原则</title>
+    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/</url>
+    <content><![CDATA[<p>对于所有的设计模式，无论思想是什么，都遵守三个基本原则：</p>
+<p>单一职责原则，开放封闭原则，依赖倒转原则</p>
+<span id="more"></span>
+<p>对于这三个原则，与其说是设计模式所遵守的原则，不如规定为我们程序设计中应该遵守的原则。在程序设计中，即使我们对设计模式不是很清楚，但是如果我们设计过程中遵守这几个基本原则，那么设计出来的程序还是会很优雅的</p>
+<p>首先来看到<strong>单一职责原则</strong></p>
+<p>这个原则在应用场景中其实就是<strong>面向对象</strong>。这个原则注意的本质上就是在类的设计中让其负责的功能尽可能的专一，使得我们在设计过程中可以更加专注于特定功能的实现，能够减轻我们的设计压力和维护压力。</p>
+<p>举个简单的例子吧，就比如不久前做的那个堆排序作业。其实现在看来heap类的设计是存在大问题的。这个类负责的功能太多了，它既负责了对于数据的对排序处理，又负责了对于堆排序的渲染。这就导致了我后期在debug时想要去找到对应的错误位置需要去找到整个类中存在的错误。而此时类简单看实现代码行数已经达到了小几百行。这是要去debug是极其不易的。确实有亲身体会。</p>
+<p>因此，这个单一职责原则的目的就在于各个功能模块间的实现分离。通过这种分离，我们能够实现更加高效的设计和debug。就比如，当你数据构建层面出错就去找对应数据构建的类。当你渲染出现问题就去找对应渲染的类。同时类功能的分离也能提高代码的复用性。</p>
+<p>就比如那个heap类，由于我们将渲染模块和数据模块都耦合到了一起，如果我们想要在这个项目中再去添加与现在的排序类相似的类，我们是无法复用现在已有类的渲染模块的。直接继承将是一个糟糕的注意。而且我们已有的渲染模块是基于heap类去设计的，即使我们想要cv，我们也得考虑新类的设计，这是代码低复用性的体现。相反，我们应该考虑的是一个隐藏实现细节的渲染类来进行各种排序的实现。让heap等排序类专注于数据层面的构建，通过设计出render等渲染类来实现对应的渲染动画。</p>
+<p>因此，在我们设计类的时候，我们要尽可能的让类的功能尽可能的单一，通过不同类之间的配合再来实现复杂的功能而不是一股脑塞在一个类中。而且这在类的定义中也可以看出类的设计初衷就是让我们设计一个功能单一的类。类是一组相关属性和行为的集合。注意这里是一组而不是多组。我们在任何时候都不应该有万能的这个概念，毕竟这个概念是不符合我们的设计逻辑的。尽管用户层是希望一个万能，但是用户层的万能与底层的万能不能等效。</p>
+<p>接下来看第二个原则	<strong>开放封闭原则</strong></p>
+<p>其实这个原则就是<strong>单一职责原则</strong>的延续。简单来说，如果你的一个类很好的遵守了单一职责原则，换句话说这个类在一个功能上做到了极致，那么无论你添加什么这个类的功能都不会有什么改变。同时，你会发现如果一个类很好的遵守了单一职责原则，那么当出现新的需求时，仅仅依靠现在的类是无法解决的，那么现在就需要进行扩展，那么此时我们就有俩种方式来进行扩展。一种是直接修改我们现在的类去添加对应的功能，但是正如我们前面所说，这样其实是未被单一职责原则的。那么，内求失败后，我们需要外求。</p>
+<p>既然外求，由于我们还是需要遵守单一职责原则，那么我们应该考虑实现一个新的类来实现我们新增的功能，而且一般来看这个类是需要和已有的一些类进行联动的。但是这个设计过程并不应该影响到已经设计好的类。在这个新增的类设计完成后，我们应该考虑把这个类和原先的类打包到另外一个大类中去实现。这种设计下，这个大类就对原有的功能进行了扩展，而且俩个小子类又都遵守了单一职责原则。</p>
+<p>好，回来看看我们哪里体现了开放封闭原则。首先，我们实现了对已有功能的扩展，这是一种对于原有设计的开放性质的阐述。其次，我们并没有对原有的类进行修改，已完成的类是相对来说封闭的，这是封闭的性质。</p>
+<p>这个封闭属性是相当重要的。毕竟如果一个类保留了它的封闭属性，那么它一般是通过了一定的测试，能够稳定运行的，如果我们去对这个类进行添加修改等破坏了它的封闭性，那么对于原有的哪些个用到封闭的类的api地方，又有可能导致一些奇奇怪怪的错误产生。而导致必须对整个类全部进行重新审核和测试。</p>
+<p>举个例子吧，在现实中，我们通常可以看到一些男人在外部工作，不理家中事，但是家里还是被老婆打理的不错。这就是一个典型的开放封闭原则的示例。别杠，再杠让你飞起来。家庭是一个大类，这个大类中包含了一个负责家庭资金供给的父亲，一个负责家庭打理的母亲，还有其他一些杂七杂八的东西。种种这些相互独立，但是又组成一个整体。我们可以看做每个对象之间相互独立，但是多个对象构成了一个大类达到了一种和谐。</p>
+<p>这个其实在QT中可以窥见。在QT中，其实已有的库可以视作一系列的具有封闭属性的库，我们在设计中要做的一般也是设计这些具有封闭性的类。然后，我们会在一些特别的类中，就比如，一个项目初始的窗口类中去进行这个小类的实例化与调用。这也是一种开放封闭原则的设计实例。</p>
+<p>接着再来看一些需要注意的地方。就是即使我们实现了一些新的类，我们怎么去实现这些新的类与已有的类之间的联动。这里就需要我们在设计类是预留一些接口。这个接口一般来说是可以预见到的，就比如，商场的购物通常会有”打折”这种事情发生，可能是几折几折，也可能是买一送一等等，但是这些都有一个共性，就是他们都是”打折”这件事。因此，我们在设计商场购物的对应类中，我们应该预留一个专门的接口用于打折以实现以后可能存在的扩展。这个其实身边就能看到，就比如我们的笔记本，笔记本保留了相当多的插口供我们使用，而且一个插口可以使用不同的设备，只要这个设备的插口符合我们笔记本的接口规范。</p>
+<p>这种接口的设计一般是通过<strong>多态</strong>的特性来进行实现的。在父类中去预留一个虚函数接口，当我们想要一个具体的打折方案后，我们去继承这个父类并对这个方法进行对应的重写，通过使用这个重写类去对父类进行替换，来实现我们打折方案的改变。而且由于继承这种关系，所以这些个父子类间的差异就在与这个重写的接口类处，不用太去担心冲突问题。</p>
+<p>一般来说，这个接口是一个虚类的父类指针以提供该虚类的系列子类的指向。</p>
+<p>这种<strong>开放封闭原则</strong>能够保证程序的可扩展性，可维护性，可复用性。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/1.jpeg" alt="1"></p>
+<p>接下来看第三个原则，<strong>依赖倒转原则</strong>，话不多说，直接上图</p>
+<p><strong>高层模块不应该依赖低层模块，二者都应该依赖于抽象；</strong></p>
+<p><strong>抽象不应该依赖细节，细节应该依赖于抽象</strong></p>
+<p>再解释下高层模块和低层模块。高层模块就是编写的应用程序，也就是应用层，这个你应该可以理解。接下来注意一点，我们要分析的是底层模块，而不是底层模块，所有位于高层模块下的模块都是低层模块。抽象基本就等价于C++中的抽象类以及各类的api。</p>
+<p>举例下这里的直接依赖，就比如一个外卖系统中，通过使用一个数据库系统来实现数据的存储与使用，如果直接使用一个具体数据库的引用，那么这个就是直接依赖。而我们<strong>高层模块不应该依赖低层模块，二者都应该依赖于抽象</strong>的目的就是避免这种直接的绑定。你可以想象，你游戏账户直接绑定一个手机号，那么当你绑定的这个手机号出现了问题，你这个游戏账号将会导致一系列的问题，就比如我们无法去登录等。</p>
+<p>而为了避免这种情况，我们的想法是通过一个中间层来进行缓冲，而这个的作用就是实现高层模块和底层模块的隔离，避免这俩者之间的直接调用。而且对于这个中间类(抽象类)需要有几个规定。最简单的一点就是这个函数必须在高层和底层的代码发生改动时不必要去修改另外一边的代码，起到所谓的隔离作用。通过这种隔绝，我们能够使得修改代码时只用去关心对应代码区域的修改而不用去关注全局代码的更改。</p>
+<p>在使用时，我们一般是需要高层模块来使用这个抽象的api的，在c++中，这个就是所谓的虚函数。但是吧，一般来说，我们的这个抽象的父类是不会提供具体的实现也是不应该提供具体的实现的。需要在对应的子类中去进行具体的不同功能的划分与实现。</p>
+<p>这个就比如吧，我们在进行一个项目的设计中，前期由于一些设计方面的问题，直接使用了mySQL数据库作为使用的数据库。但是在之后的发展中，由于数据的堆积，这个数据库无法满足我们的需求了，我们需要去替换一个更大的数据库，此时如果我们是直接调用的mySQL的数据库的话，那么我们在替换这个数据库的时候，我们需要去把全部用到mySQL的地方都进行更改，这个工作量是巨大且不可接受的，因为这个会导致前面已经通过测试的代码需要全部重新审批。但是如果我们引入了一个中间层来进行设计，提供一个统一的一个接口，我们只需要去注意我们使用接口的对象的替换就行了。如果我们设计的足够合理，我们就只需要去替换这里就行了，这个设计架构就相对于前面的全局替换高效了不止一星半点。</p>
+<p><strong>抽象不应该依赖细节，细节应该依赖于抽象</strong></p>
+<p>重新来分半简述下这句话</p>
+<p>抽象不应该依赖细节：抽象(如接口或基类)不应该直接绑定到具体实现上，而是应该独立存在。简单来说，我们的一个基类函数，不应该导致我们这个抽象的接口被固定了，我们不应该给其提供实现，或者至少说不应该限定它只能有一个实现。简单以实现来看的话，我们不应该限定我们的基类函数为不可改变的。至少是一个virtual的，至于要不要是纯虚函数取决于具体的环境。这种设计下，抽象就不会被绑定到一个具体的实现上，至少来说可以是在子类中重载的。</p>
+<p>接下来看后半句话，<strong>细节应该依赖于抽象</strong>。具体的实现(如派生类或子类)应该遵循抽象层定义的规则(如接口或虚函数)。是说，这里的子类的具体实现不应该脱离我们使用的抽象层来实现。还是回到c++中，就是说我们的子类的实现不能够脱离我们基类的根本目的。只有按照基类设计的目的去设计对应的子类，我们才能保证接口能够正确的被使用。</p>
+<p>在这种设计中，我们可以进行一点设计层次上的分析。这里调用一个类的类就是一个应用层类似的。一个抽象类的基类其实就相当于一个中间层，提供了一系列的接口，但是这些接口通常是没有意义的，或者说应该是没有意义的。具体的实现应该在这个抽象类的子类中进行实现。通过这样，我们就实现了一种隔离，通过这种隔离我们能够实现本来高耦合的降低。</p>
+<p>也就是说，在这种设计要求下，我们如果选择在子类中去进行一些基类中没有的功能的扩展，我们需要在基类中预留一些接口函数去等待这些接口函数的插入。通过这种实现我们能够实现避免大量修改原有的代码。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/3.jpeg" alt="3"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/4.jpeg" alt="4"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/2.jpeg" alt="2"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/5.jpeg" alt="5"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/6.jpeg" alt="6"></p>
+<p>接下来看一个重要的原则，<strong>里氏代换原则</strong>。</p>
+<p>这个原则其实很好理解，它本身要求的是子类类型必须能够替换他们的父类类型。我们也应该知道这个规则在QT中时相当常见的。就比如一个窗口类函数参数，我们可以使用对应窗口类的一系列父类和子类，只要他们是QWidget类或者其派生类的就行。而这种课替换性就是里氏代换原则所要求的。</p>
+<p>要实现这种原则，就必须要求多态这个面向对象特性。父类指针可以指向子类对象。</p>
+<p>对于这种原则，需要简单了解的就是子类必须实现父类中全部要求的接口函数。</p>
+<p>额外需要注意我们这里提到的里氏代换原则的目的，只有拥有这个原则的设计，我们才有可能保证依赖倒转原则。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/7.jpeg" alt="7"></p>
+<p>简单来看的话，这个原则要求我们在设计高层模块是我们只需要&#x3D;也只应该去调用虚类中的父类函数，而不要求我们去了解我们的子类的附加函数，我们应该通过父类的对应接口就能够调用所有的子类方法。</p>
+]]></content>
+      <categories>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>设计模式基础</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>命令模式</title>
     <url>/2024/12/30/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="命令模式"><a href="#命令模式" class="headerlink" title="命令模式"></a>命令模式</h1><p>​	</p>
@@ -1418,120 +2162,6 @@
 <p>​	这里其实就没有什么好说的，需要注意的是，在命令模式中，我们需要在程序一开始进行所有的命令的初始化，之后我们所有发出的命令本质上其实就是保留了一份对应的指针。当然，你可以在每次调用时都进行副本的一次创建，不给你也应该知道这种模式的坏处。</p>
 <p>下面给出一个不是很美的UML类图，我自己都没去看()</p>
 <h2 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h2><p><img src="/2024/12/30/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/20-%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F/d99bb4bb90aeefcc2db7233d91cc5a2c.png" alt="img"></p>
-]]></content>
-      <categories>
-        <category>设计模式</category>
-      </categories>
-      <tags>
-        <tag>行为型设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>三个原则</title>
-    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/</url>
-    <content><![CDATA[<p>接下来简单看一下类间的5种关系。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/1.jpeg" alt="1"></p>
-<span id="more"></span>
-
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/2.jpeg" alt="2"></p>
-<p>每个类框的创建遵守之前的规则。而对于子类，我们可以看到这里只写出了子类重写的哪些函数(假设这些个子类没有额外的对象)。也就是说，对于子类来说，不需要对父类中的对象再进行描述，使用空心三角箭头就能表示继承关系并使得对应父类的成员不需要再被描述。</p>
-<p>再来详细分析下，对于空心三角箭头，俩端分别连接父类和子类。其中，箭头指向的是父类，另一端连接的是子类。</p>
-<p>接着来看到第二种类间关系，<strong>关联</strong>关系。</p>
-<p>这种关系其实很常见，就是一个类中引用了一个类。这个类可能是别的类，也可能还是自身的类，依照引用关系和对象的不同存在多种关系。</p>
-<p>1~单向关联关系</p>
-<p>这种关系就是一个类中包括了另一个类(需要是一个与本类不同的类)，并且被包含的那个类不知道包含它的类的信息。父子或母子之类的关系的类建模</p>
-<p>使用带箭头的实线进行连接</p>
-<p>2~双向关联关系</p>
-<p>这种关系就是一个类中包括了另一个类(需要是一个与本类不同的类)，被包含的类中也包含了包含它的类。学生与老师的类建模抽象。</p>
-<p>使用不带箭头的实线进行连接</p>
-<p>3~自关联关系</p>
-<p>这种关系就是一个类中包含了指向本身同一种类的引用。就比如树的节点类。</p>
-<p>使用指向自身的带箭头线进行连接。</p>
-<p>当然，总总这些绘图线段都不是一定的，取决于使用的绘图软件。</p>
-<p>接下来看下一种关系	<strong>聚合</strong>关系</p>
-<p>这个关系乍看起来有点抽象。其实可以通过教室和学生，图书馆和藏书间的关系辅助理解。一个教室中可能会有多个学生，图书馆中也包含着系列藏书。这俩者之间构成了一个聚合关系。</p>
-<p>对于聚合关系，就比如教室和学生这种。我们需要理清下这俩者之间的关系。无论教室还是学生，都是可以独立存在的，但是吧，教室中没有学生这些对象的话，其实是没有存在的意义的。对于独立存在的学生，不同于教室，他们独立存在是有着自己的意义的。从某种意义上这个也可以成为识别聚合关系的一种方法。	同时，这些聚合关系中，拥有的对象通常不只有一个。就比如教室中的学生，数量通常都是多个。在这种架构下，我们去取出其中的一个学生对于教室这个整体其实是没有很大影响的，当然这得是在一种至少不是很少的情况下的。你如果要说只有几个学生的这种情况我也无话可说。</p>
-<p>以一种C++的类来看吧，如果一个类中包含了多个别的类的数组，当我们对这个主类进行析构的时候，这些个包含的子类并没有被析构的话，可以看做这些类之间是一种聚合的关系。</p>
-<p>在这里我其实对聚合关系和关联关系有点疑惑。不过可以这么理解，类间关系是不一定存在一种的。或者说，类间关系是由类的属性而产生的，而不是由类间关系而产生的类。聚合关系某种程度上可以看做是关联关系的子类。聚合关系一定是关联关系，但是关联关系不一定是聚合关系。</p>
-<p>如果类间是一个聚合关系，那么这些类之间应该使用空心菱形的直线进行连接。菱形与聚合的整体相连，另一端与对应的部分相连。</p>
-<p>举出一个聚合类型的例子</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/3.jpeg" alt="3"></p>
-<p>接下来看另一种关系	<strong>组合</strong>关系</p>
-<p>使用实心菱形线段进行标识组合关系。与上相似故略过</p>
-<p>组合关系也是一种整体和部分的关系。很多方面它跟聚合关系都很相似。但是这里相对于聚合关系不同的是，这里的部分其实是依赖于整体而存活的，当主对象被析构时，这个组合关系的部分类不应该还存活着。举个例子，就比如头和嘴巴，眼睛，眉毛等。后面的部分在整体消失时不应该还存在(你杠就是你对)。</p>
-<p>这样看来，通过组合关系联系的各个类相对于聚合关系有着更为紧密的联系。以C++的视角来看的话，就是当组合关系中的整体类被析构的时候，它对应的部分类也应该被析构掉。</p>
-<p>接下来来看类与类之间最弱的一种关系	<strong>依赖</strong>关系</p>
-<p>依赖关系的判断有点抽象。可以用排除法来进行。如果一个类既不是继承.关联.聚合.组合关系，那么它就是一个依赖关系。你可以看出这个关系有多弱了吧。</p>
-<p>当然，还是有不通过排除法来进行判断的方法的</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/4.jpeg" alt="4"></p>
-<p>当我们一个类使用了另外一个类作为本类的函数参数。在函数参数内使用了别的类作为本类函数的一个局部变量，一个类中调用了别的类的静态方法。这三种情况下，这些个类之间构成了依赖关系。当然，其实这个相较于排除法其实更难判断了。</p>
-<p>依赖关系使用带线头的虚线进行标识，由依赖的一方指向被依赖的一方。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/5.jpeg" alt="5"></p>
-<p>对于类图关系，类之间是可能存在多种关系的，但是我们不需要将全部关系都列出来，我们只需要将这些类关系中最强的关系描述出来就行了。</p>
-]]></content>
-      <categories>
-        <category>设计模式</category>
-        <category>UML类图</category>
-      </categories>
-      <tags>
-        <tag>UML类图</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>观察者模式</title>
-    <url>/2024/12/25/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/17-%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<h1 id="观察者模式"><a href="#观察者模式" class="headerlink" title="观察者模式"></a>观察者模式</h1><blockquote>
-<p>由于一些原因，我需要先学观察者模式，其实就是我需要这个模式去进行课设()</p>
-</blockquote>
-<hr>
-<h2 id="感悟"><a href="#感悟" class="headerlink" title="感悟"></a>感悟</h2><blockquote>
-<p>​	其实所有的设计模式如果只是在看的阶段去过一遍你的感触其实不会很深。相反，如果你在设计中因为一些设计导致出现了一些问题，需要一些设计模式来进行弥补的话，这种学习将会是很深刻的。当然啦，你如果一点设计模式都没有学过，你其实都不会意识到你需要这些设计模式。</p>
-<p>​	所以，在我的设想中，一个设计模式好的学习流程应该是先去系统的学一学一些设计模式，就比如创建型设计模式中的几种，然后去进行使用，在使用的阶段你其实不时就会发现你的创建型设计模式和结构型设计模式通常会出现一些问题。或者吧，也可以先依照设计模式的三原则去进行设计架构，然后你一定会发现使用三原则的话会导致的一些疑惑的。</p>
-<p>​	就比如我的课设，我在进行重构，想要重新规范下三原则中的单一职责原则时，我想要进行数据模块和渲染模块间的解耦，然后发现这种解耦会导致我的渲染操作不知道在哪里调用，这时我就回来看设计模式，发现这种问题可以通过行为模式中的观察者模式来解决，然后我就自我驱动的去学了，这才是一个学习的正反馈过程啊。</p>
-</blockquote>
-<hr>
-<span id="more"></span>
-
-<h2 id="存在意图"><a href="#存在意图" class="headerlink" title="存在意图"></a>存在意图</h2><blockquote>
-<p>​	定义对象建一种一对多的依赖关系，当一个对象的状态发生转变事，所有依赖于它的对象都得到通知并且自动更新。</p>
-</blockquote>
-<p>​	</p>
-<h2 id="使用的动机"><a href="#使用的动机" class="headerlink" title="使用的动机"></a>使用的动机</h2><p>​	在实际的设计过程中，我们常常会遇到一个问题。就是当我们对于一个系统进行解耦的时候，我们把它分割为了一系列的模块。就比如，你在原本的设计中设计了一个可以自己实现数据处理和结构渲染的类。现在你要对这个类进行进一步的解耦，我们先不考虑它是怎么解耦的。</p>
-<p>​	我们目前需要看的是，这种解耦会出现的副作用，其中最明显的就是在我们解耦过后，我们原本代码中合作的数据处理模块和渲染模块之间无法协调工作了，这是由于类的特殊性导致的，如果使用嵌套类来实现这只新的模块分割倒也是一种解决方案，但是这种设计又违反了我们的开放封闭原则。所以我们需要一种机制来实现这种独立出来的类的联动。当然，是有其他的一些应用场景的，但是我还没碰到过。</p>
-<h3 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h3><p>​	就比如我们的数据模块和渲染模块间的联动，我们期望的是当我们数据发生变动时我们能够实时的去反应出这种变化。这在我们原有的一个系统中只需要去在数据变更时去进行对应的渲染代码执行即可。但是我们现在已经不能够直接去调用渲染代码了，但是我们还是需要这个功能。此时就需要一种机制去进行通知对应的渲染模块去进行工作，而观察者模式恰恰好能够充当这个角色。</p>
-<p>​	说了这么多其实还是实际项目中的应用情况。我们来举几个生活中的例子。</p>
-<p>​	在现实生活中，我们在任何一个视频网站上，通常都有关注这个功能，当我们关注之后，这个博主只要一更新内容，我们如果有对应的设置的话，我们就能收到对应的通知。同时，一个博主可能存在着许多粉丝，相应的，所有这些粉丝都能够收到对应的推送。这就是一种<strong>发布-订阅模式</strong>。在这种模式中，博主和用户这俩个账号是相对独立的。其中是存在着一种机制来进行实时的通知的。正是由观察着模式来实现这种功能。</p>
-<hr>
-<h2 id="简单概括"><a href="#简单概括" class="headerlink" title="简单概括"></a>简单概括</h2><p>​	在观察者模式中，一般存在着俩种角色。一个是<strong>订阅者</strong>，一个是<strong>发布者</strong>。一个发布者可能有着多个订阅者。但是一般来说一个订阅者对于发布者是一对一的的。当然实际中，你可能会说一个人可以订阅多个博主，但是这也是不冲突的。这用文字是不好进行阐述的，但是你应该能够理解。</p>
-<p>​	通过进行观察者模式，我们实现了一种通知机制，在发布者发布一些信息之后，所有的订阅者应该都能够收到对应的信息。至于订阅者收到这个信息后会进行一个什么样的处理，这个是观察者模式中不关注的。</p>
-<blockquote>
-<p>​	在观察者模式中，最重要的就是通知机制。这个会在接下来的UML类图中去进行分析。</p>
-</blockquote>
-<hr>
-<h2 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h2><p><img src="/2024/12/25/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/17-%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F/eb9aece31234e8ef95f7e2e0399e5915.png" alt="img"></p>
-<blockquote>
-<p>观察者模式的UML类图是需要重点分析的，需要重点理解的就是观察者模式中的通知机制。</p>
-</blockquote>
-<p>​	这里我们将只进行抽象发布者类和抽象订阅者类的分析，其他的子类都不是很重要。</p>
-<p>​	首先可以看到在途中ConcreteObserver和ConcreteSubject是一个互相聚合的关系。我们就是通过这种互相聚合来实现通知机制的。</p>
-<p>​	</p>
-<h3 id="ConcreteObserver类"><a href="#ConcreteObserver类" class="headerlink" title="ConcreteObserver类"></a>ConcreteObserver类</h3><p>​	这个类就是我们对应的观察者类。这个设计中使用了一个name作为信息的接收。当然，这个成员也可以是订阅者的名字，不过这个不重要。主要是看到另外的一个成员，一个指针链表，在这个指针链表中，储存的是当前观察者对应的发布者的指针。也就是说，在订阅者的属性中，是存在一个成员用于管理发布者的信息的。其实你应该很可以理解这个存在的意义，就比如你社交软件中关注的博主。这个其实就是你对应的发布者。订阅者可以通过这个list链表去找到其的订阅者信息并以此进行通知操作。</p>
-<p>​	这个其实就是一个对于前面一对多的扩展，实现了一个人可以同时关注多个博主的功能。当然，这里的信息处理事很薄弱的。</p>
-<blockquote>
-<p>​	还需要来进行着下面的系列成员函数的分析。</p>
-</blockquote>
-<h4 id="addSubject函数"><a href="#addSubject函数" class="headerlink" title="addSubject函数"></a>addSubject函数</h4><p>​	这个函数的作用其实就写在明面上了，就是添加我们的订阅者，通过一个指针去实现对于发布者的添加，实际上就是添加到自己的发布者链表中去进行管理。</p>
-<h4 id="deleteSubject函数"><a href="#deleteSubject函数" class="headerlink" title="deleteSubject函数"></a>deleteSubject函数</h4><p>​	这个函数同样很好理解，就是简单的吧我们指定的一个发布者从我们的成员链表中去移除。没什么好说的。</p>
-<h4 id="update函数"><a href="#update函数" class="headerlink" title="update函数"></a>update函数</h4><p>​	这个是整个类的核心，用于进行事件的通知，在这UML类图中是体现不出它到底是怎么进行一个通知的，简单来说一下吧，这其实是一个被调用的函数，而且调用对象一般是对应的发布者，发布者能够通过这个接口来进行信息的传递。</p>
-<hr>
-<h4 id="ConcreteObsertver类"><a href="#ConcreteObsertver类" class="headerlink" title="ConcreteObsertver类"></a>ConcreteObsertver类</h4><p>​	这个类就是我们的发布者基类了，在这个基类中，很多属性都跟订阅者很相似，我们这里就不加以赘述了。这里主要看到一个函数。就是这里的send函数</p>
-<h4 id="send函数"><a href="#send函数" class="headerlink" title="send函数"></a>send函数</h4><p>​	这个函数的作用已经写的很明白了，就是发送信息。它的参数就是它的信息。但是UML类图是体现不出发送这种操作的，还是得等等下的代码分析，不过可以简单的说一下，这里的发布信息就是通过对应的成员链表去进行通知，去进行一次链表的遍历，并依次调用每个成员对应的接收信息的方法去进行推送。</p>
-<hr>
-<p>​	</p>
-<h2 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h2><p>​	在观察者模式中，最重要看的是它的代码，毕竟相对于其他模式，观察者模式在其的UML类图中暴露的信息有限，但是我并不想再进行分析了，我要回去搓我的课设了，所以我要挖一个我可能永远也不会填的坑了。</p>
-<p>​	自己分析去吧</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 抽象观察者（订阅者）</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Observer</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Observer</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">update</span><span class="params">(<span class="type">const</span> std::string &amp;message)</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 具体观察者（订阅者）</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Subscriber</span> : <span class="keyword">public</span> Observer &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::string name;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">Subscriber</span><span class="params">(<span class="type">const</span> std::string &amp;name)</span> : name(name) &#123;</span>&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">update</span><span class="params">(<span class="type">const</span> std::string &amp;message)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Subscriber &quot;</span> &lt;&lt; name &lt;&lt; <span class="string">&quot; received message: &quot;</span> &lt;&lt; message &lt;&lt; std::endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">std::string <span class="title">getName</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> name; &#125; <span class="comment">// 用于识别订阅者</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 抽象发布者</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Publisher</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">Publisher</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">subscribe</span><span class="params">(std::shared_ptr&lt;Observer&gt; observer)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">unsubscribe</span><span class="params">(<span class="type">const</span> std::string &amp;observerName)</span> </span>= <span class="number">0</span>; <span class="comment">// 通过标识符移除</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">notify</span><span class="params">(<span class="type">const</span> std::string &amp;message)</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 具体发布者</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">NewsPublisher</span> : <span class="keyword">public</span> Publisher &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::vector&lt;std::shared_ptr&lt;Observer&gt;&gt; subscribers; <span class="comment">// 订阅者列表</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">subscribe</span><span class="params">(std::shared_ptr&lt;Observer&gt; observer)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        subscribers.<span class="built_in">push_back</span>(observer);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">unsubscribe</span><span class="params">(<span class="type">const</span> std::string &amp;observerName)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        subscribers.<span class="built_in">erase</span>(</span><br><span class="line">            std::<span class="built_in">remove_if</span>(subscribers.<span class="built_in">begin</span>(), subscribers.<span class="built_in">end</span>(),</span><br><span class="line">                           [&amp;observerName](<span class="type">const</span> std::shared_ptr&lt;Observer&gt; &amp;subscriber) &#123;</span><br><span class="line">                               <span class="keyword">auto</span> concreteSubscriber = std::<span class="built_in">dynamic_pointer_cast</span>&lt;Subscriber&gt;(subscriber);</span><br><span class="line">                               <span class="keyword">return</span> concreteSubscriber &amp;&amp; concreteSubscriber-&gt;<span class="built_in">getName</span>() == observerName;</span><br><span class="line">                           &#125;),</span><br><span class="line">            subscribers.<span class="built_in">end</span>()</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">notify</span><span class="params">(<span class="type">const</span> std::string &amp;message)</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span> &amp;subscriber : subscribers) &#123;</span><br><span class="line">            subscriber-&gt;<span class="built_in">update</span>(message);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 创建发布者</span></span><br><span class="line">    <span class="keyword">auto</span> publisher = std::<span class="built_in">make_shared</span>&lt;NewsPublisher&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建订阅者</span></span><br><span class="line">    <span class="keyword">auto</span> subscriber1 = std::<span class="built_in">make_shared</span>&lt;Subscriber&gt;(<span class="string">&quot;Alice&quot;</span>);</span><br><span class="line">    <span class="keyword">auto</span> subscriber2 = std::<span class="built_in">make_shared</span>&lt;Subscriber&gt;(<span class="string">&quot;Bob&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 订阅新闻</span></span><br><span class="line">    publisher-&gt;<span class="built_in">subscribe</span>(subscriber1);</span><br><span class="line">    publisher-&gt;<span class="built_in">subscribe</span>(subscriber2);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 发布新闻</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Publishing news...&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    publisher-&gt;<span class="built_in">notify</span>(<span class="string">&quot;Breaking News: Observer Pattern in Action!&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 取消订阅</span></span><br><span class="line">    publisher-&gt;<span class="built_in">unsubscribe</span>(<span class="string">&quot;Alice&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 再次发布新闻</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;\nPublishing more news...&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    publisher-&gt;<span class="built_in">notify</span>(<span class="string">&quot;Update: Observer Pattern Still Relevant!&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 ]]></content>
       <categories>
         <category>设计模式</category>
@@ -1613,61 +2243,53 @@
   </entry>
   <entry>
     <title>三个原则</title>
-    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/</url>
-    <content><![CDATA[<p>对于所有的设计模式，无论思想是什么，都遵守三个基本原则：</p>
-<p>单一职责原则，开放封闭原则，依赖倒转原则</p>
+    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/</url>
+    <content><![CDATA[<p>接下来简单看一下类间的5种关系。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/1.jpeg" alt="1"></p>
 <span id="more"></span>
-<p>对于这三个原则，与其说是设计模式所遵守的原则，不如规定为我们程序设计中应该遵守的原则。在程序设计中，即使我们对设计模式不是很清楚，但是如果我们设计过程中遵守这几个基本原则，那么设计出来的程序还是会很优雅的</p>
-<p>首先来看到<strong>单一职责原则</strong></p>
-<p>这个原则在应用场景中其实就是<strong>面向对象</strong>。这个原则注意的本质上就是在类的设计中让其负责的功能尽可能的专一，使得我们在设计过程中可以更加专注于特定功能的实现，能够减轻我们的设计压力和维护压力。</p>
-<p>举个简单的例子吧，就比如不久前做的那个堆排序作业。其实现在看来heap类的设计是存在大问题的。这个类负责的功能太多了，它既负责了对于数据的对排序处理，又负责了对于堆排序的渲染。这就导致了我后期在debug时想要去找到对应的错误位置需要去找到整个类中存在的错误。而此时类简单看实现代码行数已经达到了小几百行。这是要去debug是极其不易的。确实有亲身体会。</p>
-<p>因此，这个单一职责原则的目的就在于各个功能模块间的实现分离。通过这种分离，我们能够实现更加高效的设计和debug。就比如，当你数据构建层面出错就去找对应数据构建的类。当你渲染出现问题就去找对应渲染的类。同时类功能的分离也能提高代码的复用性。</p>
-<p>就比如那个heap类，由于我们将渲染模块和数据模块都耦合到了一起，如果我们想要在这个项目中再去添加与现在的排序类相似的类，我们是无法复用现在已有类的渲染模块的。直接继承将是一个糟糕的注意。而且我们已有的渲染模块是基于heap类去设计的，即使我们想要cv，我们也得考虑新类的设计，这是代码低复用性的体现。相反，我们应该考虑的是一个隐藏实现细节的渲染类来进行各种排序的实现。让heap等排序类专注于数据层面的构建，通过设计出render等渲染类来实现对应的渲染动画。</p>
-<p>因此，在我们设计类的时候，我们要尽可能的让类的功能尽可能的单一，通过不同类之间的配合再来实现复杂的功能而不是一股脑塞在一个类中。而且这在类的定义中也可以看出类的设计初衷就是让我们设计一个功能单一的类。类是一组相关属性和行为的集合。注意这里是一组而不是多组。我们在任何时候都不应该有万能的这个概念，毕竟这个概念是不符合我们的设计逻辑的。尽管用户层是希望一个万能，但是用户层的万能与底层的万能不能等效。</p>
-<p>接下来看第二个原则	<strong>开放封闭原则</strong></p>
-<p>其实这个原则就是<strong>单一职责原则</strong>的延续。简单来说，如果你的一个类很好的遵守了单一职责原则，换句话说这个类在一个功能上做到了极致，那么无论你添加什么这个类的功能都不会有什么改变。同时，你会发现如果一个类很好的遵守了单一职责原则，那么当出现新的需求时，仅仅依靠现在的类是无法解决的，那么现在就需要进行扩展，那么此时我们就有俩种方式来进行扩展。一种是直接修改我们现在的类去添加对应的功能，但是正如我们前面所说，这样其实是未被单一职责原则的。那么，内求失败后，我们需要外求。</p>
-<p>既然外求，由于我们还是需要遵守单一职责原则，那么我们应该考虑实现一个新的类来实现我们新增的功能，而且一般来看这个类是需要和已有的一些类进行联动的。但是这个设计过程并不应该影响到已经设计好的类。在这个新增的类设计完成后，我们应该考虑把这个类和原先的类打包到另外一个大类中去实现。这种设计下，这个大类就对原有的功能进行了扩展，而且俩个小子类又都遵守了单一职责原则。</p>
-<p>好，回来看看我们哪里体现了开放封闭原则。首先，我们实现了对已有功能的扩展，这是一种对于原有设计的开放性质的阐述。其次，我们并没有对原有的类进行修改，已完成的类是相对来说封闭的，这是封闭的性质。</p>
-<p>这个封闭属性是相当重要的。毕竟如果一个类保留了它的封闭属性，那么它一般是通过了一定的测试，能够稳定运行的，如果我们去对这个类进行添加修改等破坏了它的封闭性，那么对于原有的哪些个用到封闭的类的api地方，又有可能导致一些奇奇怪怪的错误产生。而导致必须对整个类全部进行重新审核和测试。</p>
-<p>举个例子吧，在现实中，我们通常可以看到一些男人在外部工作，不理家中事，但是家里还是被老婆打理的不错。这就是一个典型的开放封闭原则的示例。别杠，再杠让你飞起来。家庭是一个大类，这个大类中包含了一个负责家庭资金供给的父亲，一个负责家庭打理的母亲，还有其他一些杂七杂八的东西。种种这些相互独立，但是又组成一个整体。我们可以看做每个对象之间相互独立，但是多个对象构成了一个大类达到了一种和谐。</p>
-<p>这个其实在QT中可以窥见。在QT中，其实已有的库可以视作一系列的具有封闭属性的库，我们在设计中要做的一般也是设计这些具有封闭性的类。然后，我们会在一些特别的类中，就比如，一个项目初始的窗口类中去进行这个小类的实例化与调用。这也是一种开放封闭原则的设计实例。</p>
-<p>接着再来看一些需要注意的地方。就是即使我们实现了一些新的类，我们怎么去实现这些新的类与已有的类之间的联动。这里就需要我们在设计类是预留一些接口。这个接口一般来说是可以预见到的，就比如，商场的购物通常会有”打折”这种事情发生，可能是几折几折，也可能是买一送一等等，但是这些都有一个共性，就是他们都是”打折”这件事。因此，我们在设计商场购物的对应类中，我们应该预留一个专门的接口用于打折以实现以后可能存在的扩展。这个其实身边就能看到，就比如我们的笔记本，笔记本保留了相当多的插口供我们使用，而且一个插口可以使用不同的设备，只要这个设备的插口符合我们笔记本的接口规范。</p>
-<p>这种接口的设计一般是通过<strong>多态</strong>的特性来进行实现的。在父类中去预留一个虚函数接口，当我们想要一个具体的打折方案后，我们去继承这个父类并对这个方法进行对应的重写，通过使用这个重写类去对父类进行替换，来实现我们打折方案的改变。而且由于继承这种关系，所以这些个父子类间的差异就在与这个重写的接口类处，不用太去担心冲突问题。</p>
-<p>一般来说，这个接口是一个虚类的父类指针以提供该虚类的系列子类的指向。</p>
-<p>这种<strong>开放封闭原则</strong>能够保证程序的可扩展性，可维护性，可复用性。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/1.jpeg" alt="1"></p>
-<p>接下来看第三个原则，<strong>依赖倒转原则</strong>，话不多说，直接上图</p>
-<p><strong>高层模块不应该依赖低层模块，二者都应该依赖于抽象；</strong></p>
-<p><strong>抽象不应该依赖细节，细节应该依赖于抽象</strong></p>
-<p>再解释下高层模块和低层模块。高层模块就是编写的应用程序，也就是应用层，这个你应该可以理解。接下来注意一点，我们要分析的是底层模块，而不是底层模块，所有位于高层模块下的模块都是低层模块。抽象基本就等价于C++中的抽象类以及各类的api。</p>
-<p>举例下这里的直接依赖，就比如一个外卖系统中，通过使用一个数据库系统来实现数据的存储与使用，如果直接使用一个具体数据库的引用，那么这个就是直接依赖。而我们<strong>高层模块不应该依赖低层模块，二者都应该依赖于抽象</strong>的目的就是避免这种直接的绑定。你可以想象，你游戏账户直接绑定一个手机号，那么当你绑定的这个手机号出现了问题，你这个游戏账号将会导致一系列的问题，就比如我们无法去登录等。</p>
-<p>而为了避免这种情况，我们的想法是通过一个中间层来进行缓冲，而这个的作用就是实现高层模块和底层模块的隔离，避免这俩者之间的直接调用。而且对于这个中间类(抽象类)需要有几个规定。最简单的一点就是这个函数必须在高层和底层的代码发生改动时不必要去修改另外一边的代码，起到所谓的隔离作用。通过这种隔绝，我们能够使得修改代码时只用去关心对应代码区域的修改而不用去关注全局代码的更改。</p>
-<p>在使用时，我们一般是需要高层模块来使用这个抽象的api的，在c++中，这个就是所谓的虚函数。但是吧，一般来说，我们的这个抽象的父类是不会提供具体的实现也是不应该提供具体的实现的。需要在对应的子类中去进行具体的不同功能的划分与实现。</p>
-<p>这个就比如吧，我们在进行一个项目的设计中，前期由于一些设计方面的问题，直接使用了mySQL数据库作为使用的数据库。但是在之后的发展中，由于数据的堆积，这个数据库无法满足我们的需求了，我们需要去替换一个更大的数据库，此时如果我们是直接调用的mySQL的数据库的话，那么我们在替换这个数据库的时候，我们需要去把全部用到mySQL的地方都进行更改，这个工作量是巨大且不可接受的，因为这个会导致前面已经通过测试的代码需要全部重新审批。但是如果我们引入了一个中间层来进行设计，提供一个统一的一个接口，我们只需要去注意我们使用接口的对象的替换就行了。如果我们设计的足够合理，我们就只需要去替换这里就行了，这个设计架构就相对于前面的全局替换高效了不止一星半点。</p>
-<p><strong>抽象不应该依赖细节，细节应该依赖于抽象</strong></p>
-<p>重新来分半简述下这句话</p>
-<p>抽象不应该依赖细节：抽象(如接口或基类)不应该直接绑定到具体实现上，而是应该独立存在。简单来说，我们的一个基类函数，不应该导致我们这个抽象的接口被固定了，我们不应该给其提供实现，或者至少说不应该限定它只能有一个实现。简单以实现来看的话，我们不应该限定我们的基类函数为不可改变的。至少是一个virtual的，至于要不要是纯虚函数取决于具体的环境。这种设计下，抽象就不会被绑定到一个具体的实现上，至少来说可以是在子类中重载的。</p>
-<p>接下来看后半句话，<strong>细节应该依赖于抽象</strong>。具体的实现(如派生类或子类)应该遵循抽象层定义的规则(如接口或虚函数)。是说，这里的子类的具体实现不应该脱离我们使用的抽象层来实现。还是回到c++中，就是说我们的子类的实现不能够脱离我们基类的根本目的。只有按照基类设计的目的去设计对应的子类，我们才能保证接口能够正确的被使用。</p>
-<p>在这种设计中，我们可以进行一点设计层次上的分析。这里调用一个类的类就是一个应用层类似的。一个抽象类的基类其实就相当于一个中间层，提供了一系列的接口，但是这些接口通常是没有意义的，或者说应该是没有意义的。具体的实现应该在这个抽象类的子类中进行实现。通过这样，我们就实现了一种隔离，通过这种隔离我们能够实现本来高耦合的降低。</p>
-<p>也就是说，在这种设计要求下，我们如果选择在子类中去进行一些基类中没有的功能的扩展，我们需要在基类中预留一些接口函数去等待这些接口函数的插入。通过这种实现我们能够实现避免大量修改原有的代码。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/3.jpeg" alt="3"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/4.jpeg" alt="4"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/2.jpeg" alt="2"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/5.jpeg" alt="5"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/6.jpeg" alt="6"></p>
-<p>接下来看一个重要的原则，<strong>里氏代换原则</strong>。</p>
-<p>这个原则其实很好理解，它本身要求的是子类类型必须能够替换他们的父类类型。我们也应该知道这个规则在QT中时相当常见的。就比如一个窗口类函数参数，我们可以使用对应窗口类的一系列父类和子类，只要他们是QWidget类或者其派生类的就行。而这种课替换性就是里氏代换原则所要求的。</p>
-<p>要实现这种原则，就必须要求多态这个面向对象特性。父类指针可以指向子类对象。</p>
-<p>对于这种原则，需要简单了解的就是子类必须实现父类中全部要求的接口函数。</p>
-<p>额外需要注意我们这里提到的里氏代换原则的目的，只有拥有这个原则的设计，我们才有可能保证依赖倒转原则。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/7.jpeg" alt="7"></p>
-<p>简单来看的话，这个原则要求我们在设计高层模块是我们只需要&#x3D;也只应该去调用虚类中的父类函数，而不要求我们去了解我们的子类的附加函数，我们应该通过父类的对应接口就能够调用所有的子类方法。</p>
+
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/2.jpeg" alt="2"></p>
+<p>每个类框的创建遵守之前的规则。而对于子类，我们可以看到这里只写出了子类重写的哪些函数(假设这些个子类没有额外的对象)。也就是说，对于子类来说，不需要对父类中的对象再进行描述，使用空心三角箭头就能表示继承关系并使得对应父类的成员不需要再被描述。</p>
+<p>再来详细分析下，对于空心三角箭头，俩端分别连接父类和子类。其中，箭头指向的是父类，另一端连接的是子类。</p>
+<p>接着来看到第二种类间关系，<strong>关联</strong>关系。</p>
+<p>这种关系其实很常见，就是一个类中引用了一个类。这个类可能是别的类，也可能还是自身的类，依照引用关系和对象的不同存在多种关系。</p>
+<p>1~单向关联关系</p>
+<p>这种关系就是一个类中包括了另一个类(需要是一个与本类不同的类)，并且被包含的那个类不知道包含它的类的信息。父子或母子之类的关系的类建模</p>
+<p>使用带箭头的实线进行连接</p>
+<p>2~双向关联关系</p>
+<p>这种关系就是一个类中包括了另一个类(需要是一个与本类不同的类)，被包含的类中也包含了包含它的类。学生与老师的类建模抽象。</p>
+<p>使用不带箭头的实线进行连接</p>
+<p>3~自关联关系</p>
+<p>这种关系就是一个类中包含了指向本身同一种类的引用。就比如树的节点类。</p>
+<p>使用指向自身的带箭头线进行连接。</p>
+<p>当然，总总这些绘图线段都不是一定的，取决于使用的绘图软件。</p>
+<p>接下来看下一种关系	<strong>聚合</strong>关系</p>
+<p>这个关系乍看起来有点抽象。其实可以通过教室和学生，图书馆和藏书间的关系辅助理解。一个教室中可能会有多个学生，图书馆中也包含着系列藏书。这俩者之间构成了一个聚合关系。</p>
+<p>对于聚合关系，就比如教室和学生这种。我们需要理清下这俩者之间的关系。无论教室还是学生，都是可以独立存在的，但是吧，教室中没有学生这些对象的话，其实是没有存在的意义的。对于独立存在的学生，不同于教室，他们独立存在是有着自己的意义的。从某种意义上这个也可以成为识别聚合关系的一种方法。	同时，这些聚合关系中，拥有的对象通常不只有一个。就比如教室中的学生，数量通常都是多个。在这种架构下，我们去取出其中的一个学生对于教室这个整体其实是没有很大影响的，当然这得是在一种至少不是很少的情况下的。你如果要说只有几个学生的这种情况我也无话可说。</p>
+<p>以一种C++的类来看吧，如果一个类中包含了多个别的类的数组，当我们对这个主类进行析构的时候，这些个包含的子类并没有被析构的话，可以看做这些类之间是一种聚合的关系。</p>
+<p>在这里我其实对聚合关系和关联关系有点疑惑。不过可以这么理解，类间关系是不一定存在一种的。或者说，类间关系是由类的属性而产生的，而不是由类间关系而产生的类。聚合关系某种程度上可以看做是关联关系的子类。聚合关系一定是关联关系，但是关联关系不一定是聚合关系。</p>
+<p>如果类间是一个聚合关系，那么这些类之间应该使用空心菱形的直线进行连接。菱形与聚合的整体相连，另一端与对应的部分相连。</p>
+<p>举出一个聚合类型的例子</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/3.jpeg" alt="3"></p>
+<p>接下来看另一种关系	<strong>组合</strong>关系</p>
+<p>使用实心菱形线段进行标识组合关系。与上相似故略过</p>
+<p>组合关系也是一种整体和部分的关系。很多方面它跟聚合关系都很相似。但是这里相对于聚合关系不同的是，这里的部分其实是依赖于整体而存活的，当主对象被析构时，这个组合关系的部分类不应该还存活着。举个例子，就比如头和嘴巴，眼睛，眉毛等。后面的部分在整体消失时不应该还存在(你杠就是你对)。</p>
+<p>这样看来，通过组合关系联系的各个类相对于聚合关系有着更为紧密的联系。以C++的视角来看的话，就是当组合关系中的整体类被析构的时候，它对应的部分类也应该被析构掉。</p>
+<p>接下来来看类与类之间最弱的一种关系	<strong>依赖</strong>关系</p>
+<p>依赖关系的判断有点抽象。可以用排除法来进行。如果一个类既不是继承.关联.聚合.组合关系，那么它就是一个依赖关系。你可以看出这个关系有多弱了吧。</p>
+<p>当然，还是有不通过排除法来进行判断的方法的</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/4.jpeg" alt="4"></p>
+<p>当我们一个类使用了另外一个类作为本类的函数参数。在函数参数内使用了别的类作为本类函数的一个局部变量，一个类中调用了别的类的静态方法。这三种情况下，这些个类之间构成了依赖关系。当然，其实这个相较于排除法其实更难判断了。</p>
+<p>依赖关系使用带线头的虚线进行标识，由依赖的一方指向被依赖的一方。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/5.jpeg" alt="5"></p>
+<p>对于类图关系，类之间是可能存在多种关系的，但是我们不需要将全部关系都列出来，我们只需要将这些类关系中最强的关系描述出来就行了。</p>
 ]]></content>
       <categories>
         <category>设计模式</category>
+        <category>UML类图</category>
       </categories>
       <tags>
-        <tag>设计模式基础</tag>
+        <tag>UML类图</tag>
       </tags>
   </entry>
   <entry>
@@ -1724,74 +2346,6 @@
       </tags>
   </entry>
   <entry>
-    <title>建造者模式</title>
-    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<p>接下来我们进入到建造者模式中最麻烦的模式，生成者模式(<strong>建造者模式</strong>)。这种模式可以看做是对于抽象工厂模式的一个方面的改良。我们先回来看到抽象工厂模式，在抽象工厂模式中，一个工厂只需要去负责对应零件的获取即可，只需要获取到了这一系列一个具体产品需要的具体零件，我们就默认这些零件已经组合好成为了我们需要的一个具体产品。</p>
-<span id="more"></span>
-<p>看到这个过程，我们其实可以看到它其实省略了一个过程，就是零件是怎么组装形成我们最后的产品的。在现实世界中，我们仅仅获取到了一些零件是远远不够的，毕竟，就算给你一个手机所需要的所有零件，你也不知道这些零件要怎么组装才能形成我们需要的具体产品。这时就引入了一种新的创建型模式：生成者模式(<strong>建造者模式</strong>)。</p>
-<p>既然它是创建型模式，那么它最后的目的就还是一个具体类对象的创建，但是正如我们前面所说，这个模式相对于抽象工厂模式来说进行了一些改进，其相对于不注重细节的抽象工厂模式进行了在零件组装上的细化。使得在对象创建时能够更加细致的对整个过程进行管理。就比如把，你要建造一栋楼，那么你至少需要地基才能建造第一层乃至更多层的楼吧。在抽象工厂模式中，其不关注你到底怎么建造的。哪怕你先提供了最高层的楼，再提供一个地基，它也是允许的，毕竟它忽略了一个组装的细节。</p>
-<p>但是我们建造者模式不允许这样的创建。建造者模式将一个创建对象的过程进行细化和规定，其规定了一个具体产品的组成零件，以及这些个零件之间的组装细节。就比如，你需要先有地基，你才能建第一层楼，才能接着建造接下来的一系列楼层。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/1.jpeg" alt="1"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/2.jpeg" alt="2"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/3.jpeg" alt="3"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/4.jpeg" alt="4"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/5.jpeg" alt="5"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/6.png" alt="6"></p>
-<p>来简单看一个生成器模式下的UML类图。简单来分析下建造者类中的层次，首先我们应该看到的就是ShipBuilder这个类，可以看到，这个类是接下来的俩个具体类的子类。也可以这么说，这个是一个抽象工厂层，这个层次规定了一个产品所需要的步骤，我们所有具体的工厂类都应该是从这些个抽象工厂类中派生出来的。在这个类中，你可以看到其实相对于抽象工厂它是相似的。在演示中由于设计的复杂性这里不会让其去下辖抽象工厂层次中的零件类，但我们需要知道其实是有的。</p>
-<p>在这些具体的建造者工厂类中，我们一般会存在一个成员来对我们建造的规则进行一个记录，这个的具体类型取决于实现。</p>
-<p>说完了船的建造这一块，我们来说指令发出这一块的。在生成一个船的指令发出时，可能经过多层的处理。一般来说，为了好看，我们都会考虑增加一个管理者类，在用户层可以通过这个类去跟具体的工厂进行间接的交互，而不必直接去找到对应的工厂，其实就是加了一层中介。在这个管理者类中，需要这个管理者类可以管理我们需要的一系列产品的生产。所以这里就需要这个管理者类包含一个抽象工厂类的指针，令其可以指向所有的子类对象。再者，如果说一个产品中还有细分的品种，我们就需要让这个管理者类中去添加对应的生产函数，毕竟一个指针只能指向对应的对象，但是对应对象的生产是必须通过方法的(即函数)。也就是说，一个管理者类的方法数量，取决于我们一个产品的种类。</p>
-<p>好，接下来就是最后一层，用户层，在我们这里中，由于存在管理者类，所以与用户层直接进行交互的将会是管理者类，用户层通过想管理者类提出要求，就比如要那艘船，要什么品质的船等相对来说更加细致的要求，就可以获取对应的产品了，不用关注底层的实现。</p>
-<p>也就是说，生产者模式其实还可以看做是一种对于抽象工厂模式的扩充。其更加注重了各个零件组装的细节，能够相对于抽象工厂类去实现更加细致化的操作。</p>
-<p>好了，我好像对建造者模式有一定的理解了，让我们启动。</p>
-<p>首先，在建造者模式中，存在几个比较重要的层次需要我们了解。首先是用户层，这个其实对应的调用，我们不多赘述。</p>
-<p>但是吧，我决定建造者模式从下往上去建模比较好，来吧。我们首先需要看到我们整个模式需要生产的东西，就是一个具体的类对象。用上面造船为例子吧。船的类就是整个模式要生产的东西的板子。对于这一层，可能是由一个抽象类来规定我们生产的产品的基本属性，然后通过一个具体的派生类来实现具体的一个船对象所需要的属性。当然，也有可能不是使用多态而是穷举所有的船类。这个取决于我们具体的实现。但是无论是哪种实现，我们需要注意的是，在这一层的船类中，对船的约束是相当宽泛的。就好比说，这个东西我给你标签为船，但是这个东西的具体并不会在这个标签上就注明，这里也是如此。</p>
-<p>接下来需要看到建造者层，这是在整个层次中的底层。这一层中我们还是可以抽象出来俩层，一层是抽象建造者层，一层是具体建造者层。这个抽象建造者层规定了这一系列的建造者所要建造的物品的种类。就比如，你如果是一个船建造者，那么它要派生出来的类就是具体的船的建造者，但是，并不规定到底是哪一个船。</p>
-<p>一般来说，在抽象建造者层中，一般只存在着一系列的建造方法，不会存在一个成员对象用于储存。这个其实是为了方便一个扩展。因为我们不确定在设计中我们的船类是否是使用多态的，如果你的具体船类是使用多态的，那么使用成员指针自然是一个极好的方法，但是，如果你是穷举出一系列的船的，你使用成员指针的话，你就必须包括所有的可能创建的船，这个其实不是很符合单一职责原则的。</p>
-<p>所以我们可以看到，在建造者类中，我们特别需要注意的就是其所遵守的<strong>单一职责原则</strong>，这个原则使得建造者类在设计上是关注与船的功能的构建即可。其在设计中一般来说都是提供一系列的对应的要创建的对象的组装方法的。就比如组装船。在建造者类中，其可能存在的方法就包括武器，能源，装饰等等。但是，一般来说，在建造者类中，不会包括这些方法的组合。也就是说，建造者类负责提供一些(较大块的)零件，让其他模块来组合形成一个具体的类对象。</p>
-<p>接下来我们需要来看到更接近用户层的类，<strong>管理者层</strong>。这个层在一些资料中说是可有可无的，但是吧，现实设计中一般都是包含这个类的。</p>
-<p>这个类可以看做是对用户需求提出的层次和建造者层次的缓冲。管理者类一般是可以存在多个的，一个管理者类负责一类船的生产。</p>
-<p>用现实生活来举例吧，一个船厂一般有自己生产的船的方向，但是并不固定。当一个公司甲方想要去委托一个船厂去生产一个具有特定功能的船的时候，其一般都不会直接去找到制造部门，而是去找到船厂的销售部门，向这个部门去阐述自己的需求，或者说选择自己需要的船型号。接下来这个销售部门会去解析这个需求，将这个需求解析成一步步可以落地的步骤，然后让这个船厂的制造部门去做。</p>
-<p>在这个例子中，甲方扮演的角色就是用户层，销售部门扮演的就是管理者层，制造部门扮演的就是建造者层，而我们最后的需求产品，就是我们一个具体的船类的对象。</p>
-<p>可以看出来，我们管理者层这里负责一个需求的解析，就比如甲方去A船厂提出我需要你们一个标准型号的船，那么这个管理者类就会对这个需求进行解析，就假设一个标准型号的船需要一个船身，一个发动机，一个武器这个配置，那么管理者层就会把这个配置发送给我们具体的建造者类中去，然后这个建造者类就会依照这个管理者类发来的需求按顺序去一个个实现到一个船对象中。当执行完后，一个标准A船就被制造出来了。</p>
-<p>接下来，就需要船厂能够提供一个接口让用户能够提船。这个一般应该在制造者类中去实现，至于是在抽象类中就有还是每个类维护一个自己的方法取决于各自的实现。其实，这些个制造者类就好像一个公司一个部门的不同项目，其各自有着一套对接流程，甲方需要依照这些接口流程去获取自己需要的东西。</p>
-<p>同时，我们可以考虑到如果不想要A船厂的船而想要B船厂的船。那我们需要怎么做，那我们需要去找到对应船厂的中介(管理者)，对应船厂需要特定的船产品(具体的产品类)，还需要对应船厂有自己的制造部门(建造者类)，这是最简单的配置了，这也是我们在建造者模式中想要进行扩展需要添加的几个方面。</p>
-<p>我再来对制造者类来进行下分析。我们抽象这个建造者类为具体的生产部门。在这个部门中，其的目的是生成出一个管理者可能会要求生产的产品，也就是说，在制造者类中，应该存在一个可以用来储存当前生产的对象的地方，在类中就抽象为一个成员指针。这个可以玩笑为”新建文件夹”。在制造者类中，其一开始并不知道这个类将要被怎么个设计，但是这个制造者类中应该包含着对于这个新建文件夹的所有操作。</p>
-<p>既然这个制造者类不能自己决定要怎么个制作方法，那么就需要外部来给他提出要求，在生产者模式中就是管理者类起到了这方面的作用。前面已经提到了，管理者类会将用户提出的需求转化为具体的组装步骤转发给制造者类去进行实现。</p>
-<p>也就是说，管理者类会提供一个完整的设计流程给制造者，制造者类只需要按这个提供的流程去进行组装即可。</p>
-<p>差不多了，那么接下来我们来讨论下管理者类的必要性。其实理论上管理者类的存在不是必须的，但是正如设计模式存在的意义一般，这个层次的存在也是为了方便我们的设计和使用。我们当然可以把这个管理者要要提供的组装流程直接封装在制造者类中。但是吧，这就像你一个甲方要去直接与对应乙方的技术部门进行交流一样。这通常是一份吃力不讨好的工作。为了更高效的交流，我们应该考虑这个公司中的对接部门，这个部门能够协调甲方的需求和自己方公司的实际能力，这种缓存能更好的提高效率。</p>
-<p>也就是说，对于设计模式的学习，我们一定得结合实际来看，毕竟设计模式其实就是一种对于现实世界的抽象建模，其旨在解决现实生活中的问题，结合现实问题能让我们更好的理解设计模式。</p>
-]]></content>
-      <categories>
-        <category>设计模式</category>
-      </categories>
-      <tags>
-        <tag>创建型设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>原型模式</title>
-    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/9-%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<p>接下来我们来看到最后一种建造者模式，<strong>原型模式</strong></p>
-<p>这种模式的核心需求是<strong>通过复制已有对象来创建对象而不是通过类构造函数</strong>。核心思想就是<strong>克隆对象</strong></p>
-<span id="more"></span>
-<p>其实吧，你看到这上面的时候你其实可能会疑惑这种模式存在的意义，毕竟即使复制已有对象和通过构造函数来构造对象存在一定的差异，但是也不会存在多么离谱的区别，所以这种模式的存在意义到底在哪。</p>
-<p>首先我们知道在一个类的默认设计中，编译器都会默认提供一个拷贝构造函数，即使这个拷贝构造函数只能提供浅拷贝的功能。也就是说，要在一个类的外面来拷贝一个类其实是相对简单的，最多就是添加一个拷贝三件套即可。</p>
-<p>我们来深入探讨一下，我们如果使用多态下的类对象拷贝，在这种情况下，我们在类的外部对于任何一个同层次的类的拷贝都是简单的(这里指的是用相应的类名称指针来拷贝对应的类对象)。但是，我们来考虑下使用父类指针来拷贝下子类对象的情况呢，这种是我们的拷贝构造函数所无法提供的，而这个情况就是我们的原型模式的一种运用场景了。</p>
-<p>这里我们讨论下这个原型模式的应用场景。相对来说，原型模式反而是相对来说应用广泛的一个模式了，毕竟这个就是对于扩展方法的一种扩展。只需要一个clone方法即该类对应的拷贝构造函数三件套。需要注意的是，我们在使用这种原型模式时，需要考虑设计上的效率问题，如果我们要拷贝的类对象是直接构造起来比较费时的话，那原型模式能够很好的提高效率。</p>
-<p>在接下去之前我们需要解释下原型模式的实际实现，本质就是在类内使用拷贝构造函数来实现拷贝。那么我们就需要考虑下我们的拷贝构造和一般的构造的效率之间区别，在一般情况下，这俩种的情况是差不多的，甚至于在大多数情况下，使用无参构造来实现是更加简便的。但是吧，就比如我们前面学到的抽象工厂模式和生产者模式，这些要产生的类是一系列相对来说更加复杂的，都是无法通过简单的无参构造实现的，还需要一系列的额外函数来添加属性的。这时候原型模式的作用就体现出来了，其绕开了构建一个复杂对象时需要的流程，直接对现有的对象进行复制，获取一个可以直接使用的对象。即使我们后续需要对这个对象进行修改，也只用去修改对应的成员即可，跟普通的构造出来的对象没有什么大区别，但是在构造的消耗上优化了很多。</p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/9-%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F/1.jpeg" alt="1"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/9-%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F/2.jpeg" alt="2"></p>
-<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/9-%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F/3.jpeg" alt="3"></p>
-<p>而且，这是一个可以简单的嵌入到其他模式中的模式，这也就体现了它应用的广泛性，毕竟它应用简单而且能优化性能。</p>
-]]></content>
-      <categories>
-        <category>设计模式</category>
-      </categories>
-      <tags>
-        <tag>创建型设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>设计模式课设举例</title>
     <url>/2024/12/26/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E8%AF%BE%E8%AE%BE%E4%B8%BE%E4%BE%8B/</url>
     <content><![CDATA[<p>​	这个项目进行了之前项目的优化，项目对应的UML类图如图。</p>
@@ -1819,6 +2373,29 @@
       </categories>
       <tags>
         <tag>课程设计</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>原型模式</title>
+    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/9-%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p>接下来我们来看到最后一种建造者模式，<strong>原型模式</strong></p>
+<p>这种模式的核心需求是<strong>通过复制已有对象来创建对象而不是通过类构造函数</strong>。核心思想就是<strong>克隆对象</strong></p>
+<span id="more"></span>
+<p>其实吧，你看到这上面的时候你其实可能会疑惑这种模式存在的意义，毕竟即使复制已有对象和通过构造函数来构造对象存在一定的差异，但是也不会存在多么离谱的区别，所以这种模式的存在意义到底在哪。</p>
+<p>首先我们知道在一个类的默认设计中，编译器都会默认提供一个拷贝构造函数，即使这个拷贝构造函数只能提供浅拷贝的功能。也就是说，要在一个类的外面来拷贝一个类其实是相对简单的，最多就是添加一个拷贝三件套即可。</p>
+<p>我们来深入探讨一下，我们如果使用多态下的类对象拷贝，在这种情况下，我们在类的外部对于任何一个同层次的类的拷贝都是简单的(这里指的是用相应的类名称指针来拷贝对应的类对象)。但是，我们来考虑下使用父类指针来拷贝下子类对象的情况呢，这种是我们的拷贝构造函数所无法提供的，而这个情况就是我们的原型模式的一种运用场景了。</p>
+<p>这里我们讨论下这个原型模式的应用场景。相对来说，原型模式反而是相对来说应用广泛的一个模式了，毕竟这个就是对于扩展方法的一种扩展。只需要一个clone方法即该类对应的拷贝构造函数三件套。需要注意的是，我们在使用这种原型模式时，需要考虑设计上的效率问题，如果我们要拷贝的类对象是直接构造起来比较费时的话，那原型模式能够很好的提高效率。</p>
+<p>在接下去之前我们需要解释下原型模式的实际实现，本质就是在类内使用拷贝构造函数来实现拷贝。那么我们就需要考虑下我们的拷贝构造和一般的构造的效率之间区别，在一般情况下，这俩种的情况是差不多的，甚至于在大多数情况下，使用无参构造来实现是更加简便的。但是吧，就比如我们前面学到的抽象工厂模式和生产者模式，这些要产生的类是一系列相对来说更加复杂的，都是无法通过简单的无参构造实现的，还需要一系列的额外函数来添加属性的。这时候原型模式的作用就体现出来了，其绕开了构建一个复杂对象时需要的流程，直接对现有的对象进行复制，获取一个可以直接使用的对象。即使我们后续需要对这个对象进行修改，也只用去修改对应的成员即可，跟普通的构造出来的对象没有什么大区别，但是在构造的消耗上优化了很多。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/9-%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F/1.jpeg" alt="1"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/9-%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F/2.jpeg" alt="2"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/9-%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F/3.jpeg" alt="3"></p>
+<p>而且，这是一个可以简单的嵌入到其他模式中的模式，这也就体现了它应用的广泛性，毕竟它应用简单而且能优化性能。</p>
+]]></content>
+      <categories>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>创建型设计模式</tag>
       </tags>
   </entry>
   <entry>
@@ -1885,6 +2462,51 @@
       </categories>
       <tags>
         <tag>行为型设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>建造者模式</title>
+    <url>/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p>接下来我们进入到建造者模式中最麻烦的模式，生成者模式(<strong>建造者模式</strong>)。这种模式可以看做是对于抽象工厂模式的一个方面的改良。我们先回来看到抽象工厂模式，在抽象工厂模式中，一个工厂只需要去负责对应零件的获取即可，只需要获取到了这一系列一个具体产品需要的具体零件，我们就默认这些零件已经组合好成为了我们需要的一个具体产品。</p>
+<span id="more"></span>
+<p>看到这个过程，我们其实可以看到它其实省略了一个过程，就是零件是怎么组装形成我们最后的产品的。在现实世界中，我们仅仅获取到了一些零件是远远不够的，毕竟，就算给你一个手机所需要的所有零件，你也不知道这些零件要怎么组装才能形成我们需要的具体产品。这时就引入了一种新的创建型模式：生成者模式(<strong>建造者模式</strong>)。</p>
+<p>既然它是创建型模式，那么它最后的目的就还是一个具体类对象的创建，但是正如我们前面所说，这个模式相对于抽象工厂模式来说进行了一些改进，其相对于不注重细节的抽象工厂模式进行了在零件组装上的细化。使得在对象创建时能够更加细致的对整个过程进行管理。就比如把，你要建造一栋楼，那么你至少需要地基才能建造第一层乃至更多层的楼吧。在抽象工厂模式中，其不关注你到底怎么建造的。哪怕你先提供了最高层的楼，再提供一个地基，它也是允许的，毕竟它忽略了一个组装的细节。</p>
+<p>但是我们建造者模式不允许这样的创建。建造者模式将一个创建对象的过程进行细化和规定，其规定了一个具体产品的组成零件，以及这些个零件之间的组装细节。就比如，你需要先有地基，你才能建第一层楼，才能接着建造接下来的一系列楼层。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/1.jpeg" alt="1"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/2.jpeg" alt="2"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/3.jpeg" alt="3"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/4.jpeg" alt="4"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/5.jpeg" alt="5"></p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/8-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/6.png" alt="6"></p>
+<p>来简单看一个生成器模式下的UML类图。简单来分析下建造者类中的层次，首先我们应该看到的就是ShipBuilder这个类，可以看到，这个类是接下来的俩个具体类的子类。也可以这么说，这个是一个抽象工厂层，这个层次规定了一个产品所需要的步骤，我们所有具体的工厂类都应该是从这些个抽象工厂类中派生出来的。在这个类中，你可以看到其实相对于抽象工厂它是相似的。在演示中由于设计的复杂性这里不会让其去下辖抽象工厂层次中的零件类，但我们需要知道其实是有的。</p>
+<p>在这些具体的建造者工厂类中，我们一般会存在一个成员来对我们建造的规则进行一个记录，这个的具体类型取决于实现。</p>
+<p>说完了船的建造这一块，我们来说指令发出这一块的。在生成一个船的指令发出时，可能经过多层的处理。一般来说，为了好看，我们都会考虑增加一个管理者类，在用户层可以通过这个类去跟具体的工厂进行间接的交互，而不必直接去找到对应的工厂，其实就是加了一层中介。在这个管理者类中，需要这个管理者类可以管理我们需要的一系列产品的生产。所以这里就需要这个管理者类包含一个抽象工厂类的指针，令其可以指向所有的子类对象。再者，如果说一个产品中还有细分的品种，我们就需要让这个管理者类中去添加对应的生产函数，毕竟一个指针只能指向对应的对象，但是对应对象的生产是必须通过方法的(即函数)。也就是说，一个管理者类的方法数量，取决于我们一个产品的种类。</p>
+<p>好，接下来就是最后一层，用户层，在我们这里中，由于存在管理者类，所以与用户层直接进行交互的将会是管理者类，用户层通过想管理者类提出要求，就比如要那艘船，要什么品质的船等相对来说更加细致的要求，就可以获取对应的产品了，不用关注底层的实现。</p>
+<p>也就是说，生产者模式其实还可以看做是一种对于抽象工厂模式的扩充。其更加注重了各个零件组装的细节，能够相对于抽象工厂类去实现更加细致化的操作。</p>
+<p>好了，我好像对建造者模式有一定的理解了，让我们启动。</p>
+<p>首先，在建造者模式中，存在几个比较重要的层次需要我们了解。首先是用户层，这个其实对应的调用，我们不多赘述。</p>
+<p>但是吧，我决定建造者模式从下往上去建模比较好，来吧。我们首先需要看到我们整个模式需要生产的东西，就是一个具体的类对象。用上面造船为例子吧。船的类就是整个模式要生产的东西的板子。对于这一层，可能是由一个抽象类来规定我们生产的产品的基本属性，然后通过一个具体的派生类来实现具体的一个船对象所需要的属性。当然，也有可能不是使用多态而是穷举所有的船类。这个取决于我们具体的实现。但是无论是哪种实现，我们需要注意的是，在这一层的船类中，对船的约束是相当宽泛的。就好比说，这个东西我给你标签为船，但是这个东西的具体并不会在这个标签上就注明，这里也是如此。</p>
+<p>接下来需要看到建造者层，这是在整个层次中的底层。这一层中我们还是可以抽象出来俩层，一层是抽象建造者层，一层是具体建造者层。这个抽象建造者层规定了这一系列的建造者所要建造的物品的种类。就比如，你如果是一个船建造者，那么它要派生出来的类就是具体的船的建造者，但是，并不规定到底是哪一个船。</p>
+<p>一般来说，在抽象建造者层中，一般只存在着一系列的建造方法，不会存在一个成员对象用于储存。这个其实是为了方便一个扩展。因为我们不确定在设计中我们的船类是否是使用多态的，如果你的具体船类是使用多态的，那么使用成员指针自然是一个极好的方法，但是，如果你是穷举出一系列的船的，你使用成员指针的话，你就必须包括所有的可能创建的船，这个其实不是很符合单一职责原则的。</p>
+<p>所以我们可以看到，在建造者类中，我们特别需要注意的就是其所遵守的<strong>单一职责原则</strong>，这个原则使得建造者类在设计上是关注与船的功能的构建即可。其在设计中一般来说都是提供一系列的对应的要创建的对象的组装方法的。就比如组装船。在建造者类中，其可能存在的方法就包括武器，能源，装饰等等。但是，一般来说，在建造者类中，不会包括这些方法的组合。也就是说，建造者类负责提供一些(较大块的)零件，让其他模块来组合形成一个具体的类对象。</p>
+<p>接下来我们需要来看到更接近用户层的类，<strong>管理者层</strong>。这个层在一些资料中说是可有可无的，但是吧，现实设计中一般都是包含这个类的。</p>
+<p>这个类可以看做是对用户需求提出的层次和建造者层次的缓冲。管理者类一般是可以存在多个的，一个管理者类负责一类船的生产。</p>
+<p>用现实生活来举例吧，一个船厂一般有自己生产的船的方向，但是并不固定。当一个公司甲方想要去委托一个船厂去生产一个具有特定功能的船的时候，其一般都不会直接去找到制造部门，而是去找到船厂的销售部门，向这个部门去阐述自己的需求，或者说选择自己需要的船型号。接下来这个销售部门会去解析这个需求，将这个需求解析成一步步可以落地的步骤，然后让这个船厂的制造部门去做。</p>
+<p>在这个例子中，甲方扮演的角色就是用户层，销售部门扮演的就是管理者层，制造部门扮演的就是建造者层，而我们最后的需求产品，就是我们一个具体的船类的对象。</p>
+<p>可以看出来，我们管理者层这里负责一个需求的解析，就比如甲方去A船厂提出我需要你们一个标准型号的船，那么这个管理者类就会对这个需求进行解析，就假设一个标准型号的船需要一个船身，一个发动机，一个武器这个配置，那么管理者层就会把这个配置发送给我们具体的建造者类中去，然后这个建造者类就会依照这个管理者类发来的需求按顺序去一个个实现到一个船对象中。当执行完后，一个标准A船就被制造出来了。</p>
+<p>接下来，就需要船厂能够提供一个接口让用户能够提船。这个一般应该在制造者类中去实现，至于是在抽象类中就有还是每个类维护一个自己的方法取决于各自的实现。其实，这些个制造者类就好像一个公司一个部门的不同项目，其各自有着一套对接流程，甲方需要依照这些接口流程去获取自己需要的东西。</p>
+<p>同时，我们可以考虑到如果不想要A船厂的船而想要B船厂的船。那我们需要怎么做，那我们需要去找到对应船厂的中介(管理者)，对应船厂需要特定的船产品(具体的产品类)，还需要对应船厂有自己的制造部门(建造者类)，这是最简单的配置了，这也是我们在建造者模式中想要进行扩展需要添加的几个方面。</p>
+<p>我再来对制造者类来进行下分析。我们抽象这个建造者类为具体的生产部门。在这个部门中，其的目的是生成出一个管理者可能会要求生产的产品，也就是说，在制造者类中，应该存在一个可以用来储存当前生产的对象的地方，在类中就抽象为一个成员指针。这个可以玩笑为”新建文件夹”。在制造者类中，其一开始并不知道这个类将要被怎么个设计，但是这个制造者类中应该包含着对于这个新建文件夹的所有操作。</p>
+<p>既然这个制造者类不能自己决定要怎么个制作方法，那么就需要外部来给他提出要求，在生产者模式中就是管理者类起到了这方面的作用。前面已经提到了，管理者类会将用户提出的需求转化为具体的组装步骤转发给制造者类去进行实现。</p>
+<p>也就是说，管理者类会提供一个完整的设计流程给制造者，制造者类只需要按这个提供的流程去进行组装即可。</p>
+<p>差不多了，那么接下来我们来讨论下管理者类的必要性。其实理论上管理者类的存在不是必须的，但是正如设计模式存在的意义一般，这个层次的存在也是为了方便我们的设计和使用。我们当然可以把这个管理者要要提供的组装流程直接封装在制造者类中。但是吧，这就像你一个甲方要去直接与对应乙方的技术部门进行交流一样。这通常是一份吃力不讨好的工作。为了更高效的交流，我们应该考虑这个公司中的对接部门，这个部门能够协调甲方的需求和自己方公司的实际能力，这种缓存能更好的提高效率。</p>
+<p>也就是说，对于设计模式的学习，我们一定得结合实际来看，毕竟设计模式其实就是一种对于现实世界的抽象建模，其旨在解决现实生活中的问题，结合现实问题能让我们更好的理解设计模式。</p>
+]]></content>
+      <categories>
+        <category>设计模式</category>
+      </categories>
+      <tags>
+        <tag>创建型设计模式</tag>
       </tags>
   </entry>
 </search>
