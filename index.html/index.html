@@ -186,6 +186,150 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/" class="post-title-link" itemprop="url">Storage_Files & Pages</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-02-27 16:51:15 / Modified: 23:11:37" itemprop="dateCreated datePublished" datetime="2025-02-27T16:51:15+08:00">2025-02-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.3k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="储存管理"><a href="#储存管理" class="headerlink" title="储存管理"></a>储存管理</h1><h2 id="前情回顾"><a href="#前情回顾" class="headerlink" title="前情回顾"></a><strong>前情回顾</strong></h2><p>​	接下来，我将跟着15445的进度跳过中间的中级SQL和高级SQL和其他一些对于数据库的优化操作，直接跳到书籍的第三章节中来。正如15445在课程中所说的，这门课程主要是为了让我们了解一个数据库系统到底是什么，而不是了解数据库系统怎么来进行使用。</p>
+<p>​	如下图</p>
+<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227191240783.png" alt="image-20250227191240783"></p>
+<p>​	我其实在学习这个的时候遇到了一个问题，就是我学校的课程内容其实相对于15445来说存在比较大的出入，就比如，学校的课程目标在database system concepts中主要就是第一二部分的内容。但是15445的课程目标则是后面的第三部分的内容，从底层来进行分析一个DBMS。在我看来，你作为一个CSER，在这方面的选择其实不应该犹豫，毕竟相对来说，CMU已经是很多CSER所能接触到的最好的课程了，如果想要拥有一个更好的底子，跟着CMU的课程目标走无疑是更加能够提高个人的能力的，所以，拼命吧，不必要去学校偷懒。</p>
+<blockquote>
+<p>CSER，Database Start！</p>
+</blockquote>
+<p>先来看一个图，这个其实15445的课程大纲</p>
+<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227195226036.png" alt="image-20250227195226036"></p>
+<p>​	该图中的左侧是15445整门课程大致的学习章目，此时我们已经进入Storage储存管理部分，右侧的层次架构是整个储存部分的基础管理结构，由下至上逐渐抽象，逐渐的远离硬件结构，在15445中则是从底层逐渐学起，逐渐架构起对于硬件与软件层次的认知。</p>
+<h2 id="数据储存"><a href="#数据储存" class="headerlink" title="数据储存"></a>数据储存</h2><p>​	接下来我们来进行对于一个DBMS中数据的底层管理体系进行分析。</p>
+<p>​	学过了CSAPP，其实不难知道数据在底层上都应该是储存在磁盘等非易失性储存器的，数据库中最主要的就是那些数据，因此这一点又需要额外重点注意。在这种架构下，DBMS确保了一个数据库的主要储存位置都位于非易失型储存器上。在现代的数据库使用中，由于在性能与损耗之间的平衡，对于需要使用的数据库数据，还是需要从非易失型储存器转移到主存中的，正如操作系统负责部分文件从外存往内存中的加载一样，DBMS负责数据库的数据在易失型和非易失型储存器之间的移动。</p>
+<p>​	因此，接下来的学习中，我们的重点将会侧重于如果将一个DB中的数据安全的转移到主存中去，话不多说，启动。</p>
+<h3 id="储存架构"><a href="#储存架构" class="headerlink" title="储存架构"></a>储存架构</h3><p>​	接下来看一个老朋友</p>
+<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227201731393.png" alt="image-20250227201731393"></p>
+<p>​	对于这个图中的内存架构，如果学过CSAPP中的储存模型，相似能够很快的理解。</p>
+<p>​	这里主要对一些东西重复一下</p>
+<ul>
+<li>Volatile(易失型储存器):在易失型储存器中，储存器硬件上的内容可以按照字节来进行寻址，但是这种储存器一但断电其上面储存的信息将会在很短的一段时间内小时，不难长时间储存。</li>
+<li>Non-Volatile(非易失型储存器):一般来说，非易失型储存器并不能按照上面的通过字节来进行内容的读取，因为它实在是太慢了，使用按字节读取的损耗不能够弥补付出。但是这种储存器在断电后其上的信息仍然能够长时间储存。</li>
+</ul>
+<p>​	在数据库的内存系统中，我们主要考虑的是在各个硬件架构之后，我们需要怎么去确保在数据的传输过程更安全，更有效率，话不多说，开始。</p>
+<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227202547718.png" alt="image-20250227202547718"></p>
+<p>​	在non-volatile中，基本所有情况下对于数据的随机访问都是慢与顺序访问的，这样其实也很好理解，毕竟相对于顺序访问，随机访问通常意味着更多的磁头的移动和读取，这种硬件的移动和读取是我们所不喜欢的，这大大影响了数据读取的效率，那么一个DBMS就必须在这一块之上去下功夫。</p>
+<p>​	最简单的一点，为了优化效率，我们在设计DBMS时，我们需要去选择哪些能够使得我们最后在读取&#x2F;写入数据时能够顺序读取&#x2F;写入数据的数据结构或者算法。就比如，我们在需要将主存中的数据写回到外存中时，去选择哪些能够顺序写入外存的储存页的方法，写出同理。</p>
+<p>​	例如，在MySQL中，在往磁盘写入数据时，其通常是先将需要写入的数据先给以顺序写入的方式写入到一个缓存池中去，然后通知外界你这块数据已经成功被保存。但是实际上这块数据可能还没有被写入到外存中，只有当触发了缓存池中的写入限制时才会一次性写入到外存中，这次写入可能是随机写入的，但是我们不用对这个进行管理，因为这个是在后台进行的。</p>
+<p>​	接下来来看一个美图</p>
+<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227205144263.png" alt="image-20250227205144263"></p>
+<p>​	这个的图学过CSAPP的话，一眼过去基本就能猜测出对应的操作了，这里就不进行再分析了。</p>
+<p>​	</p>
+<p>​	在DBMS中，上面那个过程对于disk上的内存页的调配很多程度上都是相对于OS独立实现的，那么，为什么呢，为什么要自己造轮子呢？（其实使用C++来写东西的人应该对于这个问题会有一个初步的自己的回答）</p>
+<p>​	这一块不会进行分析，时间紧任务重，先赶进度先。在课间中对于这一点进行了这一块的较大篇幅的讲解，感兴趣可以去看一看。</p>
+<h3 id="文件储存"><a href="#文件储存" class="headerlink" title="文件储存"></a>文件储存</h3><p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227210340760.png" alt="image-20250227210340760"></p>
+<p>​	在DBMS中，对于数据库一般都是以文件的形式储存在disk上的，OS无法解析这些文件，只是知道这些文件的存在。并且，基本上每个DBMS都有自己一套的数据库的储存方法，很多DBMS的数据库文件都是无法互相解析的。部分DBMS例外。</p>
+<p>​	需要注意的是，在15445中，其进行学习的储存基础的文件系统是OS的文件系统，对于哪些少数自己实现文件系统的，并不在课程讨论之内。</p>
+<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227211251521.png" alt="image-20250227211251521"></p>
+<p>​	一个DBMS中一般会存在一个自己的storage manager用来管理自己的数据库文件，通过对manager进行特定的优化可以看到各个数据库之间的性能差距，但我们这里要学习的是他们的基本共性。</p>
+<p>​	对于一个manager，其一般会将文件视为一系列的pages的集合，在文件中，其负责跟踪每个页在该文件中的位置已经跟踪每个页中存在的空闲位置。</p>
+<h3 id="PAGES"><a href="#PAGES" class="headerlink" title="PAGES"></a>PAGES</h3><p>​	接下来我们来看到数据库文件的基本储存单位:<strong>pages</strong>。</p>
+<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227212103999.png" alt="image-20250227212103999"></p>
+<p>​	对于一个<strong>pages</strong>来说，其内部一般是一系列的block的集合，在每个页中，其中包含了关于这个页中的一些信息，这个就像我们二进制文件中的那些前置信息一样，这些信息一般都是位于页的起始部分的，规定了页的一些基础属性，已经系列页的跳转位置，页内的块索引等等，碰到再说。</p>
+<p>​	额外的，每个页拥有，也需要一个唯一且特殊的标识符来进行标识，这个由DBMS来设定和提供。</p>
+<p>​	一般来说，在一个页中，该页只会储存一种类型的数据，就比如当储存一个表时，一般只会储存这个表的数据而不会混杂多个表的数据，当是索引页的时候，就不会去储存数据页。这种设计其实在CSAPP中也有一定的出现，优势页很明显，就是这样的设计能够减少页的切换，使得你要读取数据时，一般只需要再一个页内去读取就行，对应与磁头等的物理操作就会减少一些，提高了效率，对应的只是一些越来越廉价的外存的损耗，这是完全可以接受的。</p>
+<p>​	同时，这种设计也使得在硬盘在遭受一些极端的外界因素而损毁时，我们能够尽可能的去读取剩余的数据(如果表头数据还在的话)。</p>
+<p>有时我们会在页中去储存多余的元数据，这在一定程度上也是为了数据的恢复。</p>
+<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227215004495.png" alt="image-20250227215004495"></p>
+<p>​	在计算机层面上，存在着多种pages，最底层的是Hardware Page,这种是最基本的硬件层面上的页，接着是OS Page，这种是OS定义的基本页，通常都是与Hardware Page相挂钩的，以前一般是与其一样的大小，在现在内存廉价后变大了许多，但在本门课中假设OS Pages跟Hardware Page的大小一致为4KB。再之后就是我们的Database Page，这个是建立在OS Pages上的，虽然DBMS不使用OS的文件系统，但是DBMS的文件读取读入，还是通过OS实现的，至于Database Pages的大小，这个每个DBMS一般都有自己的规定，如上右图。  </p>
+<p>​	我们这里需要对页的大小的选择进行一下分析，为什么不直接选择最大的页面而是有些选择较小的页面。这里需要考虑一个页的写回，当我们一个页的大小是16KB时，我们对其修改了一些数据后需要对其进行写回，那么此时OS需要做什么，OS需要把整个16KB大小的页面都给写回到disk中，假设我们只对于这个页面修改了1条数据，其在写回时仍需要把这个16KB大小的页面写回，这是十分浪费的，当然，较大的页面大小使得我们在这个页中去查询大量相同的数据时拥有更高的效率，所以我们需要平衡页面大小与查询性能之间的关系。</p>
+<p>​	举例，当我们对于数据库操作是读密集型的时候，大页面会具有更大的优势，毕竟你可以在一个页面内去读取更多的数据，再需要时再丢弃这个页读取新页。而对于写密集型的时候，小页面具有更大的优势，因为写回时会浪费的页面大小空间会相对大页来说更少。</p>
+<h3 id="储存形式"><a href="#储存形式" class="headerlink" title="储存形式"></a>储存形式</h3><p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227221435425.png" alt="image-20250227221435425"></p>
+<p>​	在不同的DBMS中，其对于其自己的数据库文件中的页管理可能是不同的形式的。这里先来对于Heap File Organization来进行讨论，这是最常见的一种DBMS对于数据库文件中的页面管理方法。</p>
+<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227222236459.png" alt="image-20250227222236459"></p>
+<p>​	对于堆文件架构的数据库文件来说，其中储存的页是无序的，或者说，其中的数据时按照插入顺序排序的，每个页面都有着自己独立的一个编号，通过这个编号，在需要查找某块数据时，通过数据对于的页编号能够索引到对应的块。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Offset = Page# x PageSize;</span><br></pre></td></tr></table></figure>
+
+<p>​	</p>
+<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227225125034.png" alt="image-20250227225125034"></p>
+<p>​	在一个DBMS当中，通常会存在一个特殊的索引页来进行对应数据库文件中的特定页的索引，通过这个索引页，可以索引到对应的页，但是需要注意的是，也只能索引到特定的页，至于对于也里面的数据内容，这不是索引页中需要了解的，是在索引到特定的页之后需要对其进行的解析等的操作。</p>
+<p>​	在课程中，还对堆文件中的空闲页空间管理进行了一次demo的演示，在DBMS中，存在着一种能够跟踪储存一个表的系列页的空闲空间的方法。在演示的demo中，我们看到有时候我们往数据库中去插入对于的数据然后去查看插入后的对应的表的空闲空间，可能是与插入前一致的(猜测其实是被缓存了还没有插入，因此，没有触发对应的空闲空间的检测)，但是如果此时使用DBMS自带的更新语句更新再查询，就会发现对应的页空闲空间产生了变化。接着还有当我们从表中去删除数据再去查看对应的空闲空间时，可以看到删除后的空闲空间发生了实时的变化。通过这个可以看到对于的DBMS的空闲页的更新机制。</p>
+<p>​	需要注意的是，这里的空闲空间查询机制在一些程度上是相对独立的机制，或者这么说，只要你去查看了对应的表所使用的页的空闲空间，那么它所输出的结果就确实是现在在disk上的空闲空间大小，只是我们空闲空间管理器锁需要具备的基本功能。至于为什么我们插入数据后还是没有变化，想必你也有点头绪，就是因为此时这些插入的数据还是被缓存了，并没有被实时的写入到对应的disk中的文件中，因此此时查看磁盘中的文件空闲空间才会是插入之前的情况。至于删除这种操作后会有区别，想必就是进行了实时的更新了吧，这个应该取决于你DBMS的设计，如果设计的删除和插入一样会被缓存，那么这里的查询也应该会延后更新。不过这都不重要，因为我们已经理解了缓存会带来的空闲查询延后更新的这种影响。</p>
+<h3 id="PAGE格式"><a href="#PAGE格式" class="headerlink" title="PAGE格式"></a>PAGE格式</h3>
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/26/%E6%95%B0%E6%8D%AE%E5%BA%93/1.4-Modern%20SQL(modify)/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -303,10 +447,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2025-02-25 17:51:15 / Modified: 15:03:41" itemprop="dateCreated datePublished" datetime="2025-02-25T17:51:15+08:00">2025-02-25</time>
+              <time title="Created: 2025-02-25 17:51:15" itemprop="dateCreated datePublished" datetime="2025-02-25T17:51:15+08:00">2025-02-25</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-02-27 11:08:22" itemprop="dateModified" datetime="2025-02-27T11:08:22+08:00">2025-02-27</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -343,36 +493,14 @@
 
       
           <h1 id="函数对象"><a href="#函数对象" class="headerlink" title="函数对象"></a>函数对象</h1><p>​	函数对象其实本身并不神秘，简单来说，一个函数对象就是能够被以函数调用形式来进行调用的任意对象。可以想到，函数对象就应该包括函数名，函数指针以及重载了()运算符的类对象。</p>
-<h2 id="函数指针"><a href="#函数指针" class="headerlink" title="函数指针"></a>函数指针</h2><p>​	函数指针本身也是一个指针。需要知道的是，本质上看，函数其实跟普通的变量一样，都是一个符号，只是说这个符号的功能比较特殊。不必多说，我们先来看一下简单的函数指针的声明方式。</p>
-<p>​	一般来说，函数指针是一对一绑定的，这是因为函数指针本身的类型声明比较麻烦的原因。</p>
-<p>​	假设我们现在拥有这么一个函数</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​	我们想要定义一个函数指针来指向这个函数，那么我们得先确定我们要使用的这个函数指针所要指向的函数形式来进行声明，简单来看，一个函数指针需要一下这些信息:(函数的返回类型，函数的所有参数类型)。并通过这样来进行声明。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">int</span> (*func_ptr)(<span class="type">int</span>, <span class="type">int</span>);  <span class="comment">// 定义一个函数指针</span></span><br></pre></td></tr></table></figure>
-
-<p>​	通过这种定义，我们就定义了一个能够指向返回类型为int,拥有俩个int参数的函数的函数指针。</p>
-<p>​	再用文字来重复一遍，一个函数指针的声明由(函数返回类型，(*函数指针符号名)(函数参数返回类型枚举))来组成。</p>
-<p>​	</p>
-<ul>
-<li><strong>函数指针的使用</strong></li>
-</ul>
-<p>​	函数指针相对于其他符号来说有点不同，重点就是他可以通过()来直接调用该函数指针指向的函数。</p>
-<p>​	来看一个小demo</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 定义函数指针并指向 add 函数</span></span><br><span class="line">    <span class="built_in">int</span> (*func_ptr)(<span class="type">int</span>, <span class="type">int</span>) = add;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 通过函数指针调用 add 函数</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Result: &quot;</span> &lt;&lt; <span class="built_in">func_ptr</span>(<span class="number">3</span>, <span class="number">4</span>) &lt;&lt; endl;  <span class="comment">// 输出 7</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>​	但其实这种使用情况是很少见的，毕竟你完全可以通过函数本身去进行调用，至于那些个类函数，那你更不应该通过函数指针来进行调用，更多的是将函数指针来作为函数参数的传递来实现更多的扩展。这个之后碰到再说。</p>
-<p>​	</p>
-<p>在stl中，函数符的概念已经被定义了，如下</p>
-<ul>
-<li>生成器是不用参数能直接调用的函数符</li>
-<li>一元函数是用一个参数就可以调用的函数符</li>
-<li>二元函数是用一个参数就可以调用的函数符</li>
-<li>返回bool值的一元函数是谓词</li>
-<li>返回bool值的二元函数是二元谓词</li>
-</ul>
-<p>​	来看一下最常用的stl库排序函数sort函数，这个函数前面俩个参数使用的是俩个迭代器，第三个参数时一个谓词(应该是一个二元谓词，毕竟需要将俩个数进行比较)</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/02/25/C++%E5%AD%A6%E4%B9%A0/%E5%87%BD%E6%95%B0%E5%AF%B9%E8%B1%A1/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -723,7 +851,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-25 09:13:57" itemprop="dateModified" datetime="2025-02-25T09:13:57+08:00">2025-02-25</time>
+                <time title="Modified: 2025-02-27 18:50:09" itemprop="dateModified" datetime="2025-02-27T18:50:09+08:00">2025-02-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -741,14 +869,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>2k</span>
+              <span>557</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>2 mins.</span>
+              <span>1 mins.</span>
             </span>
 
         </div>
@@ -1184,104 +1312,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/01/03/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/22-%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/01/03/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/22-%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">中介者模式</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-01-03 21:24:34" itemprop="dateCreated datePublished" datetime="2025-01-03T21:24:34+08:00">2025-01-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-01-04 13:22:08" itemprop="dateModified" datetime="2025-01-04T13:22:08+08:00">2025-01-04</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>4.5k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>4 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="中介者模式"><a href="#中介者模式" class="headerlink" title="中介者模式"></a>中介者模式</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>​	用一个中介对象来封装一系列的对象交互。中介者使得各对象不需要显示的相互引用，从而是其耦合松散，而且可以独立地改变他们的交互。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/01/03/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/22-%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1353,7 +1383,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-count">40</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1398,7 +1428,7 @@
           <h3 class="widget-title">Tag Cloud</h3>
           <div id="myCanvasContainer" class="widget tagcloud">
               <canvas width="250" height="250" id="resCanvas" style="width=100%">
-                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
               </canvas>
           </div>
       </div>
@@ -1453,13 +1483,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">Symbols count total: </span>
-    <span title="Symbols count total">116k</span>
+    <span title="Symbols count total">119k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">Reading time total &asymp;</span>
-    <span title="Reading time total">1:45</span>
+    <span title="Reading time total">1:48</span>
 </div>
 
         

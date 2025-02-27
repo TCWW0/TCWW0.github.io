@@ -23,15 +23,15 @@
     var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="函数对象​	函数对象其实本身并不神秘，简单来说，一个函数对象就是能够被以函数调用形式来进行调用的任意对象。可以想到，函数对象就应该包括函数名，函数指针以及重载了()运算符的类对象。 函数指针​	函数指针本身也是一个指针。需要知道的是，本质上看，函数其实跟普通的变量一样，都是一个符号，只是说这个符号的功能比较特殊。不必多说，我们先来看一下简单的函数指针的声明方式。 ​	一般来说，函数指针是一对一绑定">
+  <meta name="description" content="函数对象​	函数对象其实本身并不神秘，简单来说，一个函数对象就是能够被以函数调用形式来进行调用的任意对象。可以想到，函数对象就应该包括函数名，函数指针以及重载了()运算符的类对象。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="函数对象">
 <meta property="og:url" content="https://tcww0.github.io/2025/02/25/C++%E5%AD%A6%E4%B9%A0/%E5%87%BD%E6%95%B0%E5%AF%B9%E8%B1%A1/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="函数对象​	函数对象其实本身并不神秘，简单来说，一个函数对象就是能够被以函数调用形式来进行调用的任意对象。可以想到，函数对象就应该包括函数名，函数指针以及重载了()运算符的类对象。 函数指针​	函数指针本身也是一个指针。需要知道的是，本质上看，函数其实跟普通的变量一样，都是一个符号，只是说这个符号的功能比较特殊。不必多说，我们先来看一下简单的函数指针的声明方式。 ​	一般来说，函数指针是一对一绑定">
+<meta property="og:description" content="函数对象​	函数对象其实本身并不神秘，简单来说，一个函数对象就是能够被以函数调用形式来进行调用的任意对象。可以想到，函数对象就应该包括函数名，函数指针以及重载了()运算符的类对象。">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2025-02-25T09:51:15.000Z">
-<meta property="article:modified_time" content="2025-02-25T07:03:41.051Z">
+<meta property="article:modified_time" content="2025-02-27T03:08:22.633Z">
 <meta property="article:author" content="TCWW">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -216,10 +216,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2025-02-25 17:51:15 / Modified: 15:03:41" itemprop="dateCreated datePublished" datetime="2025-02-25T17:51:15+08:00">2025-02-25</time>
+              <time title="Created: 2025-02-25 17:51:15" itemprop="dateCreated datePublished" datetime="2025-02-25T17:51:15+08:00">2025-02-25</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-02-27 11:08:22" itemprop="dateModified" datetime="2025-02-27T11:08:22+08:00">2025-02-27</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -263,6 +269,8 @@
 
       
         <h1 id="函数对象"><a href="#函数对象" class="headerlink" title="函数对象"></a>函数对象</h1><p>​	函数对象其实本身并不神秘，简单来说，一个函数对象就是能够被以函数调用形式来进行调用的任意对象。可以想到，函数对象就应该包括函数名，函数指针以及重载了()运算符的类对象。</p>
+<span id="more"></span>
+
 <h2 id="函数指针"><a href="#函数指针" class="headerlink" title="函数指针"></a>函数指针</h2><p>​	函数指针本身也是一个指针。需要知道的是，本质上看，函数其实跟普通的变量一样，都是一个符号，只是说这个符号的功能比较特殊。不必多说，我们先来看一下简单的函数指针的声明方式。</p>
 <p>​	一般来说，函数指针是一对一绑定的，这是因为函数指针本身的类型声明比较麻烦的原因。</p>
 <p>​	假设我们现在拥有这么一个函数</p>
@@ -414,7 +422,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-count">40</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -459,7 +467,7 @@
           <h3 class="widget-title">Tag Cloud</h3>
           <div id="myCanvasContainer" class="widget tagcloud">
               <canvas width="250" height="250" id="resCanvas" style="width=100%">
-                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
               </canvas>
           </div>
       </div>
@@ -514,13 +522,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">Symbols count total: </span>
-    <span title="Symbols count total">116k</span>
+    <span title="Symbols count total">119k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">Reading time total &asymp;</span>
-    <span title="Reading time total">1:45</span>
+    <span title="Reading time total">1:48</span>
 </div>
 
         
