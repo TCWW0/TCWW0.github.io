@@ -23,15 +23,15 @@
     var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="模版​	模版是C++中一个相对重要的特性了，直接来吧 类模版​	由于这种东西还是得上手去敲，所以我们在这里对很多内容将会进行简化。 ​	模版这种东西最直观的作用就是进行方法与所使用的数据类型之间的解耦，使得在设计方法时能够更加专注于特定功能的方法的构建而不必要去关注所使用的数据类型。 使用​	一个模版的声明，无论是类模版，还是函数模版，都是基本一致的。通过template关键字来进行 1templ">
+  <meta name="description" content="模版​	模版是C++中一个相对重要的特性了，直接来吧 类模版​	由于这种东西还是得上手去敲，所以我们在这里对很多内容将会进行简化。 ​	模版这种东西最直观的作用就是进行方法与所使用的数据类型之间的解耦，使得在设计方法时能够更加专注于特定功能的方法的构建而不必要去关注所使用的数据类型。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="类模版">
 <meta property="og:url" content="https://tcww0.github.io/2025/02/16/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E6%A8%A1%E7%89%88/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="模版​	模版是C++中一个相对重要的特性了，直接来吧 类模版​	由于这种东西还是得上手去敲，所以我们在这里对很多内容将会进行简化。 ​	模版这种东西最直观的作用就是进行方法与所使用的数据类型之间的解耦，使得在设计方法时能够更加专注于特定功能的方法的构建而不必要去关注所使用的数据类型。 使用​	一个模版的声明，无论是类模版，还是函数模版，都是基本一致的。通过template关键字来进行 1templ">
+<meta property="og:description" content="模版​	模版是C++中一个相对重要的特性了，直接来吧 类模版​	由于这种东西还是得上手去敲，所以我们在这里对很多内容将会进行简化。 ​	模版这种东西最直观的作用就是进行方法与所使用的数据类型之间的解耦，使得在设计方法时能够更加专注于特定功能的方法的构建而不必要去关注所使用的数据类型。">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2025-02-16T00:51:15.000Z">
-<meta property="article:modified_time" content="2025-02-24T01:46:30.738Z">
+<meta property="article:modified_time" content="2025-02-28T07:10:24.416Z">
 <meta property="article:author" content="TCWW">
 <meta property="article:tag" content="C++">
 <meta name="twitter:card" content="summary">
@@ -224,7 +224,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-24 09:46:30" itemprop="dateModified" datetime="2025-02-24T09:46:30+08:00">2025-02-24</time>
+                <time title="Modified: 2025-02-28 15:10:24" itemprop="dateModified" datetime="2025-02-28T15:10:24+08:00">2025-02-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -271,6 +271,8 @@
         <h1 id="模版"><a href="#模版" class="headerlink" title="模版"></a>模版</h1><p>​	模版是C++中一个相对重要的特性了，直接来吧</p>
 <h2 id="类模版"><a href="#类模版" class="headerlink" title="类模版"></a>类模版</h2><p>​	由于这种东西还是得上手去敲，所以我们在这里对很多内容将会进行简化。</p>
 <p>​	模版这种东西最直观的作用就是进行方法与所使用的数据类型之间的解耦，使得在设计方法时能够更加专注于特定功能的方法的构建而不必要去关注所使用的数据类型。</p>
+<span id="more"></span>
+
 <h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>​	一个模版的声明，无论是类模版，还是函数模版，都是基本一致的。通过template关键字来进行</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;		||		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br></pre></td></tr></table></figure>
 

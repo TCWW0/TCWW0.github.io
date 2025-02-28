@@ -219,7 +219,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-28 12:23:01" itemprop="dateModified" datetime="2025-02-28T12:23:01+08:00">2025-02-28</time>
+                <time title="Modified: 2025-02-28 15:09:52" itemprop="dateModified" datetime="2025-02-28T15:09:52+08:00">2025-02-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -257,85 +257,14 @@
 
       
           <h1 id="储存管理"><a href="#储存管理" class="headerlink" title="储存管理"></a>储存管理</h1><h2 id="前情回顾"><a href="#前情回顾" class="headerlink" title="前情回顾"></a><strong>前情回顾</strong></h2><p>​	接下来，我将跟着15445的进度跳过中间的中级SQL和高级SQL和其他一些对于数据库的优化操作，直接跳到书籍的第三章节中来。正如15445在课程中所说的，这门课程主要是为了让我们了解一个数据库系统到底是什么，而不是了解数据库系统怎么来进行使用。</p>
-<p>​	如下图</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227191240783.png" alt="image-20250227191240783"></p>
-<p>​	我其实在学习这个的时候遇到了一个问题，就是我学校的课程内容其实相对于15445来说存在比较大的出入，就比如，学校的课程目标在database system concepts中主要就是第一二部分的内容。但是15445的课程目标则是后面的第三部分的内容，从底层来进行分析一个DBMS。在我看来，你作为一个CSER，在这方面的选择其实不应该犹豫，毕竟相对来说，CMU已经是很多CSER所能接触到的最好的课程了，如果想要拥有一个更好的底子，跟着CMU的课程目标走无疑是更加能够提高个人的能力的，所以，拼命吧，不必要去学校偷懒。</p>
-<blockquote>
-<p>CSER，Database Start！</p>
-</blockquote>
-<p>先来看一个图，这个其实15445的课程大纲</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227195226036.png" alt="image-20250227195226036"></p>
-<p>​	该图中的左侧是15445整门课程大致的学习章目，此时我们已经进入Storage储存管理部分，右侧的层次架构是整个储存部分的基础管理结构，由下至上逐渐抽象，逐渐的远离硬件结构，在15445中则是从底层逐渐学起，逐渐架构起对于硬件与软件层次的认知。</p>
-<h2 id="数据储存"><a href="#数据储存" class="headerlink" title="数据储存"></a>数据储存</h2><p>​	接下来我们来进行对于一个DBMS中数据的底层管理体系进行分析。</p>
-<p>​	学过了CSAPP，其实不难知道数据在底层上都应该是储存在磁盘等非易失性储存器的，数据库中最主要的就是那些数据，因此这一点又需要额外重点注意。在这种架构下，DBMS确保了一个数据库的主要储存位置都位于非易失型储存器上。在现代的数据库使用中，由于在性能与损耗之间的平衡，对于需要使用的数据库数据，还是需要从非易失型储存器转移到主存中的，正如操作系统负责部分文件从外存往内存中的加载一样，DBMS负责数据库的数据在易失型和非易失型储存器之间的移动。</p>
-<p>​	因此，接下来的学习中，我们的重点将会侧重于如果将一个DB中的数据安全的转移到主存中去，话不多说，启动。</p>
-<h3 id="储存架构"><a href="#储存架构" class="headerlink" title="储存架构"></a>储存架构</h3><p>​	接下来看一个老朋友</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227201731393.png" alt="image-20250227201731393"></p>
-<p>​	对于这个图中的内存架构，如果学过CSAPP中的储存模型，相似能够很快的理解。</p>
-<p>​	这里主要对一些东西重复一下</p>
-<ul>
-<li>Volatile(易失型储存器):在易失型储存器中，储存器硬件上的内容可以按照字节来进行寻址，但是这种储存器一但断电其上面储存的信息将会在很短的一段时间内小时，不难长时间储存。</li>
-<li>Non-Volatile(非易失型储存器):一般来说，非易失型储存器并不能按照上面的通过字节来进行内容的读取，因为它实在是太慢了，使用按字节读取的损耗不能够弥补付出。但是这种储存器在断电后其上的信息仍然能够长时间储存。</li>
-</ul>
-<p>​	在数据库的内存系统中，我们主要考虑的是在各个硬件架构之后，我们需要怎么去确保在数据的传输过程更安全，更有效率，话不多说，开始。</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227202547718.png" alt="image-20250227202547718"></p>
-<p>​	在non-volatile中，基本所有情况下对于数据的随机访问都是慢与顺序访问的，这样其实也很好理解，毕竟相对于顺序访问，随机访问通常意味着更多的磁头的移动和读取，这种硬件的移动和读取是我们所不喜欢的，这大大影响了数据读取的效率，那么一个DBMS就必须在这一块之上去下功夫。</p>
-<p>​	最简单的一点，为了优化效率，我们在设计DBMS时，我们需要去选择哪些能够使得我们最后在读取&#x2F;写入数据时能够顺序读取&#x2F;写入数据的数据结构或者算法。就比如，我们在需要将主存中的数据写回到外存中时，去选择哪些能够顺序写入外存的储存页的方法，写出同理。</p>
-<p>​	例如，在MySQL中，在往磁盘写入数据时，其通常是先将需要写入的数据先给以顺序写入的方式写入到一个缓存池中去，然后通知外界你这块数据已经成功被保存。但是实际上这块数据可能还没有被写入到外存中，只有当触发了缓存池中的写入限制时才会一次性写入到外存中，这次写入可能是随机写入的，但是我们不用对这个进行管理，因为这个是在后台进行的。</p>
-<p>​	接下来来看一个美图</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227205144263.png" alt="image-20250227205144263"></p>
-<p>​	这个的图学过CSAPP的话，一眼过去基本就能猜测出对应的操作了，这里就不进行再分析了。</p>
-<p>​	</p>
-<p>​	在DBMS中，上面那个过程对于disk上的内存页的调配很多程度上都是相对于OS独立实现的，那么，为什么呢，为什么要自己造轮子呢？（其实使用C++来写东西的人应该对于这个问题会有一个初步的自己的回答）</p>
-<p>​	这一块不会进行分析，时间紧任务重，先赶进度先。在课间中对于这一点进行了这一块的较大篇幅的讲解，感兴趣可以去看一看。</p>
-<h3 id="文件储存"><a href="#文件储存" class="headerlink" title="文件储存"></a>文件储存</h3><p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227210340760.png" alt="image-20250227210340760"></p>
-<p>​	在DBMS中，对于数据库一般都是以文件的形式储存在disk上的，OS无法解析这些文件，只是知道这些文件的存在。并且，基本上每个DBMS都有自己一套的数据库的储存方法，很多DBMS的数据库文件都是无法互相解析的。部分DBMS例外。</p>
-<p>​	需要注意的是，在15445中，其进行学习的储存基础的文件系统是OS的文件系统，对于哪些少数自己实现文件系统的，并不在课程讨论之内。</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227211251521.png" alt="image-20250227211251521"></p>
-<p>​	一个DBMS中一般会存在一个自己的storage manager用来管理自己的数据库文件，通过对manager进行特定的优化可以看到各个数据库之间的性能差距，但我们这里要学习的是他们的基本共性。</p>
-<p>​	对于一个manager，其一般会将文件视为一系列的pages的集合，在文件中，其负责跟踪每个页在该文件中的位置已经跟踪每个页中存在的空闲位置。</p>
-<h2 id="PAGES"><a href="#PAGES" class="headerlink" title="PAGES"></a>PAGES</h2><p>​	接下来我们来看到数据库文件的基本储存单位:<strong>pages</strong>。</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227212103999.png" alt="image-20250227212103999"></p>
-<p>​	对于一个<strong>pages</strong>来说，其内部一般是一系列的block的集合，在每个页中，其中包含了关于这个页中的一些信息，这个就像我们二进制文件中的那些前置信息一样，这些信息一般都是位于页的起始部分的，规定了页的一些基础属性，已经系列页的跳转位置，页内的块索引等等，碰到再说。</p>
-<p>​	额外的，每个页拥有，也需要一个唯一且特殊的标识符来进行标识，这个由DBMS来设定和提供。</p>
-<p>​	一般来说，在一个页中，该页只会储存一种类型的数据，就比如当储存一个表时，一般只会储存这个表的数据而不会混杂多个表的数据，当是索引页的时候，就不会去储存数据页。这种设计其实在CSAPP中也有一定的出现，优势页很明显，就是这样的设计能够减少页的切换，使得你要读取数据时，一般只需要再一个页内去读取就行，对应与磁头等的物理操作就会减少一些，提高了效率，对应的只是一些越来越廉价的外存的损耗，这是完全可以接受的。</p>
-<p>​	同时，这种设计也使得在硬盘在遭受一些极端的外界因素而损毁时，我们能够尽可能的去读取剩余的数据(如果表头数据还在的话)。</p>
-<p>有时我们会在页中去储存多余的元数据，这在一定程度上也是为了数据的恢复。</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227215004495.png" alt="image-20250227215004495"></p>
-<p>​	在计算机层面上，存在着多种pages，最底层的是Hardware Page,这种是最基本的硬件层面上的页，接着是OS Page，这种是OS定义的基本页，通常都是与Hardware Page相挂钩的，以前一般是与其一样的大小，在现在内存廉价后变大了许多，但在本门课中假设OS Pages跟Hardware Page的大小一致为4KB。再之后就是我们的Database Page，这个是建立在OS Pages上的，虽然DBMS不使用OS的文件系统，但是DBMS的文件读取读入，还是通过OS实现的，至于Database Pages的大小，这个每个DBMS一般都有自己的规定，如上右图。  </p>
-<p>​	我们这里需要对页的大小的选择进行一下分析，为什么不直接选择最大的页面而是有些选择较小的页面。这里需要考虑一个页的写回，当我们一个页的大小是16KB时，我们对其修改了一些数据后需要对其进行写回，那么此时OS需要做什么，OS需要把整个16KB大小的页面都给写回到disk中，假设我们只对于这个页面修改了1条数据，其在写回时仍需要把这个16KB大小的页面写回，这是十分浪费的，当然，较大的页面大小使得我们在这个页中去查询大量相同的数据时拥有更高的效率，所以我们需要平衡页面大小与查询性能之间的关系。</p>
-<p>​	举例，当我们对于数据库操作是读密集型的时候，大页面会具有更大的优势，毕竟你可以在一个页面内去读取更多的数据，再需要时再丢弃这个页读取新页。而对于写密集型的时候，小页面具有更大的优势，因为写回时会浪费的页面大小空间会相对大页来说更少。</p>
-<h3 id="储存形式"><a href="#储存形式" class="headerlink" title="储存形式"></a>储存形式</h3><p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227221435425.png" alt="image-20250227221435425"></p>
-<p>​	在不同的DBMS中，其对于其自己的数据库文件中的页管理可能是不同的形式的。这里先来对于Heap File Organization来进行讨论，这是最常见的一种DBMS对于数据库文件中的页面管理方法。</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227222236459.png" alt="image-20250227222236459"></p>
-<p>​	对于堆文件架构的数据库文件来说，其中储存的页是无序的，或者说，其中的数据时按照插入顺序排序的，每个页面都有着自己独立的一个编号，通过这个编号，在需要查找某块数据时，通过数据对于的页编号能够索引到对应的块。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Offset = Page# x PageSize;</span><br></pre></td></tr></table></figure>
-
-<p>​	</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250227225125034.png" alt="image-20250227225125034"></p>
-<p>​	在一个DBMS当中，通常会存在一个特殊的索引页来进行对应数据库文件中的特定页的索引，通过这个索引页，可以索引到对应的页，但是需要注意的是，也只能索引到特定的页，至于对于也里面的数据内容，这不是索引页中需要了解的，是在索引到特定的页之后需要对其进行的解析等的操作。</p>
-<p>​	在课程中，还对堆文件中的空闲页空间管理进行了一次demo的演示，在DBMS中，存在着一种能够跟踪储存一个表的系列页的空闲空间的方法。在演示的demo中，我们看到有时候我们往数据库中去插入对于的数据然后去查看插入后的对应的表的空闲空间，可能是与插入前一致的(猜测其实是被缓存了还没有插入，因此，没有触发对应的空闲空间的检测)，但是如果此时使用DBMS自带的更新语句更新再查询，就会发现对应的页空闲空间产生了变化。接着还有当我们从表中去删除数据再去查看对应的空闲空间时，可以看到删除后的空闲空间发生了实时的变化。通过这个可以看到对于的DBMS的空闲页的更新机制。</p>
-<p>​	需要注意的是，这里的空闲空间查询机制在一些程度上是相对独立的机制，或者这么说，只要你去查看了对应的表所使用的页的空闲空间，那么它所输出的结果就确实是现在在disk上的空闲空间大小，只是我们空闲空间管理器锁需要具备的基本功能。至于为什么我们插入数据后还是没有变化，想必你也有点头绪，就是因为此时这些插入的数据还是被缓存了，并没有被实时的写入到对应的disk中的文件中，因此此时查看磁盘中的文件空闲空间才会是插入之前的情况。至于删除这种操作后会有区别，想必就是进行了实时的更新了吧，这个应该取决于你DBMS的设计，如果设计的删除和插入一样会被缓存，那么这里的查询也应该会延后更新。不过这都不重要，因为我们已经理解了缓存会带来的空闲查询延后更新的这种影响。</p>
-<p>​	</p>
-<h3 id="PAGE格式"><a href="#PAGE格式" class="headerlink" title="PAGE格式"></a>PAGE格式</h3><p>​	接下来看到PAGE的格式。众所周知啊，对于底层数据的文件，页，块等的组织，一般都会在对应区域的其实位置附上一些信息用于识别该块内存所有的一些信息。也就是所谓的头部。</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250228103902474.png" alt="image-20250228103902474"></p>
-<p>​	在页的头部中，包含了这个页的大小和一些杂七杂八的信息，这里就不进行一个个深入了。</p>
-<p>​	我们主要的是接下来的内容，一个页中是如何对其中的数据进行组织的，换句话说，一个页中是如何储存其的信息，对应的元组是怎么进行排列的。在接下来的讨论中，可以考虑十分友好的遵守了单一职责原则，在这里面我们暂时只需要考虑文件内部如何组织数据而不必去考虑外部给其带来的影响。</p>
-<p>​	</p>
-<p>​	接下来看到一个问题:当我们要储存一个元组时，我们应该如何将这些元组放入到这些页面中，当我们想要从一个页中去查找一个元组，我们需要怎么去查找。</p>
-<p>​	接下来看一种元组的储存形式</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250228110856551.png" alt="image-20250228110856551"></p>
-<p>​	这是一个顺序储存，当我们需要插入元组的时候，分配器会为其分配一个特定的ID并查找空闲区域并进行插入，在只存在插入时这种架构不会存在什么问题，但是想想也是不可能的，最明显的，当你需要进行删除时，会发生什么呢。首先，你需要去将页内的元组的存在有效性被抹除，对应的内存块对于外界来说会是一个空闲的状态。那么，当此时我们需要插入时，由于顺序插入，查询到空闲且合理的位置就进行插入，那么这里就可能导致类似于 <strong>Tuple #1 Tuple #4 Tuple #3</strong>之类的元组顺序，这样的话对于外界来说，索引起来是非常麻烦的。</p>
-<p>​	还存在一个问题，在这种内存架构下，如果你的元组大小的长度是一个可变的呢，就比如不同的邮箱通常存在着不同的长度，如果你想要去规定元组的大小为最大的长度，那么这里就会存在一个十分常见且不讨喜的问题。在一定时间的使用后，内存空间将会被严重碎片化，这是我们所不想看到的。</p>
-<p>​	在种种这种顺序储存结构存在的缺陷的基础上，出现了另外的一种储存格式：槽页面</p>
-<p><strong><code>slotted pages</code></strong></p>
-<p>​	接下来看一下一种顺序存储的优化页面，槽页面。</p>
-<p><img src="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/image-20250228115641837.png" alt="image-20250228115641837"></p>
-<p>​	在槽页面中，出现了额外的一种结构（槽数组）来对页内的元组进行管理。在这种架构下，元组的储存位置与数据进一步的分离了。可以说，这种架构下的槽数组的每个元素与每个元组之间，类似于一种映射的关系。通过槽数组中的数据，可以直接去定位到对应的元组位置，这种分离使得在元组的管理上更加的灵活。</p>
-<p>​	对于元组来说，其的添加删除其实还是跟之前很相似，都是查询到一块空闲区域时进行插入，但是这种架构下的元组相较于顺序存储具有更强的变长能力。当插入不同长度的元组时的操作并无不同，猜测在槽数组中，每个元素都包含了一系列元组的信息，其中就包括了对应元组的长度。同时，删除时的操作其实也跟之前很相似，这里是将元组对于的槽数组元素的可用标志位给置否(类似于语言中内存分配器的实现)。其实这种结构下的内存分配，与各个语言中的内存分配器很相似，所以其实没有什么新奇的地方。</p>
-<p>​	与内存分配器相同的是，在这种架构下的页结构对于碎片化的空闲空间在一定的时机中也可能触发合并操作，比如可能挪动部分的元组位置来进行合并碎片小块来提供一个大块的操作。总总这些，其实跟内存分配器的思路很相似，这里不再进行赘诉。</p>
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h4><p>槽页面架构通过引入槽数组，成功地将元组的管理与数据的实际存储位置分离，使得插入、删除操作更加高效，并且具备了更强的可变长度支持。同时，槽数组的设计与内存分配器非常相似，通过标记、合并等方式有效管理内存碎片化问题，提升了存储空间的利用率和系统的整体性能。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -380,10 +309,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2025-02-26 16:51:15 / Modified: 18:02:57" itemprop="dateCreated datePublished" datetime="2025-02-26T16:51:15+08:00">2025-02-26</time>
+              <time title="Created: 2025-02-26 16:51:15" itemprop="dateCreated datePublished" datetime="2025-02-26T16:51:15+08:00">2025-02-26</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-02-28 15:08:35" itemprop="dateModified" datetime="2025-02-28T15:08:35+08:00">2025-02-28</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -578,7 +513,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-26 17:25:16" itemprop="dateModified" datetime="2025-02-26T17:25:16+08:00">2025-02-26</time>
+                <time title="Modified: 2025-02-28 15:08:27" itemprop="dateModified" datetime="2025-02-28T15:08:27+08:00">2025-02-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -596,7 +531,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>267</span>
+              <span>260</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
@@ -616,110 +551,12 @@
 
       
           <h1 id="窗口函数"><a href="#窗口函数" class="headerlink" title="窗口函数"></a>窗口函数</h1><p>​	接下来看一些DBMS中存在的一些窗口函数。</p>
-<p>![image-20250225092345760](.&#x2F;1.3-Modern SQL(function).assets&#x2F;image-20250225092345760.png)</p>
+<p>![image-20250225092345760](.&#x2F;1.3-Modern SQL(function)&#x2F;image-20250225092345760.png)</p>
 <p>​	上面那句话其实就是说一个窗口函数是对于输出序列中的一个特定窗口范围内的数据进行操作的函数。这个函数于聚合函数相似，都是对于一系列的元组执行操作的函数，但是这个函数于聚合函数最大的不同就是窗口函数并不会对输出结果进行合并，而是每个输入元组都能获得一个窗口函数的一个输出属性。</p>
 <p>​	没意思，润</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2025/02/25/%E6%95%B0%E6%8D%AE%E5%BA%93/1.3-Modern%20SQL(function)/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/" class="post-title-link" itemprop="url">Modern SQL-STRING</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-02-23 21:51:15" itemprop="dateCreated datePublished" datetime="2025-02-23T21:51:15+08:00">2025-02-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-26 17:25:24" itemprop="dateModified" datetime="2025-02-26T17:25:24+08:00">2025-02-26</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>2.6k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>2 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h1><p>​	在SQL中，自然也存在字符串这种元素。一般来说，SQL使用单引号**’ ‘**来标识这是一个字符串，同时在SQL标准中，数据库对于字符串大小写应该是一个敏感的状态。但是，很多数据库系统中，包括但不限于MySQL和SQL Server中，对于这些个标准都是存在一些选择的。例如在MySQL中，其对于字符串的大小写就是不敏感的，当然，你可以在MySQL中去使用对于的标准设置语句去进行调整。不过种种这些，都是一些小玩意，在使用具体的数据库时去进行适当的调整即可，没必要去进行一个个的深入了解。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -777,7 +614,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-26 17:25:20" itemprop="dateModified" datetime="2025-02-26T17:25:20+08:00">2025-02-26</time>
+                <time title="Modified: 2025-02-28 15:08:21" itemprop="dateModified" datetime="2025-02-28T15:08:21+08:00">2025-02-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -819,6 +656,104 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.2-modernSQL(nested)/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/" class="post-title-link" itemprop="url">Modern SQL-STRING</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-02-23 21:51:15" itemprop="dateCreated datePublished" datetime="2025-02-23T21:51:15+08:00">2025-02-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-02-28 15:07:37" itemprop="dateModified" datetime="2025-02-28T15:07:37+08:00">2025-02-28</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>2.6k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>2 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h1><p>​	在SQL中，自然也存在字符串这种元素。一般来说，SQL使用单引号**’ ‘**来标识这是一个字符串，同时在SQL标准中，数据库对于字符串大小写应该是一个敏感的状态。但是，很多数据库系统中，包括但不限于MySQL和SQL Server中，对于这些个标准都是存在一些选择的。例如在MySQL中，其对于字符串的大小写就是不敏感的，当然，你可以在MySQL中去使用对于的标准设置语句去进行调整。不过种种这些，都是一些小玩意，在使用具体的数据库时去进行适当的调整即可，没必要去进行一个个的深入了解。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -974,7 +909,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-26 17:25:33" itemprop="dateModified" datetime="2025-02-26T17:25:33+08:00">2025-02-26</time>
+                <time title="Modified: 2025-02-28 15:06:05" itemprop="dateModified" datetime="2025-02-28T15:06:05+08:00">2025-02-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1072,7 +1007,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-24 09:46:30" itemprop="dateModified" datetime="2025-02-24T09:46:30+08:00">2025-02-24</time>
+                <time title="Modified: 2025-02-28 15:10:24" itemprop="dateModified" datetime="2025-02-28T15:10:24+08:00">2025-02-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1112,86 +1047,14 @@
           <h1 id="模版"><a href="#模版" class="headerlink" title="模版"></a>模版</h1><p>​	模版是C++中一个相对重要的特性了，直接来吧</p>
 <h2 id="类模版"><a href="#类模版" class="headerlink" title="类模版"></a>类模版</h2><p>​	由于这种东西还是得上手去敲，所以我们在这里对很多内容将会进行简化。</p>
 <p>​	模版这种东西最直观的作用就是进行方法与所使用的数据类型之间的解耦，使得在设计方法时能够更加专注于特定功能的方法的构建而不必要去关注所使用的数据类型。</p>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>​	一个模版的声明，无论是类模版，还是函数模版，都是基本一致的。通过template关键字来进行</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;		||		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br></pre></td></tr></table></figure>
-
-<p>​	这样就完成了一个模版的创建，但仅仅声明一个模版是没有意义的，我们需要去使用这个模版。</p>
-<p>​	总的来说，通过关键字<strong>template</strong>和尖括号的组合，我们能够创建出一个模版，这个模版中，可以去使用class关键字或者typename关键字，俩者等效，主要是习惯上的差别。接着，在class&#x2F;typename之后会跟上一个变量名，这一个就是我们模版的一个符号，我们在接下来的作用域中使用模版的直观体现，就是使用这里的符号。</p>
-<blockquote>
-<p>在使用前，我们需要了解一些简单的模板所具有的性质</p>
-</blockquote>
-<h4 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h4><p>​	一个模版的作用域是有限的，简单的说，其只会在距离其最近的一个作用域中生效，并且在离开改作用域时，其他作用域中不可见。特别需要注意的是，在部分的模版使用中，可以看到系列的嵌套模版，这些的作用域可以用局部自动变量来进行类比，这里就不进行赘诉了。</p>
-<h2 id="代码举例"><a href="#代码举例" class="headerlink" title="代码举例"></a>代码举例</h2><p>​	接下来通过一个简单的demo来了解一下简单的类模版</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">stack</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="keyword">enum</span> &#123;MAX=<span class="number">10</span>&#125;;</span><br><span class="line">    T data[MAX];</span><br><span class="line">    <span class="type">int</span> top;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">stack</span>()&#123;top=<span class="number">0</span>;&#125;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">isempty</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">isfull</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">push</span><span class="params">(<span class="type">const</span> T&amp; item)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">pop</span><span class="params">(T&amp; item)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="type">bool</span> stack&lt;T&gt;::<span class="built_in">isempty</span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> top==<span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="type">bool</span> stack&lt;T&gt;::<span class="built_in">isfull</span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> top==MAX;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="type">bool</span> stack&lt;T&gt;::<span class="built_in">push</span>(<span class="type">const</span> T&amp; item)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span>(!<span class="built_in">isfull</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        data[top++]=item;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="type">bool</span> stack&lt;T&gt;::<span class="built_in">pop</span>(T&amp; item)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">isempty</span>())<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    item=data[--top];</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>​	从上面可以了解到几点，一个template是一个独立的模版的声明。在这个关键字声明的模版之后紧邻的一个作用域中，该模版一直可见，直到出去了该作用域，该模版失效。</p>
-<p>​	除此之外，我们还需要看到一点的是，模版类的一些特殊性质。</p>
-<hr>
-<h3 id="模版类"><a href="#模版类" class="headerlink" title="模版类"></a>模版类</h3><h4 id="实例时机"><a href="#实例时机" class="headerlink" title="实例时机"></a>实例时机</h4><p>​	对于一个使用模版的类来说，这个类其实并不是一个严格意义上实例的类，换句话说，这个类其实是不存在的，因为我们现在并没有一个实际的类声明可以供给我们去进行类的实例化。这是模版的设计上导致的。毕竟模版的性质就导致了程序能够根据不同的数据类型来进行对于的数据类型的类进行创建。</p>
-<p>​	正如那句经典的话:不要为不需要的特性去浪费时间，这里其实也利用了一种类似于懒加载的机制。程序并不会在一开始就进行所有的类型的模版类的实例创建。具体的等下再继续阐述。</p>
-<p>​	总的来说，现在需要知道的就是一个模版类在编写阶段其实是一种虚的阶段，在编译器层面不会存在任何模版类这种东西，毕竟带入实际的数据类型一个模版类才有存在的价值。</p>
-<h4 id="模版类方法"><a href="#模版类方法" class="headerlink" title="模版类方法"></a>模版类方法</h4><p>​	可以观察到，在我们进行类方法的补充时，如果我们的定义是在类内进行的，其实跟普通的没什么区别。但是当我们需要再类外去进行类内方法的定义时，这里有几个需要注意的点。</p>
-<p>​	首先，我们知道我们如果想要在类外去进行类方法的定义，那么我们需要再对于的方法前去加上类解析符(<strong>类名::</strong>)。在模版类中也是如此，但是前面说过了，一个模版类stack其本身不是一个完整的类，并不存在一个实际上的类声明表示这个类。模版类的正确解析符则是在类名之后加上我们的模版参数，通过这样，之后的各种方法，才能够被绑定到创建的各种模版类实例中去。就比如**stack&lt; int &gt;**就代表着一种使用int数据类型进行填充的stack类，这样的类在编译器层面才会生成对于的类定义，也就才有意义。</p>
-<p>​	那我们这里再来观察下模版在类内的使用，前面我们已经知道创建的模版会以对于的声明的typename&#x2F;class后面的符号名来进行使用。在类内的体现就是**T data[MAX];**可以看到的是，一个模版的使用，其实就是跟一个基本数据类型的使用别无二致，我们只需要记住这个模版在未来会被替换为具体的数据类型来进行类的声明即可。</p>
-<blockquote>
-<p>​	除了这种模版的基础使用之外，还有俩种比较常用的模版使用。</p>
-</blockquote>
-<h4 id="多功能"><a href="#多功能" class="headerlink" title="多功能"></a>多功能</h4><h5 id="多参数模版"><a href="#多参数模版" class="headerlink" title="多参数模版"></a>多参数模版</h5><p>​	一个template能够承载多个参数，这个其实没有什么好说的，就是一个使用的扩展。例如</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T1</span>,<span class="keyword">class</span> <span class="title class_">T2</span>&gt;;</span><br></pre></td></tr></table></figure>
-
-<p>​	这样的模版声明就是一个多参数模版的构建，通过这样的声明，我们能在接下来的作用域中，去使用这俩个模版参数。这来个模版参数的使用与一个模版参数的使用并没有什么显著的区别。</p>
-<h5 id="递归使用模版"><a href="#递归使用模版" class="headerlink" title="递归使用模版"></a>递归使用模版</h5><p>​	其实上面那个代码实例就是一个递归使用模版的例子。我们需要知道的是string其实是一个模版实例化后再进行一个名称转换后的产物，就是一个basic_string&lt;char*&gt;模版。</p>
-<p>​	要了解这种递归的使用会产生什么效果，我们需要去观察到这里模版类生成的最后的具体的类声明到底是一个什么样的，理解了这个，我们接下来的很多关于类的使用都能减轻负担。</p>
-<h2 id="模版具体化"><a href="#模版具体化" class="headerlink" title="模版具体化"></a>模版具体化</h2><p>​	前面已经提到过了，一个模版类不是一个真正的类，只有在一个模版类被指定特定的模版参数时，它才可能进行对应的模版类的构建，具体的表现就是使用对于的类型参数去替换对于的模版类中的模版参数，只有在进行了替换之后，这个生成的类才是一个真正意义上的类。这个阶段通常是由编译器在编译阶段自动执行的。</p>
-<blockquote>
-<p>​	模版的具体化存在着多种情况，一种种来进行分析。</p>
-</blockquote>
-<h3 id="隐式实例化"><a href="#隐式实例化" class="headerlink" title="隐式实例化"></a>隐式实例化</h3><p>​	这是我们最常见的一种形式，也是我们前面所说的，通过编译器自动判断我们传递给模版类的类型参数来进行对于的类定义的生成的方式。例如</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ArrayTP&lt;<span class="type">int</span>,<span class="number">100</span>&gt; stuff;</span><br></pre></td></tr></table></figure>
-
-<p>​	需要注意的是，编译器在生成对于的类的时候，采取一种类似于懒加载的机制，只有在需要一个真正的被创建出来的类实例的时候，才会进行特定的类定义的生成。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ArrayTP&lt;<span class="type">double</span>, <span class="number">30</span>&gt;* pt;		<span class="comment">//只是一个指针，不会导致对象的创建</span></span><br><span class="line">pt=<span class="keyword">new</span> ArrayTP&lt;<span class="type">double</span>, <span class="number">30</span>&gt;;		<span class="comment">//使用了new，需要调用构造函数去创建，因此会生辰对于的类定义</span></span><br></pre></td></tr></table></figure>
-
-
-
-<blockquote>
-<p>额外需要注意的是，对于模版类来说，不只是其的类定义是一种懒加载的机制，其的方法也可以看做是一种懒加载的机制，只有在使用到对于的类方法时，才会进行对于的类方法的实例化构建。</p>
-</blockquote>
-<h3 id="显式实例化"><a href="#显式实例化" class="headerlink" title="显式实例化"></a>显式实例化</h3><p>​	对应于隐式实例化的还有一种显式实例化。顾名思义，就是显式的指出编译器需要去进行这种模版类的构建，这种方法的使用也很简单，就是在给模版类提供类型参数时前面加上一个<strong>template</strong>关键字。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> <span class="keyword">class</span> <span class="title class_">ArrayTP</span>&lt;<span class="type">double</span>,<span class="number">100</span>&gt;;</span><br></pre></td></tr></table></figure>
-
-<p>​	通过加上这个关键字，在编译器识别到这行语句时，会直接进行对应的类定义的构建。</p>
-<hr>
-<p>​	</p>
-<blockquote>
-<p>这里我们在对实例化的时机进行一下剖析，熟悉的从一个简单的东西突然发散然后给我感到想这想那，虽然浪费了一些时间，不过对于一些东西的理解也加深了，寒假末期也得逐渐找回状态了。</p>
-</blockquote>
-<h3 id="实例化时机"><a href="#实例化时机" class="headerlink" title="实例化时机"></a>实例化时机</h3><p>​	无论是显式还是隐式的实例化，它的实例化都是在编译阶段进行的，也就是说，即使是你在运行阶段完全没有涉及到部分模版类的使用，这些个模版类还是会在编译阶段被实例化。那么，隐式实例化相对于显式实例化的意义到底在哪呢？</p>
-<p>​	这里我们就需要对于隐式实例化的实例时机来分析了，就现在我所了解到的，隐式实例化是在编译器识别到代码进行了特定的模版类的使用时进行的实例化。简单来说，编译器会进行一个全部文件代码的阅读，在这其中，我们可以简单的省略所有的判断条件，只要出现了特定的模版类使用(包括但不限于一个模版类对象的创建，类方法的使用)，那么这对应的类定义以及类方法定义都会被实例化。</p>
-<p>​	知道了上面这点后，我们对于隐式实例化与显式实例化之间的区别应该有所了解了。一个隐式实例化相对于显式实例化能够更加节省编译器的资源，能够减少对于的类原型以及方法构建所需要的时间以及空间。那么，显式构建的优势在哪呢？</p>
-<p>​	其实一直到现在，由于我还没有对于模版进行比较深入的使用与了解，对于提到的显式实例化的优势，我也是有点怀疑的，不过假设我已经知道了这一块的。或者说，假定这个隐式实例化会导致一定的多余定义。那么显式实例化能够起到的作用其实很明显，就是通知编译器去生成一个对于的完整的类，包括类声明以及对于的方法定义。在这种情况下只要使用到这个被显式实例化的模版类，编译器不会再尝试去生成一个相同的类，这样能避免一些编译层面可能存在的问题。</p>
-<p>​	我们简单的使用链接性来进行隐式实例化与显式实例化之间存在的区别，</p>
-<p>​	简单来说，隐式实例化生成的符号(类以及对应的方法)等都只是一个局部链接性。当我们想要在多个文件这种去使用这个模版类去进行相同的类型实例化时，将会导致每个文件都产生对应的相同符号并编入到符号表中，在最后的符号表中，会存在符号重复的情况。虽然说编译器一般会对这些重复的符号进行合并。但是，这种生成是一种花销，这种合并也是一种花销。为了减少这种花销，提高性能，因此，出现了显式实例化这种功能。</p>
-<p>​	而显式实例化产生的类是一个全局链接性的，无论是在那个文件中，只要引用了对应的使用了显式实例的文件，那么这个显示实例产生的类就是全局可见的，再进行使用时，编译器不会再去进行对应的声明。这样就避免了一个相同的模版类被多次实例化。</p>
-<blockquote>
-<p>好了，上面耗费的时间有点多了，我们进入下一个具体化</p>
-</blockquote>
-<h3 id="模版具体化-1"><a href="#模版具体化-1" class="headerlink" title="模版具体化"></a>模版具体化</h3><p>​	很多时候，一个通用的模版其实是不够的，这些模版可能需要存在一些特例，在这些特例中，可能存在着一些与通用模版所不一致的行为，这时就需要使用显式具体化来实现了。通过显式具体化，我们能够定制一系列的在特定模版参数下的模版类。</p>
-<p>​	模版具体化，或者说，模版特化允许开发者为特定类型或特定条件提供定制化的实现，从而在保持代码泛化的同时，针对特定情况进行优化或调整。模板特化主要分为两种形式：<strong>全特化</strong>（Full Specialization）和<strong>偏特化</strong>（Partial Specialization）。</p>
-<h4 id="1-全特化（Full-Specialization）"><a href="#1-全特化（Full-Specialization）" class="headerlink" title="1. 全特化（Full Specialization）"></a>1. 全特化（Full Specialization）</h4><p>全特化是指为模板的所有参数提供具体的类型或值，从而完全指定模板的行为。</p>
-<p><strong>示例：</strong></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">cpp复制编辑<span class="comment">// 通用模板</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTemplate</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 通用实现</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// int 类型的全特化</span></span><br><span class="line"><span class="keyword">template</span> &lt;&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTemplate</span>&lt;<span class="type">int</span>&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 针对 int 类型的特化实现</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>在上述示例中，<code>MyTemplate&lt;int&gt;</code> 是 <code>MyTemplate</code> 的全特化版本，专门为 <code>int</code> 类型提供了特定的实现。</p>
-<h4 id="2-偏特化（Partial-Specialization）"><a href="#2-偏特化（Partial-Specialization）" class="headerlink" title="2. 偏特化（Partial Specialization）"></a>2. 偏特化（Partial Specialization）</h4><p>偏特化是指只为模板的部分参数提供具体的类型或值，保留其他参数为泛型。</p>
-<p><strong>示例：</strong></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> U&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTemplate</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 通用实现</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第一个类型为 int 的偏特化</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> U&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTemplate</span>&lt;<span class="type">int</span>, U&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 第一个类型为 int 的特化实现</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第二个类型为 int 的偏特化</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyTemplate</span>&lt;T, <span class="type">int</span>&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 第二个类型为 int 的特化实现</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>在上述示例中，<code>MyTemplate&lt;int, U&gt;</code> 和 <code>MyTemplate&lt;T, int&gt;</code> 分别是 <code>MyTemplate</code> 的偏特化版本，针对第一个或第二个类型为 <code>int</code> 的情况提供了特定的实现。</p>
-<blockquote>
-<p>关于模版的特性还有很多，但是由于我的动力已经在这里消失了，所以我将不会继续这一块，之后哪里遇到了感兴趣的模版的东西再回来更新吧。</p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/02/16/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E6%A8%A1%E7%89%88/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1244,7 +1107,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-25 14:18:58" itemprop="dateModified" datetime="2025-02-25T14:18:58+08:00">2025-02-25</time>
+                <time title="Modified: 2025-02-28 15:10:38" itemprop="dateModified" datetime="2025-02-28T15:10:38+08:00">2025-02-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1283,45 +1146,14 @@
       
           <p>该篇是在对于std标准库的迭代器初步接触时所写，只是一些基本的常识以及对于部分类知识的回顾</p>
 <h1 id="迭代器"><a href="#迭代器" class="headerlink" title="迭代器"></a>迭代器</h1><h2 id="初步了解"><a href="#初步了解" class="headerlink" title="初步了解"></a>初步了解</h2><p>​	迭代器本身其实并没有什么特殊的，我们需要先从它存在的意义开始了解，对于一个迭代器，其的存在意义就是为一系列的容器提供一个通用的接口。通过这个接口，我们能够实现一系列的操作。</p>
-<h3 id="基础作用"><a href="#基础作用" class="headerlink" title="基础作用"></a>基础作用</h3><p>​	既然是迭代器，那我我们势必要了解这个<strong>迭代</strong>到底是针对谁的迭代。在std库中，这个迭代就是针对于数据元素的迭代。简单来说，一个迭代器的基本作用就是实现对于一些数据的访问，至于这些数据到底是什么，相对来说迭代器本身不是多么的关注。也就是说，迭代器其实可以看做是一个相对独立的数据访问机制。其于数据组织结构之间是一种弱耦合的状态的。</p>
-<p>​	通过使用迭代器，我们应该能够实现对于一定数据的访问操作。</p>
-<h3 id="出现契机"><a href="#出现契机" class="headerlink" title="出现契机"></a>出现契机</h3><p>​	对于迭代器的出现原因进行一定的了解可以更加方便我们熟悉这个东西。</p>
-<p>​	个人感觉迭代器的出现与设计模式的出现契机有点相似。都是为了对于一系列经验的总结后自然而然出现的东西。由前文知道，我们创建一个迭代器的目的就是为了去进行一个数据的查询，修改等操作，可以预料到这些操作都是相当常见的，如果我们使用常规的设计，我们需要在一个类中去定制特定的数据处理操作。这样其实就是把底层数据组织模块与操作模块进行了一次的强耦合绑定，这种绑定可以预料到时非常难看的。而且复用性很差。</p>
-<p>​	自然而然，我们就需要一种工具来独立进行这种数据操作，通过将数据组织模块和数据处理模块之间的解耦，提高代码复用性的同时减少了在设计时的复杂度，其实也可以看做是一种结构性设计模式。</p>
-<blockquote>
-<p>​	至此，我们知道了对于迭代器到底应该以怎么样的。同时，我们应该能够理解一些迭代器所应该具有的一些性质。</p>
-</blockquote>
-<h2 id="迭代器实现"><a href="#迭代器实现" class="headerlink" title="迭代器实现"></a>迭代器实现</h2><p>​	到现在，我们还不知道一个迭代器到底是什么。我们直接进入正题。</p>
-<h3 id="裸指针"><a href="#裸指针" class="headerlink" title="裸指针"></a>裸指针</h3><p>​	由前面知道，迭代器的基础功能是完成数据的查询，修改等操作。那么根据这些属性，我们最先能够想到的基本数据类型是什么，其实就是裸指针。回想一下，通过对指针进行解引用以及各种运算符的操作，我们是不是能够操作这个指针指向的内存中存在的数据，而且通过对指针本身进行一些操作符的运算，我们能够实现通过一个指针访问到一块数据。</p>
-<p>​	这些个性质其实都是一个迭代器所应该具有的性质，接下来，我们需要进行的就是对于这个裸指针进行2扩展。毕竟，你知道的，裸指针这东西往往是无法满足我们自己的需求的。</p>
-<h3 id="类"><a href="#类" class="headerlink" title="类"></a>类</h3><p>​	相对来说，使用一个类作为迭代器来在实际应用中更加常见，先来看一个demo</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyVector</span>&#123;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        T* data;</span><br><span class="line">        <span class="type">size_t</span> size;        <span class="comment">//容器当前的大小</span></span><br><span class="line">        <span class="type">size_t</span> capacity;    <span class="comment">//容器的最大容量</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="built_in">MyVector</span>():<span class="built_in">size</span>(<span class="number">0</span>),<span class="built_in">capacity</span>(<span class="number">10</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            data=<span class="keyword">new</span> <span class="type">size_t</span>[capacity];;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">MyVector</span>(<span class="type">size_t</span> s):<span class="built_in">size</span>(<span class="number">0</span>),<span class="built_in">capacity</span>(s)</span><br><span class="line">        &#123;</span><br><span class="line">            data=<span class="keyword">new</span> <span class="type">size_t</span>[capacity];;</span><br><span class="line">        &#125;</span><br><span class="line">        ~<span class="built_in">MyVector</span>()</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">delete</span>[] data;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="function"><span class="type">void</span> <span class="title">push_back</span><span class="params">(<span class="type">const</span> T&amp; value)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (size &gt;= capacity) &#123;</span><br><span class="line">                capacity *= <span class="number">2</span>;</span><br><span class="line">                T* new_data = <span class="keyword">new</span> T[capacity];</span><br><span class="line">                <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; size; ++i) &#123;</span><br><span class="line">                    new_data[i] = data[i];</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">delete</span>[] data;</span><br><span class="line">                data = new_data;</span><br><span class="line">            &#125;</span><br><span class="line">            data[size++] = value;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        <span class="function"><span class="type">size_t</span> <span class="title">get_size</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> size;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        <span class="comment">// 迭代器内部实现</span></span><br><span class="line">        <span class="keyword">class</span> <span class="title class_">Iterator</span> &#123;</span><br><span class="line">        <span class="keyword">private</span>:</span><br><span class="line">            T* ptr;</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">public</span>:</span><br><span class="line">            <span class="built_in">Iterator</span>(T* ptr) : <span class="built_in">ptr</span>(ptr) &#123;&#125;</span><br><span class="line">    </span><br><span class="line">            <span class="comment">// 解引用操作符，返回迭代器指向的元素</span></span><br><span class="line">            T&amp; <span class="keyword">operator</span>*() &#123;</span><br><span class="line">                <span class="keyword">return</span> *ptr;</span><br><span class="line">            &#125;</span><br><span class="line">    </span><br><span class="line">            <span class="comment">// 前进操作符，返回迭代器指向的下一个元素</span></span><br><span class="line">            Iterator&amp; <span class="keyword">operator</span>++() &#123;</span><br><span class="line">                ++ptr;</span><br><span class="line">                <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">            &#125;</span><br><span class="line">    </span><br><span class="line">            <span class="comment">// 比较操作符，用于判断迭代器是否相等</span></span><br><span class="line">            <span class="type">bool</span> <span class="keyword">operator</span>!=(<span class="type">const</span> Iterator&amp; other) <span class="type">const</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> ptr != other.ptr;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    </span><br><span class="line">        <span class="comment">// 返回一个指向容器第一个元素的迭代器</span></span><br><span class="line">        <span class="function">Iterator <span class="title">begin</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Iterator</span>(data);</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        <span class="comment">// 返回一个指向容器末尾之后位置的迭代器</span></span><br><span class="line">        <span class="function">Iterator <span class="title">end</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Iterator</span>(data + size);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>​	从此间可以看到，一个迭代器其实并不神秘，就是一个类中类，在这个类中类中，又有着对应的类型指针。这个类型指针又有着一系列的方法。在一些书中，可以看到很多的迭代器类型，这些本质上其实就是一些基于类提供的不同方法所进行的分类。再简单点，就是通过重载方法的不同实现以及所带来的不同功能所进行的分类。</p>
-<p>​	在此时先不用去了解各个类型的迭代器的具体，先来简单过一遍概念即可。</p>
-<h2 id="迭代器类型"><a href="#迭代器类型" class="headerlink" title="迭代器类型"></a>迭代器类型</h2><ol>
-<li><strong>输入迭代器</strong></li>
-</ol>
-<p>​	输入是相对于程序来说的。不难推的，一个输入迭代器必须能够使得程序能够读取由这个输入迭代器管理着的数据。</p>
-<p>​	这个体现在迭代器类中的设计中则是解引用符(*)的重载，通过对于这个迭代器进行解引用，程序能够实现对应数据的读取，这也是该迭代器被加上<strong>输入</strong>这一前缀的原因。</p>
-<p>​	同时，为了单一职责原则以及对于数据的保护，输入迭代器不应该有对于数据的修改权限，这个则是通过不实现对应的修改数据方法实现的。</p>
-<ol start="2">
-<li><strong>输出迭代器</strong></li>
-</ol>
-<p>​	有了上面那个的初了解，我们应该也粗略知道了这个输出所应该的含义。通过这个输出迭代器，我们能够使用容器中的数据作为输出提供给其他需要的地方。跟输入迭代器一样，这里也应该对于迭代器处理数据的权限做一些限制。</p>
-<p>​	对应的是，输出迭代器应该具有数据的修改权限而不具备数据的读取权限，这个的实现也很简单，略。</p>
-<ol start="3">
-<li><strong>正向迭代器</strong></li>
-</ol>
-<p>​	该迭代器与前面俩个迭代器一致，都使用++重载来进行容器的遍历，需要注意的是，这个迭代器类型应该能够是的先前的迭代器能够被保存，同时，这个迭代器还存在着一些对于数据的访问控制。但是这个正向迭代器不像之前的俩个迭代器有统一的规定。你可以根据自己的需求去进行修改。</p>
-<ol start="4">
-<li><strong>双向迭代器</strong></li>
-</ol>
-<p>​	这个就不进行赘诉了，跟正向迭代器都是大同小异的。主要就是相对于来说需要额外添加一个反向的重载运算符。没什么意思就不进行深入了。</p>
-<p>​    5. <strong>随机访问迭代器</strong></p>
-<p>​	这个迭代器具有双向迭代器的所有性质，除此之外，还支持能够进行随机访问。实际上就是对于[]的重载，毕竟指针的[]使用就是我们常用的一种随机访问，通过这种统一能够具有更好的扩展性。</p>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>​	简单来看，上面5种迭代器其实形成了一种比较直观的层次结构。以输入和输出迭代器为基础。在上面包裹了一层正向迭代器，在正向迭代器的基础上进行扩展产生了双向迭代器。最后再对双向迭代器进行包装实现了随机访问迭代器。这种架构下的每一层的实现难度逐渐递增，同时功能也逐渐强大，带来的代价也成正比增加。因此，我们可以根据自己的需求去选择自己需要的迭代器种类去平衡性能与损耗之间的关系。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/02/15/C++%E5%AD%A6%E4%B9%A0/%E8%BF%AD%E4%BB%A3%E5%99%A8/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
