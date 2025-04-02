@@ -23,20 +23,24 @@
     var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="Paging​	此篇是在我在OSTEP中看到内存虚拟化分页这一章时所遇到的。需要注意的是，此篇写时我还有点感冒后遗症，脑袋不大清晰，有些地方逻辑会存在混乱，谅解吧。">
+  <meta name="description" content="数据库环境构建​	对于一个普通的java项目，想要实现对于数据库操作的支持，及连接数据库以及对于数据库的增删查改等。需要一下几个操作(可能存在的操作) ​">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Paging">
-<meta property="og:url" content="https://tcww0.github.io/2025/03/12/OS/paging/index.html">
+<meta property="og:title" content="DB环境构建">
+<meta property="og:url" content="https://tcww0.github.io/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Paging​	此篇是在我在OSTEP中看到内存虚拟化分页这一章时所遇到的。需要注意的是，此篇写时我还有点感冒后遗症，脑袋不大清晰，有些地方逻辑会存在混乱，谅解吧。">
+<meta property="og:description" content="数据库环境构建​	对于一个普通的java项目，想要实现对于数据库操作的支持，及连接数据库以及对于数据库的增删查改等。需要一下几个操作(可能存在的操作) ​">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2025-03-12T08:51:15.000Z">
-<meta property="article:modified_time" content="2025-03-12T14:32:44.492Z">
+<meta property="og:image" content="https://tcww0.github.io/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/image-20250313110757287.png">
+<meta property="og:image" content="https://tcww0.github.io/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/image-20250313111416507.png">
+<meta property="og:image" content="https://tcww0.github.io/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/image-20250313111921507.png">
+<meta property="article:published_time" content="2025-02-15T09:51:15.000Z">
+<meta property="article:modified_time" content="2025-03-13T03:20:34.652Z">
 <meta property="article:author" content="TCWW">
-<meta property="article:tag" content="OS">
+<meta property="article:tag" content="JAVA">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/image-20250313110757287.png">
 
-<link rel="canonical" href="https://tcww0.github.io/2025/03/12/OS/paging/">
+<link rel="canonical" href="https://tcww0.github.io/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/">
 
 
 <script id="page-configurations">
@@ -49,7 +53,7 @@
   };
 </script>
 
-  <title>Paging | Hexo</title>
+  <title>DB环境构建 | Hexo</title>
   
 
 
@@ -192,7 +196,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/03/12/OS/paging/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -207,7 +211,7 @@
     
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Paging
+          DB环境构建
         </h1>
 
         <div class="post-meta">
@@ -216,17 +220,23 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2025-03-12 16:51:15 / Modified: 22:32:44" itemprop="dateCreated datePublished" datetime="2025-03-12T16:51:15+08:00">2025-03-12</time>
+              <time title="Created: 2025-02-15 17:51:15" itemprop="dateCreated datePublished" datetime="2025-02-15T17:51:15+08:00">2025-02-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-03-13 11:20:34" itemprop="dateModified" datetime="2025-03-13T11:20:34+08:00">2025-03-13</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
+                  <a href="/category/JAVA/" itemprop="url" rel="index"><span itemprop="name">JAVA</span></a>
                 </span>
             </span>
 
@@ -243,14 +253,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>2.6k</span>
+              <span>1.2k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>2 mins.</span>
+              <span>1 mins.</span>
             </span>
 
         </div>
@@ -262,84 +272,33 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="Paging"><a href="#Paging" class="headerlink" title="Paging"></a>Paging</h1><p>​	此篇是在我在OSTEP中看到内存虚拟化分页这一章时所遇到的。需要注意的是，此篇写时我还有点感冒后遗症，脑袋不大清晰，有些地方逻辑会存在混乱，谅解吧。</p>
-<span id="more"></span>
+        <h1 id="数据库环境构建"><a href="#数据库环境构建" class="headerlink" title="数据库环境构建"></a>数据库环境构建</h1><p>​	对于一个普通的java项目，想要实现对于数据库操作的支持，及连接数据库以及对于数据库的增删查改等。需要一下几个操作(可能存在的操作)</p>
+<p>​	<span id="more"></span></p>
+<ol>
+<li><strong>安装数据库jdk依赖</strong></li>
+</ol>
+<p>​	以mysql为例，一个项目需要先安装对应的环境依赖包，该包一般需要额外安装，以下是一个可能的下载网址 <a target="_blank" rel="noopener" href="https://dev.mysql.com/downloads/connector/j/">依赖下载</a>。</p>
+<p><img src="/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/image-20250313110757287.png" alt="image-20250313110757287"></p>
+<p>​	需要先选择自己当前的OS环境，个人电脑开发的话选择Platform Independent即可。再在接下来的列表中选择一个合适的包下载即可。</p>
+<p>​	下载完后是一个压缩包，下载完寻找一个合适的位置解压缩即可。</p>
+<ol start="2">
+<li><strong>导入java项目</strong></li>
+</ol>
+<p>​	右键目标项目-&gt;打开模块设置(F4)-&gt;模块(model)-&gt;依赖(dependent)-&gt;”+”-&gt;导入解压后的文件夹-&gt;点击选择</p>
+<p>​	此时应该存在一个新的包而且其就是我们下载的压缩包解压后的文件。</p>
+<p><img src="/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/image-20250313111416507.png" alt="image-20250313111416507"></p>
+<ol start="3">
+<li><p><strong>测试demo</strong></p>
+<p>有了上诉步骤后，一个java项目的数据库环境已经搭建完毕。接下来来看一个简单的demo。</p>
+<p>需要注意的是，我默认你这里的电脑环境中已经存在着一个或多个数据库而且你的数据库服务已经被启动了。如果没有，可以单独去看电脑环境中对于数据库环境的搭建。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.sql.Connection;</span><br><span class="line"><span class="keyword">import</span> java.sql.DriverManager;</span><br><span class="line"><span class="keyword">import</span> java.sql.ResultSet;</span><br><span class="line"><span class="keyword">import</span> java.sql.Statement;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">testDemo</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">// 数据库连接信息（需替换为你自己的配置）</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">url</span> <span class="operator">=</span> <span class="string">&quot;jdbc:mysql://localhost:3306/******&quot;</span>;		<span class="comment">//改为自己选定的数据库</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">user</span> <span class="operator">=</span> <span class="string">&quot;*****&quot;</span>;				<span class="comment">//改为自己的数据库账号</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">password</span> <span class="operator">=</span> <span class="string">&quot;********&quot;</span>;		<span class="comment">//改为自己的数据库密码</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (</span><br><span class="line">                <span class="comment">// 1. 建立连接</span></span><br><span class="line">                <span class="type">Connection</span> <span class="variable">connection</span> <span class="operator">=</span> DriverManager.getConnection(url, user, password);</span><br><span class="line">                <span class="comment">// 2. 创建 Statement 对象</span></span><br><span class="line">                <span class="type">Statement</span> <span class="variable">statement</span> <span class="operator">=</span> connection.createStatement();</span><br><span class="line">        ) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;数据库连接成功！&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            System.err.println(<span class="string">&quot;数据库连接失败！错误信息:&quot;</span>);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<blockquote>
-<p>​	在看到这篇时，我立刻就回想到了CSAPP中的关于虚拟内存这一块的内容，对比俩本教材，可以明显看到俩种不同的风格，OSTEP是一种很温和的态度来引导你来进行学习，而CSAPP在这时已经进入中间阶段了，一些概念开始成堆的出现了，这个会在一定程度上不利于对于这部分的理解。</p>
-</blockquote>
-<p>​	</p>
-<h2 id="分页机制与内存管理"><a href="#分页机制与内存管理" class="headerlink" title="分页机制与内存管理"></a>分页机制与内存管理</h2><p>在操作系统的内存管理中，相较于使用分段（Segmentation）作为基本单位，分页（Paging）具有显著的优势。尽管分段可以提供更高的内存管理粒度，但其可变大小的特性导致较高的管理开销。例如，动态分配和回收不同大小的段会引入外部碎片问题，并增加管理的复杂度。因此，分页作为一种固定大小的管理方式，更适合作为内存管理的基本单位。</p>
-<h3 id="分页的基本概念"><a href="#分页的基本概念" class="headerlink" title="分页的基本概念"></a>分页的基本概念</h3><p>在内存虚拟化过程中，我们希望将内存抽象为一系列可供管理的结构。除了可变大小的段之外，另一种方式是使用固定大小的页（Page）。</p>
-<p>分页的核心思想是将整个内存空间划分为大小固定的页，以便进行高效的管理。这种方式具有以下优点：</p>
-<ul>
-<li>避免外部碎片问题。</li>
-<li>提供灵活的内存分配策略。</li>
-<li>便于地址映射和内存保护。</li>
-</ul>
-<p>在分页体系中，存在<strong>虚拟页（Virtual Page）</strong>和<strong>物理页（Physical Page）</strong>两种概念。</p>
-<ul>
-<li><strong>物理页</strong>：实际存储在RAM或磁盘上的内存块。</li>
-<li><strong>虚拟页</strong>：处于虚拟地址空间中的页，作为进程可见的逻辑地址单元。</li>
-</ul>
-<p>操作系统的任务是维护虚拟页与物理页之间的映射关系，从而实现高效的内存管理。</p>
-<h3 id="虚拟页到物理页的映射"><a href="#虚拟页到物理页的映射" class="headerlink" title="虚拟页到物理页的映射"></a>虚拟页到物理页的映射</h3><p>假设操作系统管理一个64KB的存储空间，并且页大小为16KB，则该存储空间可以划分为4个页框（Frame）。在虚拟内存视角下，这些页框可以被组织成一个页表（Page Table），用于存储页的映射信息。</p>
-<p>然而，计算机通常需要同时运行多个进程，每个进程都会拥有独立的虚拟地址空间。这意味着：</p>
-<ol>
-<li>不同进程的虚拟地址空间在逻辑上是隔离的。</li>
-<li>但在物理内存中，这些进程的页可能是分散存放的，而不是连续的。</li>
+<p>​	以下是运行结果</p>
+<p><img src="/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/image-20250313111921507.png" alt="image-20250313111921507"></p>
+</li>
 </ol>
-<p>由于物理内存的分配通常是动态的，虚拟页和物理页之间的映射关系并不是固定的。如果直接按照虚拟地址的顺序映射到物理地址，不仅效率低下，还会限制灵活性。因此，我们需要一种机制来管理这种映射关系，使虚拟地址空间能够高效地映射到物理地址空间。</p>
-<hr>
-<p>​	</p>
-<p>​	对于一个操作系统（OS）来说，分页相较于分段在内存管理上有其独特的优势。虽然分段能提供更灵活的内存管理，但由于其可变大小的特性，管理上的开销较大。而分页则采用固定大小的内存块，使得管理更加高效。因此，我们重点关注分页机制。</p>
-<h2 id="为什么要分页？"><a href="#为什么要分页？" class="headerlink" title="为什么要分页？"></a>为什么要分页？</h2><p>在操作系统的内存管理中，我们希望将内存抽象成可管理的单元。除了分段这种可变大小的划分方式，还有一种固定大小的划分方式——<strong>页（Page）</strong>。页的大小固定，使得整个内存管理更加整齐，减少了碎片化问题，并且让映射管理变得更简单。</p>
-<p>在分页系统中，我们主要关注两种页：</p>
-<ul>
-<li><strong>虚拟页（Virtual Page）</strong>：进程视角下的逻辑页，操作系统为每个进程维护的抽象地址空间。</li>
-<li><strong>物理页（Physical Page）</strong>：实际存储在RAM或磁盘中的内存块，真正承载数据。</li>
-</ul>
-<p>但问题来了，如何把一个虚拟页转换到物理页？换句话说，我们如何建立二者之间的映射？</p>
-<hr>
-<h2 id="虚拟地址-vs-物理地址"><a href="#虚拟地址-vs-物理地址" class="headerlink" title="虚拟地址 vs 物理地址"></a>虚拟地址 vs 物理地址</h2><p>在计算机系统中，我们经常会听到<strong>虚拟地址</strong>（Virtual Address）和<strong>物理地址</strong>（Physical Address）这两个概念。</p>
-<ul>
-<li><strong>虚拟地址</strong>：进程使用的地址，提供了一层抽象，使得进程能够独立于物理内存进行访问。例如，在C语言中，使用指针访问变量时，实际上使用的就是虚拟地址。</li>
-<li><strong>物理地址</strong>：数据在硬件中的实际存储地址，是最终被CPU访问的位置。</li>
-</ul>
-<p>为了理解它们之间的关系，我们举个例子：</p>
-<p>假设一个操作系统管理着64KB的内存，每个页的大小是16KB。这样，总共可以划分出4个页槽位（64KB &#x2F; 16KB &#x3D; 4）。在进程的虚拟地址空间中，这些页是连续编号的，但在实际的物理内存中，它们的存放位置可能是离散的。因此，我们需要一种机制来建立映射。</p>
-<hr>
-<h2 id="虚拟地址的结构"><a href="#虚拟地址的结构" class="headerlink" title="虚拟地址的结构"></a>虚拟地址的结构</h2><p>为了精准地描述一个数据在进程地址空间中的位置，虚拟地址通常由两部分组成：</p>
-<ol>
-<li><strong>页索引（Page Index）</strong>：用于标识数据所在的虚拟页。</li>
-<li><strong>页内偏移（Offset）</strong>：用于定位数据在该页中的具体位置。</li>
-</ol>
-<p>实际上，物理地址的结构也类似，同样由<strong>物理页索引</strong>和<strong>页内偏移</strong>构成。由于虚拟页和物理页的大小是相同的，<strong>页内偏移部分可以直接复用</strong>，这让地址转换的计算更加简单。</p>
-<p>所以，<strong>虚拟地址到物理地址的转换，关键在于虚拟页索引到物理页索引的映射，而页内偏移部分保持不变</strong>。</p>
-<hr>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>分页机制的核心思想是：</p>
-<ul>
-<li>通过固定大小的页管理内存，使得内存分配更加高效。</li>
-<li>虚拟地址由<strong>页索引</strong>和<strong>页内偏移</strong>组成，物理地址的结构类似。</li>
-<li><strong>虚拟地址到物理地址的转换，主要依赖页索引之间的映射，而页内偏移保持不变</strong>。</li>
-</ul>
-<h2 id="页表"><a href="#页表" class="headerlink" title="页表"></a><strong>页表</strong></h2><p>在之前的内容中，我们已经初步了解了<strong>虚拟地址到物理地址转换</strong>的动机。现在，我们来看看操作系统如何<strong>管理</strong>这种转换的一种重要机制：<strong>页表（Page Table）</strong>。</p>
-<h3 id="作用"><a href="#作用" class="headerlink" title="作用"></a><strong>作用</strong></h3><p>页表的主要作用是<strong>提供虚拟地址到物理地址的映射</strong>。在分页机制中，虚拟地址被划分为<strong>虚拟页号（VPN, Virtual Page Number）**和**页内偏移量**，而物理地址则由</strong>物理页号（PPN, Physical Page Number）**和相同的偏移量组成。因此，页表的核心功能是**将虚拟页号映射到物理页号**。</p>
-<h3 id="页表项（Page-Table-Entry-PTE）"><a href="#页表项（Page-Table-Entry-PTE）" class="headerlink" title="页表项（Page Table Entry, PTE）"></a><strong>页表项（Page Table Entry, PTE）</strong></h3><p>页表中的每一个<strong>页表项（PTE）</strong>，需要满足以下基本要求：</p>
-<ul>
-<li><strong>能够通过虚拟页号索引到正确的页表项</strong></li>
-<li><strong>在索引到页表项后，能够获取对应的物理页号</strong></li>
-</ul>
-<p>除此之外，页表项通常包含一些额外的<strong>控制位</strong>，用于管理页面的访问权限和状态：</p>
-<ul>
-<li><strong>有效位（Valid Bit）</strong>：判断该页是否在主存中，若无效，则需要触发<strong>缺页异常（Page Fault）</strong>并从磁盘加载该页。</li>
-<li><strong>读&#x2F;写&#x2F;执行权限位</strong>：限制对该页的访问权限，如只读、可写、可执行等。</li>
-<li><strong>缓存控制位</strong>：决定该页是否允许被 CPU 缓存，用于管理 I&#x2F;O 设备映射等。</li>
-<li><strong>脏位（Dirty Bit）</strong>：指示该页是否被修改过，若为1，则需要在换出时写回磁盘。</li>
-</ul>
-<p>在后续的章节中，我们将更详细地分析<strong>页表的具体结构</strong>以及<strong>多级页表的优化方案</strong>。</p>
-<hr>
-<h3 id><a href="#" class="headerlink" title></a></h3>
+<p>​	好，这个环境搭建完毕，有兴趣的可以去研究下使用build工具来自动化搭建环境，我也还没看捏。</p>
+
     </div>
 
     
@@ -358,7 +317,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>Post link: </strong>
-    <a href="https://tcww0.github.io/2025/03/12/OS/paging/" title="Paging">https://tcww0.github.io/2025/03/12/OS/paging/</a>
+    <a href="https://tcww0.github.io/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/" title="DB环境构建">https://tcww0.github.io/2025/02/15/java/1-数据库环境构建/</a>
   </li>
   <li class="post-copyright-license">
     <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
@@ -370,7 +329,7 @@
       <footer class="post-footer">
           
           <div class="post-tags">
-              <a href="/tag/OS/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> OS</a>
+              <a href="/tag/JAVA/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> JAVA</a>
           </div>
 
         
@@ -379,10 +338,13 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2025/03/10/OS/syscall/" rel="prev" title="System Call">
-      <i class="fa fa-chevron-left"></i> System Call
+    <a href="/2025/02/15/C++%E5%AD%A6%E4%B9%A0/%E9%AB%98%E7%B2%BE%E5%BA%A6/" rel="prev" title="迭代器与部分类回顾">
+      <i class="fa fa-chevron-left"></i> 迭代器与部分类回顾
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2025/02/16/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E6%A8%A1%E7%89%88/" rel="next" title="类模版">
+      类模版 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -442,7 +404,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Paging"><span class="nav-number">1.</span> <span class="nav-text">Paging</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E9%A1%B5%E6%9C%BA%E5%88%B6%E4%B8%8E%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">分页机制与内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E9%A1%B5%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.1.</span> <span class="nav-text">分页的基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E9%A1%B5%E5%88%B0%E7%89%A9%E7%90%86%E9%A1%B5%E7%9A%84%E6%98%A0%E5%B0%84"><span class="nav-number">1.1.2.</span> <span class="nav-text">虚拟页到物理页的映射</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%88%86%E9%A1%B5%EF%BC%9F"><span class="nav-number">1.2.</span> <span class="nav-text">为什么要分页？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80-vs-%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80"><span class="nav-number">1.3.</span> <span class="nav-text">虚拟地址 vs 物理地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.4.</span> <span class="nav-text">虚拟地址的结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.4.1.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B5%E8%A1%A8"><span class="nav-number">1.5.</span> <span class="nav-text">页表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8"><span class="nav-number">1.5.1.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E8%A1%A8%E9%A1%B9%EF%BC%88Page-Table-Entry-PTE%EF%BC%89"><span class="nav-number">1.5.2.</span> <span class="nav-text">页表项（Page Table Entry, PTE）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.5.3.</span> <span class="nav-text"></span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA"><span class="nav-number">1.</span> <span class="nav-text">数据库环境构建</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -458,20 +420,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-count">47</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/category/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tag/">
           
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -503,7 +465,7 @@
           <h3 class="widget-title">Tag Cloud</h3>
           <div id="myCanvasContainer" class="widget tagcloud">
               <canvas width="250" height="250" id="resCanvas" style="width=100%">
-                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
               </canvas>
           </div>
       </div>
@@ -558,13 +520,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">Symbols count total: </span>
-    <span title="Symbols count total">131k</span>
+    <span title="Symbols count total">149k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">Reading time total &asymp;</span>
-    <span title="Reading time total">1:59</span>
+    <span title="Reading time total">2:15</span>
 </div>
 
         
@@ -679,7 +641,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'comments',
       owner       : 'TCWW0',
       admin       : ['TCWW0'],
-      id          : 'd8ad7a52d0ebac71d5586339026e1d0d',
+      id          : 'efd34d653766b4c46e3bc0599766d33f',
         language: 'zh-CN',
       distractionFreeMode: true
     });

@@ -186,7 +186,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/03/12/OS/paging/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/03/19/%E6%95%B0%E6%8D%AE%E5%BA%93/8-%E4%BE%9D%E8%B5%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -202,7 +202,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2025/03/12/OS/paging/" class="post-title-link" itemprop="url">Paging</a>
+            <a href="/2025/03/19/%E6%95%B0%E6%8D%AE%E5%BA%93/8-%E4%BE%9D%E8%B5%96/" class="post-title-link" itemprop="url">依赖</a>
         </h2>
 
         <div class="post-meta">
@@ -213,7 +213,218 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2025-03-12 16:51:15 / Modified: 22:32:44" itemprop="dateCreated datePublished" datetime="2025-03-12T16:51:15+08:00">2025-03-12</time>
+              <time title="Created: 2025-03-19 16:51:15 / Modified: 19:58:29" itemprop="dateCreated datePublished" datetime="2025-03-19T16:51:15+08:00">2025-03-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="关系数据库设计"><a href="#关系数据库设计" class="headerlink" title="关系数据库设计"></a>关系数据库设计</h1><p>略去前置知识，保留一些比较重要的知识，不保证连贯性，需要自行阅读书本后再来进行串联起来</p>
+<hr>
+<h2 id="关系模式的分解"><a href="#关系模式的分解" class="headerlink" title="关系模式的分解"></a><strong>关系模式的分解</strong></h2><p>在数据库设计中，<strong>分解（Decomposition）</strong>是指将一个关系模式拆分为多个子模式，以减少冗余、消除数据异常，并提高数据一致性。</p>
+<hr>
+<h3 id="1-无损分解（Lossless-Decomposition）"><a href="#1-无损分解（Lossless-Decomposition）" class="headerlink" title="1. 无损分解（Lossless Decomposition）"></a><strong>1. 无损分解（Lossless Decomposition）</strong></h3><blockquote>
+<p><strong>如果关系模式 RR 被分解成 R1和 R2，且通过 R1 和 R2的</strong>自然连接（Natural Join）<strong>能够</strong>无损<strong>地恢复原始关系 RR，则称该分解为</strong>无损分解<strong>（Lossless Decomposition）。</strong></p>
+</blockquote>
+<p><strong>数学表达：</strong></p>
+<ul>
+<li>设 <strong>R(A,B,C)R(A, B, C)</strong> 被分解为 **R1(A,B)**和 **R2(B,C)**。</li>
+<li>如果对任意可能的数据集合，执行<strong>自然连接</strong>： <strong>R1⋈R2&#x3D; R</strong> 且不会产生<strong>额外的元组</strong>，也不会<strong>丢失信息</strong>，则该分解是<strong>无损的</strong>。</li>
+</ul>
+<hr>
+<h3 id="2-有损分解（Lossy-Decomposition）"><a href="#2-有损分解（Lossy-Decomposition）" class="headerlink" title="2. 有损分解（Lossy Decomposition）"></a><strong>2. 有损分解（Lossy Decomposition）</strong></h3><blockquote>
+<p><strong>如果关系模式的分解导致信息丢失或产生额外的错误数据，则称为有损分解（Lossy Decomposition）。</strong></p>
+</blockquote>
+<h4 id="示例：有损分解"><a href="#示例：有损分解" class="headerlink" title="示例：有损分解"></a><strong>示例：有损分解</strong></h4><p>考虑以下关系：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">employee(ID, name, street, city, salary)</span><br></pre></td></tr></table></figure>
+
+<p>我们尝试将其分解为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">employee1(ID, name)</span><br><span class="line">employee2(name, street, city, salary)</span><br></pre></td></tr></table></figure>
+
+<h4 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a><strong>问题分析</strong></h4><ul>
+<li><p>这个分解的<strong>交集</strong>属性集是 <code>&#123;name&#125;</code>，但 <code>name</code> <strong>并不是主键</strong>，因为可能存在<strong>重名的员工</strong>！</p>
+</li>
+<li><p>当我们进行自然连接：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employee1 <span class="keyword">NATURAL</span> <span class="keyword">JOIN</span> employee2;</span><br></pre></td></tr></table></figure>
+
+<p>可能会出现原关系中不存在的错误数据（即笛卡尔积导致的额外元组）。</p>
+</li>
+</ul>
+<p><strong>示例数据：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">employee1:</span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"><span class="operator">|</span> ID <span class="operator">|</span> name <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>  <span class="operator">|</span> 张三 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span>  <span class="operator">|</span> 李四 <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"></span><br><span class="line">employee2:</span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------+------+--------+</span></span><br><span class="line"><span class="operator">|</span> name <span class="operator">|</span> street  <span class="operator">|</span> city <span class="operator">|</span> salary <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------+------+--------+</span></span><br><span class="line"><span class="operator">|</span> 张三 <span class="operator">|</span> A街道   <span class="operator">|</span> X市  <span class="operator">|</span> <span class="number">5000</span>   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 李四 <span class="operator">|</span> B街道   <span class="operator">|</span> Y市  <span class="operator">|</span> <span class="number">6000</span>   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 张三 <span class="operator">|</span> C街道   <span class="operator">|</span> Z市  <span class="operator">|</span> <span class="number">7000</span>   <span class="operator">|</span>  <span class="comment">-- 另一个张三</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------+------+--------+</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>由于 <code>name</code>不是唯一的，当 <code>employee1</code>和 <code>employee2</code>进行自然连接时：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employee1 <span class="keyword">NATURAL</span> <span class="keyword">JOIN</span> employee2;</span><br></pre></td></tr></table></figure>
+
+<p>可能会产生错误的组合，如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(1, 张三, A街道, X市, 5000)</span><br><span class="line">(1, 张三, C街道, Z市, 7000)  -- 这个组合可能不正确！</span><br></pre></td></tr></table></figure>
+
+<p>这表示 <code>ID=1</code>的张三可能会匹配到错误的地址，导致数据不一致。</p>
+</li>
+</ul>
+<p><strong>结论</strong>：</p>
+<ul>
+<li><strong>因为连接后产生了原关系中不存在的元组，该分解是有损的！</strong></li>
+</ul>
+<hr>
+<h3 id="3-如何确保无损分解？"><a href="#3-如何确保无损分解？" class="headerlink" title="3. 如何确保无损分解？"></a><strong>3. 如何确保无损分解？</strong></h3><p>一个分解 <strong>R→R1,R2</strong> 是无损的，当且仅当：</p>
+<ul>
+<li><strong>R1∩R2（两个子关系的交集）至少包含一个候选码（Candidate Key）的属性</strong></li>
+</ul>
+<h4 id="无损分解示例"><a href="#无损分解示例" class="headerlink" title="无损分解示例"></a><strong>无损分解示例</strong></h4><p>假设 <code>employee</code> 关系：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">employee(ID, name, street, city, salary)</span><br></pre></td></tr></table></figure>
+
+<p>我们进行如下<strong>无损分解</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">employee1(ID, name, street, city)</span><br><span class="line">employee2(ID, salary)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>这里 <code>ID</code> 是主键，且 <code>ID</code> 作为<strong>交集</strong>出现在 <code>employee1</code> 和 <code>employee2</code> 中。</p>
+</li>
+<li><p>由于 <code>ID</code> 可以唯一标识一个员工，所以自然连接：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employee1 <span class="keyword">NATURAL</span> <span class="keyword">JOIN</span> employee2;</span><br></pre></td></tr></table></figure>
+
+<p>可以正确恢复 <code>employee</code>无丢失也无多余元组</p>
+</li>
+</ul>
+<hr>
+<h3 id="4-小结"><a href="#4-小结" class="headerlink" title="4. 小结"></a><strong>4. 小结</strong></h3><table>
+<thead>
+<tr>
+<th>分解类型</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>无损分解</strong></td>
+<td>通过自然连接可以完全恢复原始数据，不会丢失信息，也不会产生额外的元组。</td>
+</tr>
+<tr>
+<td><strong>有损分解</strong></td>
+<td>自然连接后可能会丢失信息或产生错误的额外元组，导致数据不一致。</td>
+</tr>
+</tbody></table>
+<p><strong>确保无损分解的方法：</strong> ✅ <strong>交集属性</strong> 至少包含<strong>候选码的一部分</strong>，这样才能确保自然连接时不会丢失数据。</p>
+<hr>
+<h2 id="函数依赖"><a href="#函数依赖" class="headerlink" title="函数依赖"></a>函数依赖</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>在<strong>关系数据库</strong>中，函数依赖（Functional Dependency, FD）<strong>描述的是</strong>属性之间的关系，表示<strong>一个属性的值能够唯一确定另一个属性的值</strong>。</p>
+<p><strong>数学定义：</strong></p>
+<blockquote>
+<p><strong>设 R(U) 是一个关系模式，X 和 Y 是 U 的属性集，如果对于 R 中的任意两个元组 t1 和 t2，若 t1[X] &#x3D; t2[X]，则必有 t1[Y] &#x3D; t2[Y]，则称 X 函数确定 Y，记作：</strong></p>
+<p>X→Y</p>
+<p><strong>读作 “X 函数确定 Y” 或 “Y 依赖于 X”</strong></p>
+</blockquote>
+<p>简单来说，<strong>如果知道 X 的值，就可以唯一确定 Y 的值</strong>。</p>
+<p>用简单的话来解释下这个定义：假设我们现在有一个模式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">department(dept_name,building,budget)</span><br></pre></td></tr></table></figure>
+
+<p>当我们查询任意一个元组是，如果我们已经知道了其中的一个dept_name,而且我们能通过这个dept_name区推导得出一个唯一的building值的话，那我们称这俩个属性在这个模式中构成函数依赖。而且是由dept_name决定building，所以应该表达为dept_name→building。</p>
+<blockquote>
+<p>在E-R模型的学习中。我们应该理解到了，无论是E-R模型，还是关系数据库模型，其本质都只是一个模型。而模型的本质则是对于现实世界的一种抽象，所以很多概念都是共通的，只是一些定义上的些许差别。我们需要的是一种从已有的网状知识图谱中去找到一条能通往新学习的知识的路线。而不是从0开始再进行知识点网的构建。</p>
+<p>所以所谓函数依赖其实可以视为是E-R模型中的映射基数中的一对一情况在关系模式中的体现。</p>
+</blockquote>
+<h3 id="码"><a href="#码" class="headerlink" title="码"></a>码</h3><p>有了函数依赖这个概念，我们回过头来看到我们之前碰到的关于超码的分析</p>
+<p>​	我们先来重温下超码的逻辑概念。</p>
+<blockquote>
+<p>在一个模式中，当元组的一个或多个属性的集合能够唯一的标识出一个元组时，这个属性的集合可以视为该模式的一个超码。</p>
+</blockquote>
+<p>​	对于超码来说，函数依赖的逻辑定位与其十分相像，对于一个函数依赖，我们能够通过一个或多个属性来推导出另外的一个或多个属性。不难联想到，当我们函数依赖的推导方与被推导方的并集能够完美的覆盖整个模式时，这种函数依赖的推导方应该能被称之为超码。</p>
+<p>​	对于一个函数依赖来推导超码的情况，有一点需要特别注意。当我们使用一个逻辑上的试图来推导函数依赖时，此时我们判断的基础是当前数据库模式的一个快照。</p>
+<p>​	就比如，我们拥有如下一个模式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">classroom(building,room_number,capacity)</span><br></pre></td></tr></table></figure>
+
+<p>​	我们根据该模式的一个快照来进行函数依赖的推导，此时所有的room_number都有着其一个capacity,而且所有的capacity都不相同。此时我们可能会把<strong>room_number-&gt;capacity</strong>作为一个函数依赖来进行使用。但是，这样是否存在问题呢？</p>
+<p>​	我们抽象回来看到现实视图。在一个教学楼中可能存在着各种容量的教室，这没有问题。在多个教学楼中，存在着多个编号相同的教室，这也没有问题。在不同教学楼的编号相同的教室中，出现相同容量的情况，这也没有问题吧。但是问题就来了，这里如果我们的逻辑层函数依赖<strong>room_number-&gt;capacity</strong>成立，那么在之后某次可能的SQL插入中，完全有可能插入一个除了building之外完全相同的元组，此时我们的函数依赖<strong>room_number-&gt;capacity</strong>就不成立了。</p>
+<p>​	基于上面那个例子，我想强调的是一句话:</p>
+<blockquote>
+<p>一个关系的实例可能满足的某些函数依赖并不需要再该关系的模式上成立。</p>
+<p>简单来说，我们在一个数据库模式中去思考函数依赖的构建，其都是基于当前关系的一个快照推导的。此时快照推导出来的函数依赖不存在问题不代表着该模式在接下来的使用中都不会存在问题。因此，我们得看到一个模式的本质，其是对现实世界中存在的事物的抽象建模，我们对于函数依赖的思考应该是基于这层抽象建模而不应该基于当前系统的一个快照。</p>
+</blockquote>
+<p>​	因此，我们可以总结出来自己的一句话</p>
+<blockquote>
+<p>一个模式的快照实例可能满足的某些函数依赖，并不意味着这些依赖在该关系的模式上永远成立。</p>
+</blockquote>
+<p>下面给出一个测试demo，自行测试</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建表</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> classroom (</span><br><span class="line">    building <span class="type">VARCHAR</span>(<span class="number">10</span>),</span><br><span class="line">    room_number <span class="type">INT</span>,</span><br><span class="line">    capacity <span class="type">INT</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 插入数据，当前快照满足 &quot;room_number → capacity&quot;</span></span><br><span class="line"><span class="comment">-- 对于 room_number 101，总是对应 capacity 为 50</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> classroom (building, room_number, capacity) <span class="keyword">VALUES</span> (<span class="string">&#x27;A&#x27;</span>, <span class="number">101</span>, <span class="number">50</span>);</span><br><span class="line"><span class="keyword">INSERT INTO</span> classroom (building, room_number, capacity) <span class="keyword">VALUES</span> (<span class="string">&#x27;B&#x27;</span>, <span class="number">102</span>, <span class="number">60</span>);</span><br><span class="line"><span class="keyword">INSERT INTO</span> classroom (building, room_number, capacity) <span class="keyword">VALUES</span> (<span class="string">&#x27;C&#x27;</span>, <span class="number">101</span>, <span class="number">50</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查询当前数据</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> classroom;</span><br><span class="line"><span class="comment">-- 结果：</span></span><br><span class="line"><span class="comment">-- | building | room_number | capacity |</span></span><br><span class="line"><span class="comment">-- |----------|-------------|----------|</span></span><br><span class="line"><span class="comment">-- | A        | 101         | 50       |</span></span><br><span class="line"><span class="comment">-- | B        | 102         | 60       |</span></span><br><span class="line"><span class="comment">-- | C        | 101         | 50       |</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 插入一个新记录，打破 &quot;room_number → capacity&quot; 的依赖</span></span><br><span class="line"><span class="comment">-- 由于 room_number 101 在前面均对应 50，现在插入一个 capacity 为 100 的记录</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> classroom (building, room_number, capacity) <span class="keyword">VALUES</span> (<span class="string">&#x27;D&#x27;</span>, <span class="number">101</span>, <span class="number">100</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 再次查询数据</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> classroom;</span><br><span class="line"><span class="comment">-- 结果：</span></span><br><span class="line"><span class="comment">-- | building | room_number | capacity |</span></span><br><span class="line"><span class="comment">-- |----------|-------------|----------|</span></span><br><span class="line"><span class="comment">-- | A        | 101         | 50       |</span></span><br><span class="line"><span class="comment">-- | B        | 102         | 60       |</span></span><br><span class="line"><span class="comment">-- | C        | 101         | 50       |</span></span><br><span class="line"><span class="comment">-- | D        | 101         | 100      |</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/03/12/OS/2-paging/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/03/12/OS/2-paging/" class="post-title-link" itemprop="url">Paging</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-03-12 16:51:15 / Modified: 22:41:37" itemprop="dateCreated datePublished" datetime="2025-03-12T16:51:15+08:00">2025-03-12</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -253,7 +464,7 @@
           <h1 id="Paging"><a href="#Paging" class="headerlink" title="Paging"></a>Paging</h1><p>​	此篇是在我在OSTEP中看到内存虚拟化分页这一章时所遇到的。需要注意的是，此篇写时我还有点感冒后遗症，脑袋不大清晰，有些地方逻辑会存在混乱，谅解吧。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2025/03/12/OS/paging/#more" rel="contents">
+              <a class="btn" href="/2025/03/12/OS/2-paging/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -278,7 +489,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/03/10/OS/syscall/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/03/10/OS/1-syscall/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -294,7 +505,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2025/03/10/OS/syscall/" class="post-title-link" itemprop="url">System Call</a>
+            <a href="/2025/03/10/OS/1-syscall/" class="post-title-link" itemprop="url">System Call</a>
         </h2>
 
         <div class="post-meta">
@@ -353,7 +564,7 @@
 <hr>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2025/03/10/OS/syscall/#more" rel="contents">
+              <a class="btn" href="/2025/03/10/OS/1-syscall/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1064,104 +1275,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/0-%E4%BB%8B%E7%BB%8D/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/0-%E4%BB%8B%E7%BB%8D/" class="post-title-link" itemprop="url">数据库介绍</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-02-17 21:51:15" itemprop="dateCreated datePublished" datetime="2025-02-17T21:51:15+08:00">2025-02-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-03-05 21:14:12" itemprop="dateModified" datetime="2025-03-05T21:14:12+08:00">2025-03-05</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>557</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>1 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h1><p>​	在这一个分类中，将记录我的数据库学习过程，主要是个人在学习15-445网课的思考，敬请期待吧，没什么好说的，让我们开始吧。之后有什么要补充的将会在这篇文章中进行补充(如果没忘的话)。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/0-%E4%BB%8B%E7%BB%8D/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1233,20 +1346,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-count">47</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/category/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tag/">
           
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -1278,7 +1391,7 @@
           <h3 class="widget-title">Tag Cloud</h3>
           <div id="myCanvasContainer" class="widget tagcloud">
               <canvas width="250" height="250" id="resCanvas" style="width=100%">
-                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
               </canvas>
           </div>
       </div>
@@ -1333,13 +1446,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">Symbols count total: </span>
-    <span title="Symbols count total">131k</span>
+    <span title="Symbols count total">149k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">Reading time total &asymp;</span>
-    <span title="Reading time total">1:59</span>
+    <span title="Reading time total">2:15</span>
 </div>
 
         

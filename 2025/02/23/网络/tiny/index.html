@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="TINY WEB​	基于CSAPP的课本教程，我实现了一个简单的服务器demo。该demo仅仅只有250行，但是存在着一个服务器所必须的简单的提供服务的功能，在这里对其进行一个简单的复盘。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Modern SQL-NESTED">
+<meta property="og:url" content="https://tcww0.github.io/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="TINY WEB​	基于CSAPP的课本教程，我实现了一个简单的服务器demo。该demo仅仅只有250行，但是存在着一个服务器所必须的简单的提供服务的功能，在这里对其进行一个简单的复盘。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/412ce31628442ff184998478c3c57008.jpg">
+<meta property="og:image" content="https://tcww0.github.io/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/4b9f12bd738e8068b37267643c37a831.jpg">
+<meta property="og:image" content="https://tcww0.github.io/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/8dc03b8039515d8d7a5a2d66db5d67d1.jpg">
+<meta property="article:published_time" content="2025-02-23T13:51:15.000Z">
+<meta property="article:modified_time" content="2025-04-02T01:52:55.183Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/412ce31628442ff184998478c3c57008.jpg">
+
+<link rel="canonical" href="https://tcww0.github.io/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Modern SQL-NESTED | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Modern SQL-NESTED
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-02-23 21:51:15" itemprop="dateCreated datePublished" datetime="2025-02-23T21:51:15+08:00">2025-02-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-04-02 09:52:55" itemprop="dateModified" datetime="2025-04-02T09:52:55+08:00">2025-04-02</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>12k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>11 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="TINY-WEB"><a href="#TINY-WEB" class="headerlink" title="TINY WEB"></a>TINY WEB</h1><p>​	基于CSAPP的课本教程，我实现了一个简单的服务器demo。该demo仅仅只有250行，但是存在着一个服务器所必须的简单的提供服务的功能，在这里对其进行一个简单的复盘。</p>
+<span id="more"></span>
+
+<p><img src="/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/412ce31628442ff184998478c3c57008.jpg" alt="服务器"></p>
+<p><img src="/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/4b9f12bd738e8068b37267643c37a831.jpg" alt="单连接测试"></p>
+<p><img src="/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/8dc03b8039515d8d7a5a2d66db5d67d1.jpg" alt="多连接测试"></p>
+<p>接下来一步步对这段代码进行简单的分析，重温下我的tiny web开发过程</p>
+<h2 id="程序入口"><a href="#程序入口" class="headerlink" title="程序入口"></a>程序入口</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span>** argv)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> listenfd,connfd;</span><br><span class="line">    <span class="type">char</span> hostName[MAXLINE],port[MAXLINE];       <span class="comment">//the storge of client information</span></span><br><span class="line">    <span class="type">socklen_t</span> clientlen;                        <span class="comment">//the length of client socket</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_storage</span> <span class="title">clientaddr</span>;</span>         <span class="comment">//the address of client</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(argc!=<span class="number">2</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>,<span class="string">&quot;usage: %s &lt;port&gt;\n&quot;</span>,argv[<span class="number">0</span>]);       <span class="comment">//did`t used port num</span></span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    listenfd=open_listenfd(argv[<span class="number">1</span>]);            <span class="comment">//used port to create listen fd</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        clientlen = <span class="keyword">sizeof</span>(clientaddr);</span><br><span class="line">        connfd = Accept(listenfd,(SA*)&amp;clientaddr,&amp;clientlen);</span><br><span class="line">        Getnameinfo((SA*)&amp;clientaddr,clientlen,hostName,MAXLINE,port,MAXLINE,<span class="number">0</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Accepted connection from (%s, %s)\n&quot;</span>,hostName,port);</span><br><span class="line">        <span class="comment">//doit(connfd);</span></span><br><span class="line">        optDoit(connfd);</span><br><span class="line">        Close(connfd);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	对于目前的服务器，启动的实现是一个单线程迭代阻塞服务器，每次只能处理一个来自服务器端的连接，在启动连接后，之后所有的连接都会被阻塞。</p>
+<p>​	回顾一个服务器简单的开发流程。</p>
+<ul>
+<li>创建服务器本地的套接字节点，实际上是一个监听节点，该节点是为了提供外部客户端的连接处理的。</li>
+<li>为了创建一个监听节点，我们需要先创建一个套接字节点，然后再将其转换为一个监听节点，也就是说，监听节点本质上也还是一个套接字节点，只是通过系统调用为其赋予了不同的属性使其成为了一个专门用于监听客户端请求的节点。</li>
+<li>在监听节点被创建完之后，本地的监听节点将会阻塞当前的服务器线程，知道收到来自客户端的请求，此时，其会在服务器这个接受处理的线程中去请求和创建一个新的文件描述符并返回，这个描述符会被关联到对应的对应的客户端连接中</li>
+<li>此时，本地的对应的监听文件套接字创建的子文件就会被与某个网络上的文件关联起来，这一块我还不是很了解这种不可见的信息传输，所以，这里可以假设对应的文件会储存每一次来自用户端的请求，我们只需要对这个文件进行处理即可。</li>
+</ul>
+<p>​	对于我们上面给出的main函数代码，其实可以看到一个对应的开发流程</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> listenfd,connfd;</span><br><span class="line">   <span class="type">char</span> hostName[MAXLINE],port[MAXLINE];       <span class="comment">//the storge of client information</span></span><br><span class="line">   <span class="type">socklen_t</span> clientlen;                        <span class="comment">//the length of client socket</span></span><br><span class="line">   <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_storage</span> <span class="title">clientaddr</span>;</span>         <span class="comment">//the address of client</span></span><br></pre></td></tr></table></figure>
+
+<p>​	这一段都是对应的需求内存设计。可以看到，这里的设计其实相当简单，一个服务器上只有一个connfd，所以你应该也可以推断对应的，服务器每次只能创建出一个连接文件来进行客户端的处理，一但其他客户端同时请求，其会被阻塞。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(argc!=<span class="number">2</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>,<span class="string">&quot;usage: %s &lt;port&gt;\n&quot;</span>,argv[<span class="number">0</span>]);       <span class="comment">//did`t used port num</span></span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	这一段是命令行参数检测这一块，对于该服务器，我们要求在启动时指定对应的本机上要使用的端口号。毕竟对于服务器来说，其使用的就是本地的域名，套接字这块的地址直接使用本地地址，只需要指定对应的端口号即可。</p>
+<p>​	接下来看到这一行</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">listenfd=open_listenfd(argv[<span class="number">1</span>]);            <span class="comment">//used port to create listen fd</span></span><br></pre></td></tr></table></figure>
+
+<p>​	这一行中去创建对应的监听操作符，<code>open_listenfd</code>是一个封装好的函数，直接使用本地地址和传进的端口号来创建一个监听套接字，我们来看一下它的源码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* $begin open_listenfd */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">open_listenfd</span><span class="params">(<span class="type">char</span> *port)</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">addrinfo</span> <span class="title">hints</span>, *<span class="title">listp</span>, *<span class="title">p</span>;</span></span><br><span class="line">    <span class="type">int</span> listenfd, rc, optval=<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Get a list of potential server addresses */</span></span><br><span class="line">    <span class="built_in">memset</span>(&amp;hints, <span class="number">0</span>, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> addrinfo));</span><br><span class="line">    hints.ai_socktype = SOCK_STREAM;             <span class="comment">/* Accept connections */</span></span><br><span class="line">    hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG; <span class="comment">/* ... on any IP address */</span></span><br><span class="line">    hints.ai_flags |= AI_NUMERICSERV;            <span class="comment">/* ... using port number */</span></span><br><span class="line">    <span class="keyword">if</span> ((rc = getaddrinfo(<span class="literal">NULL</span>, port, &amp;hints, &amp;listp)) != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;getaddrinfo failed (port %s): %s\n&quot;</span>, port, gai_strerror(rc));</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-2</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Walk the list for one that we can bind to */</span></span><br><span class="line">    <span class="keyword">for</span> (p = listp; p; p = p-&gt;ai_next) &#123;</span><br><span class="line">        <span class="comment">/* Create a socket descriptor */</span></span><br><span class="line">        <span class="keyword">if</span> ((listenfd = socket(p-&gt;ai_family, p-&gt;ai_socktype, p-&gt;ai_protocol)) &lt; <span class="number">0</span>) </span><br><span class="line">            <span class="keyword">continue</span>;  <span class="comment">/* Socket failed, try the next */</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Eliminates &quot;Address already in use&quot; error from bind */</span></span><br><span class="line">        setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR,    <span class="comment">//line:netp:csapp:setsockopt</span></span><br><span class="line">                   (<span class="type">const</span> <span class="type">void</span> *)&amp;optval , <span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Bind the descriptor to the address */</span></span><br><span class="line">        <span class="keyword">if</span> (bind(listenfd, p-&gt;ai_addr, p-&gt;ai_addrlen) == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">break</span>; <span class="comment">/* Success */</span></span><br><span class="line">        <span class="keyword">if</span> (close(listenfd) &lt; <span class="number">0</span>) &#123; <span class="comment">/* Bind failed, try the next */</span></span><br><span class="line">            <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;open_listenfd close failed: %s\n&quot;</span>, strerror(errno));</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Clean up */</span></span><br><span class="line">    freeaddrinfo(listp);</span><br><span class="line">    <span class="keyword">if</span> (!p) <span class="comment">/* No address worked */</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Make it a listening socket ready to accept connection requests */</span></span><br><span class="line">    <span class="keyword">if</span> (listen(listenfd, LISTENQ) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        close(listenfd);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> listenfd;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* $end open_listenfd */</span></span><br></pre></td></tr></table></figure>
+
+<p>​	这个源码的功能其实很简单，就是使用默认的配置去调用UNIX环境下的一些系统调用来生成一个监听套接字</p>
+<p>​	</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">addrinfo</span> <span class="title">hints</span>, *<span class="title">listp</span>, *<span class="title">p</span>;</span></span><br><span class="line"><span class="type">int</span> listenfd, rc, optval=<span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p>​	在这段声明中，addrinfo结构的几个变量都是会被提供给getaddrinfo系统调用的，这里不知道的还需要回去补一下CSAPP的网络编程基础。其中，由于hints是对于最终结果的属性约束，为了避免机器上莫名其妙的内存残留影响，在每次使用前最好对其进行一次刷新</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hints.ai_socktype = SOCK_STREAM;             <span class="comment">/* Accept connections */</span></span><br><span class="line">hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG; <span class="comment">/* ... on any IP address */</span></span><br><span class="line">hints.ai_flags |= AI_NUMERICSERV;            <span class="comment">/* ... using port number */</span></span><br></pre></td></tr></table></figure>
+
+<p>​	这一段就是对应的我们对于getaddrinfo解析地址的参数，在这其中</p>
+<ul>
+<li><code>SOCK_STREAM</code>：指定 <strong>TCP</strong> 连接。</li>
+<li><code>AI_PASSIVE</code>：用于监听套接字，指示 <code>getaddrinfo</code> 返回的 IP 地址应可用于 <code>bind</code>。</li>
+<li><code>AI_ADDRCONFIG</code>：启用地址配置，仅返回当前系统有可用 IP 地址的协议族（IPv4&#x2F;IPv6）。例如，如果机器只分配了 IPv4 地址，则不会返回 IPv6 地址。</li>
+<li><code>AI_NUMERICSERV</code>：端口号直接使用数字，而不是服务名。</li>
+</ul>
+<p>​	这些字段的内容其实很多，没必要去记，在需要的时候再去查一下即可，只需要了解，通过设置hints结构能够对于我们最终生成的addrinfo进行一次属性上的控制即可。</p>
+<p>​	在设置完基本的本地服务器要求的addrinfo属性后，我们就可以进行对应的getaddrinfo系统调用查询了。对于这个系统调用，只简单说明一下它的功能。其的功能是：通过使用该系统调用参数，去生成一个结构体addrinfo链表，在这个链表中，储存了一些节点的重要信息。<code>getaddrinfo</code> 的前两个参数分别是域名（或者 IP 地址）和端口号。它们都是必填项，但可以传 <code>NULL</code> 作为默认值。  如果 <code>hostname</code> 传 <code>NULL</code>，则表示使用本地地址。 如果 <code>servname</code> 传 <code>NULL</code>，则表示调用者需要手动绑定端口，通常不推荐这样做，因为系统自动分配的端口号需要额外查询才能得知。</p>
+<p>​	除此之外，该函数还返回一个状态码，当且仅当函数正常运行时会返回0，以此来进行了一次简单的错误处理。接下来是这里的重头戏，当该函数正常处理需求时，其会使用前三个参数去进行查询和构建对应的addrinfo链表，这个链表的储存位置是我们第四个参数的位置。这种参数位置设置是不是很熟悉。</p>
+<p>​	<code>getaddrinfo</code> 生成的是一个 <code>addrinfo</code> 结构体的链表，每个节点都包含了一个可用的 IP 地址及其相关的配置信息。在这里需要注意的，对于传进来的域名(第一个参数)，如果不是本地地址，那么其会去先本地的DNS缓存去查找，再然后，去连接到外部的DNS服务器去进行对应的ip的查找。总的来说，这里的函数会将在当前时刻可以查找到的对应的域名的所有的ip地址都进行储存，每个ip地址都对应着一个结构体，一个结构体中又包含着一些配置信息，目前了解这些即可。</p>
+<p>​	</p>
+<p>​	总之，目前在了解完这个函数之后，我们知道了上面调用getaddrinfo方法是为了去生成一些与传进去的域名和端口号相关联的信息方便后面的套接字创建。接下来就看懂我们的套接字创建吧。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Walk the list for one that we can bind to */</span></span><br><span class="line">    <span class="keyword">for</span> (p = listp; p; p = p-&gt;ai_next) &#123;</span><br><span class="line">        <span class="comment">/* Create a socket descriptor */</span></span><br><span class="line">        <span class="keyword">if</span> ((listenfd = socket(p-&gt;ai_family, p-&gt;ai_socktype, p-&gt;ai_protocol)) &lt; <span class="number">0</span>) </span><br><span class="line">            <span class="keyword">continue</span>;  <span class="comment">/* Socket failed, try the next */</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Eliminates &quot;Address already in use&quot; error from bind */</span></span><br><span class="line">        setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR,    <span class="comment">//line:netp:csapp:setsockopt</span></span><br><span class="line">                   (<span class="type">const</span> <span class="type">void</span> *)&amp;optval , <span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Bind the descriptor to the address */</span></span><br><span class="line">        <span class="keyword">if</span> (bind(listenfd, p-&gt;ai_addr, p-&gt;ai_addrlen) == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">break</span>; <span class="comment">/* Success */</span></span><br><span class="line">        <span class="keyword">if</span> (close(listenfd) &lt; <span class="number">0</span>) &#123; <span class="comment">/* Bind failed, try the next */</span></span><br><span class="line">            <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;open_listenfd close failed: %s\n&quot;</span>, strerror(errno));</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	可以看到，这该循环中，我们去遍历了生成的addrinfo链表，因为这里可能会生成多个ip地址，但是不保证哪个可以被我们本地连接，所以这里需要循环测试直至成功创建出对于的套接字</p>
+<p>​	接下来主要看一个<code>socket</code>函数，在该函数中，我们看到了几个熟悉的字段，前面设置过的<code>ai_family</code>字段，<code>ai_socktype</code>字段，<code>ai_socktype</code>字段，再来对其对应关系其重复一下</p>
+<ul>
+<li><p><code>socket(int domain, int type, int protocol)</code> 用于创建套接字：</p>
+</li>
+<li><p><code>p-&gt;ai_family</code>：地址族（<code>AF_INET</code> 表示 IPv4，<code>AF_INET6</code> 表示 IPv6）。</p>
+</li>
+<li><p><code>p-&gt;ai_socktype</code>：套接字类型（<code>SOCK_STREAM</code> 表示 TCP，<code>SOCK_DGRAM</code> 表示 UDP）。</p>
+</li>
+<li><p><code>p-&gt;ai_protocol</code>：通常为 <code>0</code>，表示使用默认协议（TCP&#x2F;UDP）。</p>
+</li>
+</ul>
+<p>​	接下来的setsockopt用于设置一些socket的属性，这里可以先不对其进行了解。</p>
+<p>​	一般在创建完套接字之后，即可以进行该套接字与端口的绑定了。这里再对套接字进行一下解释，所谓的套接字，本质上就还是一个文件，可以将其视作在网络中的文件单位，我们现在所谓的穿件套接字，只是创建出一个稍微普通点的文件而已，如果不对其进行使用，那么其没有什么实际的意义。而我们这里，就要将其与某一个本地的端口进行绑定。这样才能够使得该套接字工作起来。而这种赋予<code>工作</code></p>
+<p>的方法，就是使用bind系统调用。</p>
+<p>​	<code>bind</code>顾名思义，就是建立起连接，而这里的俩段则是套接字与某一个特定的端口，在链接完之后，简单的可以理解为，所有想要传输进这个端口的数据都会被储存到这个套接字中，这里的套接字就类似于一个大麻袋，将所有的来自客户端的信息都进行一个接受，当然，其也只负责接受。而对于<code>bind</code>函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">bind</span><span class="params">(<span class="type">int</span> sockfd, <span class="type">const</span> <span class="keyword">struct</span> sockaddr *addr, <span class="type">socklen_t</span> addrlen)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>​	其中第一个参数就是我们将要绑定的监听套接字，第二个参数是一个sockaddr结构体指针，也就是我们前面得到的addrinfo结构体，在这个函数内其会对其进行自动的解析，无需关系，第三个参数是第二个指针指向的结构体的大小，而这个信息也被储存到了对应的结构体中，所以可以看到，这里是直接传递一个对应与结构体的属性的。</p>
+<p>​	最后是一个简单的连接失败处理，你可能会疑惑为什么在这里会进行一个<code>close</code>，但是在仔细看一看，什么时候才会进入到这里的close呢？</p>
+<p>​	在这个函数的最后，我们不能忘记对于我们getaddrinfo函数产生的结构体链表进行清理，毕竟只要稍微了解下内存系统就知道这里是一个什么风险。</p>
+<p>​	最后的最后，在离开函数前，我们调用了listen方法让监听套接字进行了工作。其实可以这么简单的理解。创建出一个套接字，其实就是一个人想要通过高考考上大学的过程；套接字转换为监听套接字，就是一个大学学习技能特化自己的过程；监听套接字被绑定到对应的端口，就是对应的找工作收offer的过程；最后的listen方法，就是去公司上工的过程。通过这个小例子你应该能够更轻松的了解这个创建过程。</p>
+<p>​	</p>
+<hr>
+<blockquote>
+<p>接下来我们跳出这里的方法，回到我们的主函数</p>
+</blockquote>
+<p>​	在创建完监听操作符之后，我们进入了一个程序死循环，并且可以看到，该程序循环没有一个出口(你在之后可以看到，循环内部的方法不会导致循环退出)</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        clientlen = <span class="keyword">sizeof</span>(clientaddr);</span><br><span class="line">        connfd = Accept(listenfd,(SA*)&amp;clientaddr,&amp;clientlen);</span><br><span class="line">        Getnameinfo((SA*)&amp;clientaddr,clientlen,hostName,MAXLINE,port,MAXLINE,<span class="number">0</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Accepted connection from (%s, %s)\n&quot;</span>,hostName,port);</span><br><span class="line">        <span class="comment">//doit(connfd);</span></span><br><span class="line">        optDoit(connfd);</span><br><span class="line">        Close(connfd);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	对于这个循环，流程其实很简单，我们前面已经让监听套接字进行工作了，而在这里，我们则是指定对应的监听套接字所需要执行的工作。即不断监听这里服务器的对应端口(前面已绑定)。对于Accep函数，其本身其实是对于accept函数的一个错误处理的包装，包括接下来的结果一大写开头的系统调用函数，其只是一个错误处理包装，由于没什么好讲的，所以这一类的源码不进行分析，请自行阅读。</p>
+<p>​	主要来了解一个<code>accept</code>函数，该函数原型如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">accept</span><span class="params">(<span class="type">int</span> sockfd, <span class="keyword">struct</span> sockaddr *addr, <span class="type">socklen_t</span> *addrlen)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>​	其接受一个监听套接字，需要注意的是，这个监听套接字必须已经处于监听状态，否则会出现错误，这也是前面给监听套接字调用<code>listen</code>方法的原因，第二个参数是一个结构体指针，指向的是在监听到底的客户端时要储存的位置，第三个则是对应的第二个结构体的内存大小，对于后俩个参数，都可以传进NULL使用系统自动判断的结构体大小。</p>
+<p>​	需要注意的是，accept是一个阻塞型的函数，一但进入该函数体，除非存在来自客户端的连接来解除阻塞，否则当前进程会一直阻塞下去。</p>
+<p>​	之后的几行代码也很轻松，就是调用我们的getnameinfo函数去解析当前接受到的客户端信息，并在服务端进行一次访问打印而已。</p>
+<p>对于 <code>optDoit(connfd); Close(connfd);</code>俩行代码，其中optDoit是对应的服务器对于接受到的信息的解析和回应，这里我们将不会使用optDoit进行分析，而是使用doit进行分析，该optDoit涉及到了对应与CSAPP中关于服务器的作业的一个实现，感兴趣可以自己去实现一个自己的optDoit函数。</p>
+<p>​	在处理完对应的逻辑之后，我们服务器端将会将对应的创建出的connfd函数进行一次回送，自此，一个来自客户端的处理结束，服务器一个循环迭代结束，重新进行循环，重新开始我们之前的流程，知道关闭服务器进程之前运行不止…</p>
+<p>​	</p>
+<hr>
+<p>​	这也就是我为什么将该服务器视为一个循环迭代服务器的原因，该服务器每次能且只能处理一个客户端连接。接下来我们就要进入对应的doit方法的处理了。歇一会开始吧。</p>
+<blockquote>
+<p>在接下来的分析中，我将不会对于源码进行像之前一样复杂的分析，毕竟在源码中我已经加了相当多的注释，快速过一遍，你需要做的是自己去跟着敲一遍，但不只是敲一遍，在敲的过程中需要去熟悉这一门技术和对应的思想。</p>
+</blockquote>
+<h2 id="doit方法"><a href="#doit方法" class="headerlink" title="doit方法"></a>doit方法</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">doit</span><span class="params">(<span class="type">int</span> fd)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> is_static;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">stat</span> <span class="title">sbuf</span>;</span></span><br><span class="line">    <span class="type">char</span> buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE];</span><br><span class="line">    <span class="type">char</span> filename[MAXLINE],cgiargs[MAXLINE];</span><br><span class="line">    <span class="type">rio_t</span> rio;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*read request line and headers*/</span></span><br><span class="line">    Rio_readinitb(&amp;rio,fd);         <span class="comment">//read informations from client fd</span></span><br><span class="line">    <span class="keyword">if</span> (!Rio_readlineb(&amp;rio, buf, MAXLINE))  <span class="comment">//line:netp:doit:readrequest</span></span><br><span class="line">        <span class="keyword">return</span>;<span class="comment">//read informations from rio to locla buf</span></span><br><span class="line">    <span class="built_in">sscanf</span>(buf , <span class="string">&quot;%s %s %s&quot;</span>,method,uri,version);    <span class="comment">//parse the header of client input</span></span><br><span class="line"></span><br><span class="line">    Rio_writen(fd,buf,<span class="built_in">strlen</span>(buf));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(strcasecmp(method,<span class="string">&quot;GET&quot;</span>))    <span class="comment">//compare two strings ignore case only return 0 when equal</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//block non-get request</span></span><br><span class="line">        clienterror(fd,method,<span class="string">&quot;501&quot;</span>,<span class="string">&quot;Not Implemented&quot;</span>,</span><br><span class="line">                    <span class="string">&quot;Tiny could not implement this method&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line">    read_requesthdrs(&amp;rio);         <span class="comment">//read informations from client fd,ignore the header</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* for a parse_uri function</span></span><br><span class="line"><span class="comment">    *   translate a uri and the next two parameter to store the result of parsing</span></span><br><span class="line"><span class="comment">    *   the function return 1 when the request is static</span></span><br><span class="line"><span class="comment">    *   return 0 when the request is dynamic</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    is_static = parse_uri(uri,filename,cgiargs);    <span class="comment">//parse the uri</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//uri referance to a file on server,to detection if it exist</span></span><br><span class="line">    <span class="comment">/* the stat return 0 only exact find the file</span></span><br><span class="line"><span class="comment">     * when success if finding the file, system will write content to second argument</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="keyword">if</span>(stat(filename,&amp;uri)&lt;<span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        clienterror(fd,filename,<span class="string">&quot;404&quot;</span>,<span class="string">&quot;Not found&quot;</span>,<span class="string">&quot;Tiny could not find this file&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//struct stat sbuf;</span></span><br><span class="line">    <span class="keyword">if</span>(is_static)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//S_ISREG is a Macro ,used to dected whether the file is a regular file</span></span><br><span class="line">        <span class="comment">//st_mode is a field symbol the file type and permissions</span></span><br><span class="line">        <span class="comment">//S_IRUSR&amp;sbuf.st_mode dected whether the server has the permission to visit the file</span></span><br><span class="line">        <span class="keyword">if</span> (!(S_ISREG(sbuf.st_mode)) || !(sbuf.st_mode &amp; S_IRUSR))</span><br><span class="line">        &#123;</span><br><span class="line">            clienterror(fd,filename,<span class="string">&quot;403&quot;</span>,<span class="string">&quot;Forbidden&quot;</span>,<span class="string">&quot;tiny could not read the file&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> ;</span><br><span class="line">        &#125;</span><br><span class="line">        server_static(fd,filename,sbuf.st_size);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>        <span class="comment">//a dynamic request , want to request a progress</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//S_IXUSR &amp; sbuf.st_mode will used &amp; to detect if the file is valid for this server</span></span><br><span class="line">        <span class="keyword">if</span>(!(S_ISREG(sbuf.st_mode))||!(S_IXUSR &amp; sbuf.st_mode))</span><br><span class="line">        &#123;</span><br><span class="line">            clienterror(fd,filename,<span class="string">&quot;403&quot;</span>,<span class="string">&quot;Forbidden&quot;</span>,<span class="string">&quot;tiny could not run the CGI program&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> ;</span><br><span class="line">        &#125;</span><br><span class="line">        server_dynamic(fd,filename,cgiargs);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	在该方法中，参数fd指向的是客户端连接上的服务器端fd，对于服务器来说，其可以将其抽象为一个文件，不过这个文件时刻有可能有外部的输入流入(实际上，该输入是通过外部网络来传输的)。</p>
+<p>​	在该函数中，可以看到一系列的Rio函数，这些是在csapp.h中包含的函数，这些函数本质上其实就是一些包装的网络安全的读写函数，毕竟你应该知道，在网络中使用一般的printf和scanf函数是不安全的。</p>
+<p>​	我们简单来分析下这个函数的功能，具体代码留给你自己去看。</p>
+<ul>
+<li><p>首先，你需要知道一个服务器接受到的监听文件中储存的信息格式，或者说，你需要知道对应的客户端发送过来的信息格式。在对应的信息文本中，第一行是一个HTTP请求，格式为 <code>method uri version</code>,这正是该段代码中前几行进行解析的原因，在该请求中包含了一些相对重要的信息，具体可以自行查阅资料。</p>
+</li>
+<li><p>由于当前服务器小demo只支持GET请求，所以你可以看到在代码中存在一些关于读取头非GET的错误处理</p>
+</li>
+<li><p>在确认由客户端送来的HTTP请求格式正确之后，程序开始解析接下来的<code>uri</code>字段，对于<code>uri</code>字段，你可以看到存在俩种不同执行流的处理，这里又涉及到了服务器端提供的服务，即静态资源和动态资源。当然，这一块还是交给你自己去进行了解</p>
+</li>
+<li><p>如果你稍微了解所谓的动静态资源，你应该能够读到对应的<code>if (!(S_ISREG(sbuf.st_mode)) || !(sbuf.st_mode &amp; S_IRUSR))</code></p>
+<p>判断，这里的权限判断是每个服务器都必须的，毕竟你也不想你的服务器主机被渗透的千疮百孔吧，当然，这里的语句含义，还是留给你去阅读源码，我在其中已经写了一定的解析。</p>
+</li>
+<li><p>在对应权限判断之后，服务器将会进一步的开始处理对应的请求，对<code>uri</code>进行进一步的解析以及产生进一步的动作</p>
+<blockquote>
+<p>其实在该函数这里，你应该相对来说会在逻辑上感觉到得心应手。你应该可以明显感觉的是，在该函数中，好像就脱离了所谓的网络结构，对于该函数来说，所谓的运行环境只是一个普通的本机环境，其所需要关心的，其实只是对于所谓的监听文件的内容的解析和处理，其他内容不用其进行处理。这里，正是解耦合的魅力啊。</p>
+</blockquote>
+</li>
+</ul>
+<hr>
+<p>​	至此，我们完成了对于源码中的函数入口以及对应的简单处理分流函数的了解。对于剩下的代码，这一块将不会进行解释，毕竟存在着更详细的教材 <code>CSAPP</code> 。该小demo是参照该书中的tiny web进行制作的，在这之后的每一个函数，都在书中有着详细的解释，为了不误导各位，我在合理不再对源码进行分析，请各位自行阅读源码并参照CSAPP中的内容进行学习。</p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2025/02/23/%E7%BD%91%E7%BB%9C/tiny/" title="Modern SQL-NESTED">https://tcww0.github.io/2025/02/23/网络/tiny/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 网络</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/0-%E4%BB%8B%E7%BB%8D/" rel="prev" title="数据库介绍">
+      <i class="fa fa-chevron-left"></i> 数据库介绍
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.2-modernSQL(nested)/" rel="next" title="Modern SQL-NESTED">
+      Modern SQL-NESTED <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#TINY-WEB"><span class="nav-number">1.</span> <span class="nav-text">TINY WEB</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E5%85%A5%E5%8F%A3"><span class="nav-number">1.1.</span> <span class="nav-text">程序入口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#doit%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">doit方法</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">149k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">2:15</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : '9d19bc1b9a58f7a19c53eb879b1ba0d8',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

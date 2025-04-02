@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="关系数据库设计略去前置知识，保留一些比较重要的知识，不保证连贯性，需要自行阅读书本后再来进行串联起来  关系模式的分解在数据库设计中，分解（Decomposition）是指将一个关系模式拆分为多个子模式，以减少冗余、消除数据异常，并提高数据一致性。  1. 无损分解（Lossless Decomposition） 如果关系模式 RR 被分解成 R1和 R2，且通过 R1 和 R2的自然连接（Nat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="依赖">
+<meta property="og:url" content="https://tcww0.github.io/2025/03/19/%E6%95%B0%E6%8D%AE%E5%BA%93/8-%E4%BE%9D%E8%B5%96/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="关系数据库设计略去前置知识，保留一些比较重要的知识，不保证连贯性，需要自行阅读书本后再来进行串联起来  关系模式的分解在数据库设计中，分解（Decomposition）是指将一个关系模式拆分为多个子模式，以减少冗余、消除数据异常，并提高数据一致性。  1. 无损分解（Lossless Decomposition） 如果关系模式 RR 被分解成 R1和 R2，且通过 R1 和 R2的自然连接（Nat">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-19T08:51:15.000Z">
+<meta property="article:modified_time" content="2025-03-19T11:58:29.380Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://tcww0.github.io/2025/03/19/%E6%95%B0%E6%8D%AE%E5%BA%93/8-%E4%BE%9D%E8%B5%96/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>依赖 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/03/19/%E6%95%B0%E6%8D%AE%E5%BA%93/8-%E4%BE%9D%E8%B5%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          依赖
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-03-19 16:51:15 / Modified: 19:58:29" itemprop="dateCreated datePublished" datetime="2025-03-19T16:51:15+08:00">2025-03-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="关系数据库设计"><a href="#关系数据库设计" class="headerlink" title="关系数据库设计"></a>关系数据库设计</h1><p>略去前置知识，保留一些比较重要的知识，不保证连贯性，需要自行阅读书本后再来进行串联起来</p>
+<hr>
+<h2 id="关系模式的分解"><a href="#关系模式的分解" class="headerlink" title="关系模式的分解"></a><strong>关系模式的分解</strong></h2><p>在数据库设计中，<strong>分解（Decomposition）</strong>是指将一个关系模式拆分为多个子模式，以减少冗余、消除数据异常，并提高数据一致性。</p>
+<hr>
+<h3 id="1-无损分解（Lossless-Decomposition）"><a href="#1-无损分解（Lossless-Decomposition）" class="headerlink" title="1. 无损分解（Lossless Decomposition）"></a><strong>1. 无损分解（Lossless Decomposition）</strong></h3><blockquote>
+<p><strong>如果关系模式 RR 被分解成 R1和 R2，且通过 R1 和 R2的</strong>自然连接（Natural Join）<strong>能够</strong>无损<strong>地恢复原始关系 RR，则称该分解为</strong>无损分解<strong>（Lossless Decomposition）。</strong></p>
+</blockquote>
+<p><strong>数学表达：</strong></p>
+<ul>
+<li>设 <strong>R(A,B,C)R(A, B, C)</strong> 被分解为 **R1(A,B)**和 **R2(B,C)**。</li>
+<li>如果对任意可能的数据集合，执行<strong>自然连接</strong>： <strong>R1⋈R2&#x3D; R</strong> 且不会产生<strong>额外的元组</strong>，也不会<strong>丢失信息</strong>，则该分解是<strong>无损的</strong>。</li>
+</ul>
+<hr>
+<h3 id="2-有损分解（Lossy-Decomposition）"><a href="#2-有损分解（Lossy-Decomposition）" class="headerlink" title="2. 有损分解（Lossy Decomposition）"></a><strong>2. 有损分解（Lossy Decomposition）</strong></h3><blockquote>
+<p><strong>如果关系模式的分解导致信息丢失或产生额外的错误数据，则称为有损分解（Lossy Decomposition）。</strong></p>
+</blockquote>
+<h4 id="示例：有损分解"><a href="#示例：有损分解" class="headerlink" title="示例：有损分解"></a><strong>示例：有损分解</strong></h4><p>考虑以下关系：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">employee(ID, name, street, city, salary)</span><br></pre></td></tr></table></figure>
+
+<p>我们尝试将其分解为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">employee1(ID, name)</span><br><span class="line">employee2(name, street, city, salary)</span><br></pre></td></tr></table></figure>
+
+<h4 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a><strong>问题分析</strong></h4><ul>
+<li><p>这个分解的<strong>交集</strong>属性集是 <code>&#123;name&#125;</code>，但 <code>name</code> <strong>并不是主键</strong>，因为可能存在<strong>重名的员工</strong>！</p>
+</li>
+<li><p>当我们进行自然连接：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employee1 <span class="keyword">NATURAL</span> <span class="keyword">JOIN</span> employee2;</span><br></pre></td></tr></table></figure>
+
+<p>可能会出现原关系中不存在的错误数据（即笛卡尔积导致的额外元组）。</p>
+</li>
+</ul>
+<p><strong>示例数据：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">employee1:</span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"><span class="operator">|</span> ID <span class="operator">|</span> name <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>  <span class="operator">|</span> 张三 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span>  <span class="operator">|</span> 李四 <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"></span><br><span class="line">employee2:</span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------+------+--------+</span></span><br><span class="line"><span class="operator">|</span> name <span class="operator">|</span> street  <span class="operator">|</span> city <span class="operator">|</span> salary <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------+------+--------+</span></span><br><span class="line"><span class="operator">|</span> 张三 <span class="operator">|</span> A街道   <span class="operator">|</span> X市  <span class="operator">|</span> <span class="number">5000</span>   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 李四 <span class="operator">|</span> B街道   <span class="operator">|</span> Y市  <span class="operator">|</span> <span class="number">6000</span>   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 张三 <span class="operator">|</span> C街道   <span class="operator">|</span> Z市  <span class="operator">|</span> <span class="number">7000</span>   <span class="operator">|</span>  <span class="comment">-- 另一个张三</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------+------+--------+</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>由于 <code>name</code>不是唯一的，当 <code>employee1</code>和 <code>employee2</code>进行自然连接时：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employee1 <span class="keyword">NATURAL</span> <span class="keyword">JOIN</span> employee2;</span><br></pre></td></tr></table></figure>
+
+<p>可能会产生错误的组合，如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(1, 张三, A街道, X市, 5000)</span><br><span class="line">(1, 张三, C街道, Z市, 7000)  -- 这个组合可能不正确！</span><br></pre></td></tr></table></figure>
+
+<p>这表示 <code>ID=1</code>的张三可能会匹配到错误的地址，导致数据不一致。</p>
+</li>
+</ul>
+<p><strong>结论</strong>：</p>
+<ul>
+<li><strong>因为连接后产生了原关系中不存在的元组，该分解是有损的！</strong></li>
+</ul>
+<hr>
+<h3 id="3-如何确保无损分解？"><a href="#3-如何确保无损分解？" class="headerlink" title="3. 如何确保无损分解？"></a><strong>3. 如何确保无损分解？</strong></h3><p>一个分解 <strong>R→R1,R2</strong> 是无损的，当且仅当：</p>
+<ul>
+<li><strong>R1∩R2（两个子关系的交集）至少包含一个候选码（Candidate Key）的属性</strong></li>
+</ul>
+<h4 id="无损分解示例"><a href="#无损分解示例" class="headerlink" title="无损分解示例"></a><strong>无损分解示例</strong></h4><p>假设 <code>employee</code> 关系：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">employee(ID, name, street, city, salary)</span><br></pre></td></tr></table></figure>
+
+<p>我们进行如下<strong>无损分解</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">employee1(ID, name, street, city)</span><br><span class="line">employee2(ID, salary)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>这里 <code>ID</code> 是主键，且 <code>ID</code> 作为<strong>交集</strong>出现在 <code>employee1</code> 和 <code>employee2</code> 中。</p>
+</li>
+<li><p>由于 <code>ID</code> 可以唯一标识一个员工，所以自然连接：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> employee1 <span class="keyword">NATURAL</span> <span class="keyword">JOIN</span> employee2;</span><br></pre></td></tr></table></figure>
+
+<p>可以正确恢复 <code>employee</code>无丢失也无多余元组</p>
+</li>
+</ul>
+<hr>
+<h3 id="4-小结"><a href="#4-小结" class="headerlink" title="4. 小结"></a><strong>4. 小结</strong></h3><table>
+<thead>
+<tr>
+<th>分解类型</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>无损分解</strong></td>
+<td>通过自然连接可以完全恢复原始数据，不会丢失信息，也不会产生额外的元组。</td>
+</tr>
+<tr>
+<td><strong>有损分解</strong></td>
+<td>自然连接后可能会丢失信息或产生错误的额外元组，导致数据不一致。</td>
+</tr>
+</tbody></table>
+<p><strong>确保无损分解的方法：</strong> ✅ <strong>交集属性</strong> 至少包含<strong>候选码的一部分</strong>，这样才能确保自然连接时不会丢失数据。</p>
+<hr>
+<h2 id="函数依赖"><a href="#函数依赖" class="headerlink" title="函数依赖"></a>函数依赖</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>在<strong>关系数据库</strong>中，函数依赖（Functional Dependency, FD）<strong>描述的是</strong>属性之间的关系，表示<strong>一个属性的值能够唯一确定另一个属性的值</strong>。</p>
+<p><strong>数学定义：</strong></p>
+<blockquote>
+<p><strong>设 R(U) 是一个关系模式，X 和 Y 是 U 的属性集，如果对于 R 中的任意两个元组 t1 和 t2，若 t1[X] &#x3D; t2[X]，则必有 t1[Y] &#x3D; t2[Y]，则称 X 函数确定 Y，记作：</strong></p>
+<p>X→Y</p>
+<p><strong>读作 “X 函数确定 Y” 或 “Y 依赖于 X”</strong></p>
+</blockquote>
+<p>简单来说，<strong>如果知道 X 的值，就可以唯一确定 Y 的值</strong>。</p>
+<p>用简单的话来解释下这个定义：假设我们现在有一个模式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">department(dept_name,building,budget)</span><br></pre></td></tr></table></figure>
+
+<p>当我们查询任意一个元组是，如果我们已经知道了其中的一个dept_name,而且我们能通过这个dept_name区推导得出一个唯一的building值的话，那我们称这俩个属性在这个模式中构成函数依赖。而且是由dept_name决定building，所以应该表达为dept_name→building。</p>
+<blockquote>
+<p>在E-R模型的学习中。我们应该理解到了，无论是E-R模型，还是关系数据库模型，其本质都只是一个模型。而模型的本质则是对于现实世界的一种抽象，所以很多概念都是共通的，只是一些定义上的些许差别。我们需要的是一种从已有的网状知识图谱中去找到一条能通往新学习的知识的路线。而不是从0开始再进行知识点网的构建。</p>
+<p>所以所谓函数依赖其实可以视为是E-R模型中的映射基数中的一对一情况在关系模式中的体现。</p>
+</blockquote>
+<h3 id="码"><a href="#码" class="headerlink" title="码"></a>码</h3><p>有了函数依赖这个概念，我们回过头来看到我们之前碰到的关于超码的分析</p>
+<p>​	我们先来重温下超码的逻辑概念。</p>
+<blockquote>
+<p>在一个模式中，当元组的一个或多个属性的集合能够唯一的标识出一个元组时，这个属性的集合可以视为该模式的一个超码。</p>
+</blockquote>
+<p>​	对于超码来说，函数依赖的逻辑定位与其十分相像，对于一个函数依赖，我们能够通过一个或多个属性来推导出另外的一个或多个属性。不难联想到，当我们函数依赖的推导方与被推导方的并集能够完美的覆盖整个模式时，这种函数依赖的推导方应该能被称之为超码。</p>
+<p>​	对于一个函数依赖来推导超码的情况，有一点需要特别注意。当我们使用一个逻辑上的试图来推导函数依赖时，此时我们判断的基础是当前数据库模式的一个快照。</p>
+<p>​	就比如，我们拥有如下一个模式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">classroom(building,room_number,capacity)</span><br></pre></td></tr></table></figure>
+
+<p>​	我们根据该模式的一个快照来进行函数依赖的推导，此时所有的room_number都有着其一个capacity,而且所有的capacity都不相同。此时我们可能会把<strong>room_number-&gt;capacity</strong>作为一个函数依赖来进行使用。但是，这样是否存在问题呢？</p>
+<p>​	我们抽象回来看到现实视图。在一个教学楼中可能存在着各种容量的教室，这没有问题。在多个教学楼中，存在着多个编号相同的教室，这也没有问题。在不同教学楼的编号相同的教室中，出现相同容量的情况，这也没有问题吧。但是问题就来了，这里如果我们的逻辑层函数依赖<strong>room_number-&gt;capacity</strong>成立，那么在之后某次可能的SQL插入中，完全有可能插入一个除了building之外完全相同的元组，此时我们的函数依赖<strong>room_number-&gt;capacity</strong>就不成立了。</p>
+<p>​	基于上面那个例子，我想强调的是一句话:</p>
+<blockquote>
+<p>一个关系的实例可能满足的某些函数依赖并不需要再该关系的模式上成立。</p>
+<p>简单来说，我们在一个数据库模式中去思考函数依赖的构建，其都是基于当前关系的一个快照推导的。此时快照推导出来的函数依赖不存在问题不代表着该模式在接下来的使用中都不会存在问题。因此，我们得看到一个模式的本质，其是对现实世界中存在的事物的抽象建模，我们对于函数依赖的思考应该是基于这层抽象建模而不应该基于当前系统的一个快照。</p>
+</blockquote>
+<p>​	因此，我们可以总结出来自己的一句话</p>
+<blockquote>
+<p>一个模式的快照实例可能满足的某些函数依赖，并不意味着这些依赖在该关系的模式上永远成立。</p>
+</blockquote>
+<p>下面给出一个测试demo，自行测试</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 创建表</span></span><br><span class="line"><span class="keyword">CREATE TABLE</span> classroom (</span><br><span class="line">    building <span class="type">VARCHAR</span>(<span class="number">10</span>),</span><br><span class="line">    room_number <span class="type">INT</span>,</span><br><span class="line">    capacity <span class="type">INT</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 2. 插入数据，当前快照满足 &quot;room_number → capacity&quot;</span></span><br><span class="line"><span class="comment">-- 对于 room_number 101，总是对应 capacity 为 50</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> classroom (building, room_number, capacity) <span class="keyword">VALUES</span> (<span class="string">&#x27;A&#x27;</span>, <span class="number">101</span>, <span class="number">50</span>);</span><br><span class="line"><span class="keyword">INSERT INTO</span> classroom (building, room_number, capacity) <span class="keyword">VALUES</span> (<span class="string">&#x27;B&#x27;</span>, <span class="number">102</span>, <span class="number">60</span>);</span><br><span class="line"><span class="keyword">INSERT INTO</span> classroom (building, room_number, capacity) <span class="keyword">VALUES</span> (<span class="string">&#x27;C&#x27;</span>, <span class="number">101</span>, <span class="number">50</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查询当前数据</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> classroom;</span><br><span class="line"><span class="comment">-- 结果：</span></span><br><span class="line"><span class="comment">-- | building | room_number | capacity |</span></span><br><span class="line"><span class="comment">-- |----------|-------------|----------|</span></span><br><span class="line"><span class="comment">-- | A        | 101         | 50       |</span></span><br><span class="line"><span class="comment">-- | B        | 102         | 60       |</span></span><br><span class="line"><span class="comment">-- | C        | 101         | 50       |</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 插入一个新记录，打破 &quot;room_number → capacity&quot; 的依赖</span></span><br><span class="line"><span class="comment">-- 由于 room_number 101 在前面均对应 50，现在插入一个 capacity 为 100 的记录</span></span><br><span class="line"><span class="keyword">INSERT INTO</span> classroom (building, room_number, capacity) <span class="keyword">VALUES</span> (<span class="string">&#x27;D&#x27;</span>, <span class="number">101</span>, <span class="number">100</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 再次查询数据</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> classroom;</span><br><span class="line"><span class="comment">-- 结果：</span></span><br><span class="line"><span class="comment">-- | building | room_number | capacity |</span></span><br><span class="line"><span class="comment">-- |----------|-------------|----------|</span></span><br><span class="line"><span class="comment">-- | A        | 101         | 50       |</span></span><br><span class="line"><span class="comment">-- | B        | 102         | 60       |</span></span><br><span class="line"><span class="comment">-- | C        | 101         | 50       |</span></span><br><span class="line"><span class="comment">-- | D        | 101         | 100      |</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2025/03/19/%E6%95%B0%E6%8D%AE%E5%BA%93/8-%E4%BE%9D%E8%B5%96/" title="依赖">https://tcww0.github.io/2025/03/19/数据库/8-依赖/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 数据库</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/12/OS/2-paging/" rel="prev" title="Paging">
+      <i class="fa fa-chevron-left"></i> Paging
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.</span> <span class="nav-text">关系数据库设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%88%86%E8%A7%A3"><span class="nav-number">1.1.</span> <span class="nav-text">关系模式的分解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%97%A0%E6%8D%9F%E5%88%86%E8%A7%A3%EF%BC%88Lossless-Decomposition%EF%BC%89"><span class="nav-number">1.1.1.</span> <span class="nav-text">1. 无损分解（Lossless Decomposition）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%9C%89%E6%8D%9F%E5%88%86%E8%A7%A3%EF%BC%88Lossy-Decomposition%EF%BC%89"><span class="nav-number">1.1.2.</span> <span class="nav-text">2. 有损分解（Lossy Decomposition）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E6%9C%89%E6%8D%9F%E5%88%86%E8%A7%A3"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">示例：有损分解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">问题分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%A6%82%E4%BD%95%E7%A1%AE%E4%BF%9D%E6%97%A0%E6%8D%9F%E5%88%86%E8%A7%A3%EF%BC%9F"><span class="nav-number">1.1.3.</span> <span class="nav-text">3. 如何确保无损分解？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E6%8D%9F%E5%88%86%E8%A7%A3%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">无损分解示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%B0%8F%E7%BB%93"><span class="nav-number">1.1.4.</span> <span class="nav-text">4. 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96"><span class="nav-number">1.2.</span> <span class="nav-text">函数依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A0%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">码</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">149k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">2:15</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : '1c11170be076c06104a47625e9ecc6de',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
