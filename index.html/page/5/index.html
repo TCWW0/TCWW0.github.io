@@ -186,6 +186,217 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/5-%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/5-%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">单例模式(1)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-12-20 20:23:19" itemprop="dateCreated datePublished" datetime="2024-12-20T20:23:19+08:00">2024-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-12-23 12:54:18" itemprop="dateModified" datetime="2024-12-23T12:54:18+08:00">2024-12-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>2 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <span id="more"></span>
+
+<p>先给出单例模式的定义：</p>
+<p>在一个项目中，全局范围内，某个类的示例有且只有一个，通过这个唯一示例向其他数据提供数据的全局访问，这种模式就是单例模式，一个经典的应用就是任务队列。</p>
+<!-- more -->
+<p>需要注意的是，单例模式作用的对象是一个类，这种模式下的类保证某些类在系统中全局唯一，并保证这些类在整个程序中提供一个具有规范的访问接口。这个模式解决了资源管理，状态一致和模块解耦的问题。举例，这个其实可以应用于一个全局变量的访问权限封装，避免一个资源方面的使用竞争等。</p>
+<p>可以预见到，单例模式的一个基本要求是一个<strong>单例</strong>的特性。而如果要实现这个特性，仅仅在设计时去确保它只创建一次将是骗人骗己的。我们需要做的会是一个绝育，确保这个类会且只会被创建一次。</p>
+<p><img src="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/5-%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/Aspose.Words.dd48d7fc-1cb1-4ccd-95c2-6a5173fed41f.001.jpeg" alt="Aspose.Words.dd48d7fc-1cb1-4ccd-95c2-6a5173fed41f.001"></p>
+<p>要让一个类只能创建一次，我们必须堵死所有可以自由创建类以及可能导致类的复制的方法。显然，我们一个去禁止单例模式的类对象的new创建使用，要如此的话我们就需要从它的构造函数入手。</p>
+<p>我们可以直接删除(delete)掉默认构造函数，同时拒绝提供任何带参构造。同时，需要我们得知道c++内部是会自动提供一个拷贝构造函数的，所以对于这个函数我们也得进行删除，对应的，与拷贝构造函数绑定的&#x3D;重载函数也应该删除。至此，我们删除了一些与类的创建有关的一些函数。当然方法不止于此。</p>
+<p>我们还可以不删除函数而是将对应的函数放在private中实现等效的作用。毕竟private是无法通过类对象访问的，这样就避免了在外部程序通过调用new方法去创建多个类对象了。</p>
+<p>总总这些，只是解决了绝育这一步，但是我们需要考虑的还有我们对于这个单例模式下的类还是需要一个具体的示例的。而这个实例在设计中一般是通过静态成员变量来进行访问的，而且这个成员变量应该是本类的一个指针，也就是说，这个指针是提供给外界的唯一类接口，我们所有对这个类的访问和操作都必须经过这个指针。</p>
+<p>接下来，我们需要对这个指针进行初始化。毕竟在类中，你是无法对一个静态成员变量进行初始化的。</p>
+<p>类名* 类名作用域::静态成员指针&#x3D;new 类名;</p>
+<p>这个格式就是一般的单例模式的类的静态成员类指针初始化语句。</p>
+<p>在然后我们需要将这个接口提供给程序，毕竟现在我们只是实例化了这个静态成员变量，由于是类的成员变量，且一般来说我们是将其放在一个private作用域的，所以我们是没有办法通过一个类对象去进行访问的。事实上，由于我们已经对类进行了绝育，所以我们其实是无法额外new一个对象出来的。这时候，我们一般需要额外定义一个静态公有方法，这个方法用于放回一个指针，而这个指针就是我们前面创建的静态类成员指针。也就是说，我们需要一个可通过类名直接调用的静态成员函数来充当接口的作用。</p>
+<p>至此，我们已经有了一个单例类的指针，而且我们可以在项目中的任何地方去取得这个指针，只要我们包含对应的文件。当然，需要注意单例这个属性，不要在多文件中去错误的创建多个静态类成员指针。保证单例的性质。</p>
+<p>接下来看一下这种设计的可行性基础。或者说，我们需要重新认识下静态成员等的特性。</p>
+<p>首先，静态成员是属于类的，所有类都共享一份。并且能通过对象和类名来进行访问，当然，一般来说，对于静态成员只通过类名来进行访问好进行区分。这是单例模式使用这种静态成员来实现单例的基础。只有这种唯一性能够保证我们在整个程序中都保证唯一。</p>
+<p>其次，我们需要注意下我们的静态类指针一般和构造函数都是房子private中的。这里就需要注意下静态成员的访问权限了。静态成员在初始化和定义时是无视其的作用域，也就是说，即使我们声明这个静态成员的属性为private。我们仍可在外部对这个静态成员进行定义和初始化。或者说，我们必须在外部进行对应的初始化和定义。一般来说，我们的初始化和定义都会是绑定在一条语句的。一条只含有定义的语句将会导致一个未定义行为，毕竟你不知道对应的二进制文件位置处是一个怎么样的文本串。话又说回来了，对于一个初始化了的静态成员，我们在二进制文件中的位置是.date段，对于未初始化的成员变量，其的位置是在.bss段。扯远了，回来。</p>
+<p>在进行初始化和定义后，这个类静态变量的访问权限将会回复，一个静态公有变量将还是能够通过类名进行直接访问，但是如果是私有或者是保护的，那么类名就没有权限去访问到这个成员了。这时就需要用到一个类接口。一般来说，还是将这个接口设计为静态公有函数以进行区分，当然理论上你还是可以通过一个普通的公有成员函数。但是其实这样做并不是很安全。注意设计模式中的<strong>依赖倒转原则</strong>，我们完全可以通过一个静态函数来充当一个中间层来屏蔽影响，这样同时能够提供更好的逻辑上的隔离。</p>
+<p>就比如我们可以通过这种设计来达到一种懒加载或者说延迟初始化的效果，我们完全可以在外层初始化这个静态指针时初始化为一个nullptr，然后在之后进行利用这个指针去找到对应的示例时再去进行对象的创建，而这个创建可以在对应的静态公有函数中去。</p>
+
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/" class="post-title-link" itemprop="url">三个原则</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-12-20 20:22:19" itemprop="dateCreated datePublished" datetime="2024-12-20T20:22:19+08:00">2024-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-12-23 13:03:51" itemprop="dateModified" datetime="2024-12-23T13:03:51+08:00">2024-12-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.5k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>对于所有的设计模式，无论思想是什么，都遵守三个基本原则：</p>
+<p>单一职责原则，开放封闭原则，依赖倒转原则</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/4-%E4%B8%89%E4%B8%AA%E5%8E%9F%E5%88%99/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2024/12/20/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/3-%E7%B1%BB%E9%97%B4%E5%85%B3%E7%B3%BB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -946,7 +1157,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-count">49</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -991,7 +1202,7 @@
           <h3 class="widget-title">Tag Cloud</h3>
           <div id="myCanvasContainer" class="widget tagcloud">
               <canvas width="250" height="250" id="resCanvas" style="width=100%">
-                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
               </canvas>
           </div>
       </div>
@@ -1046,13 +1257,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">Symbols count total: </span>
-    <span title="Symbols count total">149k</span>
+    <span title="Symbols count total">157k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">Reading time total &asymp;</span>
-    <span title="Reading time total">2:15</span>
+    <span title="Reading time total">2:23</span>
 </div>
 
         
