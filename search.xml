@@ -3220,4 +3220,45 @@
         <tag>创建型设计模式</tag>
       </tags>
   </entry>
+  <entry>
+    <title>逻辑杂谈(1)</title>
+    <url>/2025/04/06/%E7%BD%91%E7%BB%9C/event/</url>
+    <content><![CDATA[<h1 id="杂谈"><a href="#杂谈" class="headerlink" title="杂谈"></a>杂谈</h1><p>​	在本文中，不会对于一个时间进行详细的深入，而是对于一些我了解到的一些机制进行一些简单的分析。</p>
+<span id="more"></span>
+
+<h2 id="启动时机"><a href="#启动时机" class="headerlink" title="启动时机"></a>启动时机</h2><p>​	在最近下一个异步读写的实例中，我看到了几点有点意思的需要我在学习中注意的点，其中一个，就是对应的异步驱动到底是由谁来进行实现的。</p>
+<p>​	只要你学过QT，你应该知道一件事，对于所有的框架，其本身最重要的就是其底层的执行机制。不同于库这种由编写者来实现各种方法代码的调用，对于框架来说，你是内部的代码执行逻辑的编写者，由框架本身来执行你的代码，我们在框架中进行编写的过程只是对于一个个代码执行逻辑的补充罢了。</p>
+<p>​	对于ASIO中的异步执行逻辑也是如此。如果说，前面的同步逻辑还是大部分是由我们来调用对应的库函数；那么这里的异步读写，则是我们根据框架的代码规范来提供我们想要的执行逻辑，由框架内部来自动调用我们的代码进行执行。所以，在使用框架的时候，我们非常需要注意，或者说了解的东西，一马当先的应该是对应的框架的执行逻辑，即使不进行深入的了解，也应该粗浅的有个认识。</p>
+<p>​	对于asio的异步读写来说，其内部维护了一个事件循环队列。就类似于线程池中的那种轮训机制，由框架本身来提供对应的事件调度等操作。那么，对于一个框架的使用者来说，其需要注意的是什么。其需要知道的是框架本身的启动时机已经对应的执行时机。而对于ASIO的异步逻辑来说，粗浅来看，其执行对应的逻辑可以视为一个io_context在进行维护，这也就是为什么我们在一些地方会看到对应的主程序上存在对应的创建对应的服务器类后再执行对应的run操作。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;boost/asio.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Session.h&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//特别需要注意的是，_ioc才是各种读写操作的执行者</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        boost::asio::io_context _ioc;</span><br><span class="line">        <span class="function">Server <span class="title">s</span><span class="params">(_ioc,<span class="number">10086</span>)</span></span>;</span><br><span class="line">        _ioc.<span class="built_in">run</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">catch</span> (std::exception&amp; e) &#123;</span><br><span class="line">        std::cerr &lt;&lt; <span class="string">&quot;Exception: &quot;</span> &lt;&lt; e.<span class="built_in">what</span>() &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	对于一个服务器来说，其本质上的启动时机，并不是其在本对象创建时启动的，当然，你可以在类内去进行对应的封装，但是并不建议那么干，因为这样就不符合单一职责原则了，存在了对应的耦合。好了，回过头来，为什么说这里的io_context类的run操作才是一个服务器的真正启动时机呢。</p>
+<p>​	因为对于服务器的事务来说，其本身其实是一系列的程序处理逻辑与I&#x2F;O操作构成的。其中最主要的是对应的程序处理逻辑，I&#x2F;O操作是在程序处理逻辑中派生出来的操作。而ASIO就侧重到了这一点。那么我们的程序处理逻辑到底是什么呢，其实这里就可以使用到我们的状态机的概念了。在我的理解中，对于一个程序来说，其执行一个函数方法时的程序执行流的快照，此时就可以被视为一个程序的状态，当程序开始执行另一个函数方法时，此时可以视为其由一个状态转向了另外一个状态，即状态的转移。</p>
+<p>​	在我的理解中，对应的上下文中的事件注册就是这样的思想。在初始时，其规定了一系列会被外部事件触发的状态，这些外部事件是相对于本身的类对象来说的，而对于类来说，来自库函数的一系列异步函数就可以是这些外部事件，用户通过自己的设计为这些函数设置了自己的一些状态转移的方式，或者说，对应的状态转移后会到达的另外一个状态。每个状态只专注于离他最近的状态，在·这种设计中，通过一些编写者的设计，可以实现一种回环式的状态转移。</p>
+<p>​	</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">Server::<span class="built_in">Server</span>(boost::asio::io_context&amp; ioc, <span class="type">short</span> port):_ioc(ioc),</span><br><span class="line">_acceptor(_ioc,tcp::<span class="built_in">endpoint</span>(tcp::<span class="built_in">v4</span>(),port))</span><br><span class="line">&#123;</span><br><span class="line">	std::cout &lt;&lt; <span class="string">&quot;Server start success on port: &quot;</span> &lt;&lt; port &lt;&lt; std::endl; </span><br><span class="line">	<span class="built_in">start_accept</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Server::start_accept</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Session* new_session = <span class="keyword">new</span> <span class="built_in">Session</span>(_ioc);</span><br><span class="line">	_acceptor.<span class="built_in">async_accept</span>(new_session-&gt;<span class="built_in">getSocket</span>(), std::<span class="built_in">bind</span>(&amp;Server::handle_accept, <span class="keyword">this</span>, new_session,</span><br><span class="line">		std::placeholders::_1));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Server::handle_accept</span><span class="params">(Session* new_session, <span class="type">const</span> boost::system::error_code&amp; error)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!error) &#123;</span><br><span class="line">		new_session-&gt;<span class="built_in">Start</span>();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">delete</span> new_session;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">start_accept</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	如上，我们来推导一下对应的状态转移方式。首先在外部，我们调用了对应的类的构造函数，此时构造函数中产生了一次显式的状态转移，由构造函数转向了对应的start_accept();执行流。在该执行流中，我们调用了对应的外部异步函数<code>async_accept</code>。需要注意的是，由于这里是异步的，所以这里也就不会阻塞。换句话说，这里的函数调用并不会导致一种状态转移。而是会在对应的上下文也就是io_context中去注册一种状态转移方式。这种状态转移的触发点是<code>async_accept</code>，而对应的转移点是<code>Server::handle_accept</code>执行流。</p>
+<p>​	接下来我们来模拟下触发的情况，假设这里的<code>async_accept</code>函数被触发了。由于这里是由外部框架调用的，所以我们可以不太关心这里的触发逻辑，但我们需要知道的是什么时候会触发，简单来说，当计算机接受到来自外部的连接数据包时，其会解析并且触发对应的函数方法。这里简单假设，我们这里的async_accept被触发了，那么对应的接下来的执行逻辑会是什么呢？自然是执行我们绑定在该函数的下一个状态，即对应的<code>handle_accept</code>方法。</p>
+<p>​	额外需要注意一点的是，在由ASIO框架管理的上下文中，每一个状态的触发只会触发一次，在触发之后对应的状态会过期，想要再次出发需要提前添加对应的处理逻辑。回来到我们这里的<code>handle_accept</code>函数。可以看到，在该函数里面，我们又进行了一次状态的转移，至于这里的内部实现，我们先不进行了解，只需要知道的是，这里的方法不存在额外的状态转移以及状态注册，只是单纯的处理逻辑，当然，我们并不关心这里面的关于完成这个处理逻辑所必须的状态转移。</p>
+<p>​	接下来注意到一个特别注意的一点，这里的start_accept函数的作用。我们前面已经说过，对应的状态转移每注册一次才能触发一次，这里的作用就是如此，在每次结束完对应的处理逻辑之后，在最后再次进行对应的状态转移逻辑的注册。以此来实现对应的逻辑循环调度。而这种状态转移的思想，就是对应的整个服务器逻辑的基础。</p>
+<p>​	简单的自己去模拟一下对应的程序执行流的转移吧，这能够让你很好的理解我到底在说什么。</p>
+<h2 id="传输时机"><a href="#传输时机" class="headerlink" title="传输时机"></a>传输时机</h2><p>​	接下来我将对在客户端发送过来请求后进行一些分析。</p>
+<p>​	我们先来重复一些东西，在服务器端启动之后，其一般存在着一个监听行为，对于程序代码来说，其只是添加了一个对应的<code>async_accept</code>函数已经对应的状态转移式。在接下来由程序员编写的代码的执行其实就被托管到了io_context上。我们来分析一下再客户端发送请求并且服务器端收到后的行为。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">_acceptor.<span class="built_in">async_accept</span>(new_session-&gt;<span class="built_in">getSocket</span>(), std::<span class="built_in">bind</span>(&amp;Server::handle_accept, <span class="keyword">this</span>, new_session,</span><br><span class="line">std::placeholders::_1));</span><br></pre></td></tr></table></figure>
+
+<p>​	当服务器端成功识别到对应的客户端请求时，其会触发对应的状态转移中的下一位，在这里即是对应的处理函数。但是，只要你了解一点网络基础，你就应该知道这里的不会直接使用对应的监听套接字进行处理，而是创建一个新的连接套接字进行处理。这里也脱离不开OS中的底层逻辑。所以你可以大致推测一下这里的执行逻辑。停下来想一下……</p>
+<p>​	在这一次的状态转移触发中，其使用了预分配的一个套接字，然后，其为该套接字绑定了一定的行为，或者说，状态转移式。即，当数据包到达时，其会触发对应的handle_accept函数。那么，这里的函数是怎么被触发的呢？</p>
+<p>​	想象一下，当你触发一个连接并且成功创建对应的套接字之后，你需要将接受到的数据给套接字进行读取，该套接字才会进行对应的处理。这里也是如此，所以我们这里需要考虑的一点是，该创建的新套接字时如何接受对应的数据的……这一块其实我也不是很理解，但简单来说，这是通过OS的配合来实现的，毕竟当你计算机接受到来自外部的一个数据包之后，其会先位于其TCP的缓冲区之后，接下来才会从缓冲区往特定套接字的缓冲区去进行映射，这里也是如此，由于我本人对于这块还不是很了解，为了避免误人子弟，这里不再深入。</p>
+<p>​	在这里只需简单记住一点，在接收到外部发来的数据包之后，会由ASIO来创建对应的新的连接套接字初始化。接着为其绑定一个基础的状态转移式，一般是对应的处理数据方法。需要特别注意的是，如果没有绑定数据处理的方法，那么这里将会导致数据包的舍弃，换句话说，就相当于你客户端连接上来了，但是服务器端没有进行对应的解析处理，就比如你做你的，我做我的情况，这是绝对不允许的，因为这样没有意义的同时还浪费了资源。</p>
+<p>​	接下来，我们来简单看一下在连接建立之后之后的数据处理。一般来说，服务器与客户端之间的回话并不会简单的结束，其可能会持续一段时间。那么在接下来的处理过程中，关于数据包的转发会是一个什么情况呢？就我目前粗浅的理解来说，此时会由OS来进行俩段连接的确保，毕竟对于一个连接，实际上是由一个唯一的四元组来进行维持。当网卡接受到对应的数据之后，其会进行对应的解析，找到对应的元组另一端来进行对应的数据的转发。也就是说，对于建立连接后的数据转发，其是一个独立的操作。</p>
+<p>​	我们最后再来考虑一点，就是对于来自客户端的数据的处理。首先，我们已经明白一件事，在目前的框架中，所有的执行逻辑其实是一个状态转移的过程。在一次状态转移的过程中，其会再次添加一次对应的状态转移来进行一种类似于轮询的实现。那么，问题来了，假设我们现在客户端存在一个处理逻辑，其存在着一个会删除当前客户端会话的行为。而当前由于客户端的一些误操作等，此时在接受到对应的数据包之后进入了对应的删除回话逻辑，而且在删除回话之前其又添加了一次对应的状态转移逻辑。但是在此时，由客户端一方结束了进程，此时由于底层设计，服务器端会接受到一个来自于客户端的fin包，此时又触发了对应的状态转移逻辑。如果此时原先的哪个逻辑已经执行完了对应回话的删除，但是(你应该简单的了解一些程序的执行流)，此时的fin包处理又执行到了对应的回话销毁程序。但是由于本会话已经被销毁，此时程序想要再次销毁的话，此时是有可能发生的。那么其会导致一种双重析构的严重错误，甚至于导致服务器崩溃。那么，我们该如何来避免这种情况呢。</p>
+]]></content>
+      <categories>
+        <category>网络</category>
+      </categories>
+      <tags>
+        <tag>网络</tag>
+      </tags>
+  </entry>
 </search>
