@@ -186,7 +186,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/25/%E6%95%B0%E6%8D%AE%E5%BA%93/1.3-Modern%20SQL(function)/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/04/06/%E7%BD%91%E7%BB%9C/stickyBag/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -202,7 +202,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2025/02/25/%E6%95%B0%E6%8D%AE%E5%BA%93/1.3-Modern%20SQL(function)/" class="post-title-link" itemprop="url">Modern SQL-Function</a>
+            <a href="/2025/04/06/%E7%BD%91%E7%BB%9C/stickyBag/" class="post-title-link" itemprop="url">粘包</a>
         </h2>
 
         <div class="post-meta">
@@ -211,23 +211,17 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
+              
 
-              <time title="Created: 2025-02-25 08:51:15" itemprop="dateCreated datePublished" datetime="2025-02-25T08:51:15+08:00">2025-02-25</time>
+              <time title="Created: 2025-04-06 22:51:15 / Modified: 23:36:25" itemprop="dateCreated datePublished" datetime="2025-04-06T22:51:15+08:00">2025-04-06</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-03-05 21:15:19" itemprop="dateModified" datetime="2025-03-05T21:15:19+08:00">2025-03-05</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                  <a href="/category/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
                 </span>
             </span>
 
@@ -237,14 +231,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>260</span>
+              <span>9.3k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>1 mins.</span>
+              <span>8 mins.</span>
             </span>
 
         </div>
@@ -256,18 +250,53 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="窗口函数"><a href="#窗口函数" class="headerlink" title="窗口函数"></a>窗口函数</h1><p>​	接下来看一些DBMS中存在的一些窗口函数。</p>
-<p>![image-20250225092345760](.&#x2F;1.3-Modern SQL(function)&#x2F;image-20250225092345760.png)</p>
-<p>​	上面那句话其实就是说一个窗口函数是对于输出序列中的一个特定窗口范围内的数据进行操作的函数。这个函数于聚合函数相似，都是对于一系列的元组执行操作的函数，但是这个函数于聚合函数最大的不同就是窗口函数并不会对输出结果进行合并，而是每个输入元组都能获得一个窗口函数的一个输出属性。</p>
-<p>​	没意思，润</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/02/25/%E6%95%B0%E6%8D%AE%E5%BA%93/1.3-Modern%20SQL(function)/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
+          <h1 id="粘包"><a href="#粘包" class="headerlink" title="粘包"></a>粘包</h1><blockquote>
+<p>​	在本节中，我将会针对于服务器粘包已经对应的处理进行一次解析，这根本上是我针对于粘包该现象进行的自我的分析，如有错误，请告诉我，谢谢。</p>
+</blockquote>
+<p>​	针对于粘包该现象，其本质就是由于在客户端和服务器端的数据调度不一致导致的，对于客户端来说，由于TCP内部的对于数据包的特殊处理，其内部需要发送出去的数据包是可能会先被积压到一起，等到积攒到一定程序时才进行发送的。对应的TCP发送并不会保证数据包单独的发送。对于底层来说，无论你是要发送什么，在其看来都是一段字节流，所谓的发送，就是将积攒的字节流进行一次整体的发送。而由于该段字节流在实际上可能蕴含了多个子数据包，所以如果服务器端不对其进行对应的解析，其会导致收到的数据失去了其的对应意义。我们这里就是需要处理这一种现象。具体关于粘包出现的解析，可以自己寻找材料了解。</p>
+<p>​	</p>
+<h2 id="粘包原因"><a href="#粘包原因" class="headerlink" title="粘包原因"></a>粘包原因</h2><p>​	对于粘包，我们需要看到其出现的本质是什么，其本质就是服务器端对于来自客户端的数据包的内部组成没有一种敏感度，或者说，对于客户端发送过来的数据包总是默认识别为一个大数据包，且会从头开始解析到尾。那么这里我们可以猜测一种解决方案，就是在我们的双端通信中去添加一种协议，规定由用户端发送的数据包上需要添加上对应的其发送的数据包的数据信息长度。对于服务器端来说，其在接收解析对应的数据包时其会先对其进行一次解析。其先解析出对应的数据包长度信息，然后根据该信息去进行对应的数据读取以及处理。而这里的这种思想，其实就是对应的TLV青春版，有兴趣可以去了解下。</p>
+<p>​	简单来说，我们在接下来会规定一种协议，在每个数据包的起始位置，都附上在该次发送的数据包的长度。因此，我们需要来重新设计一下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MsgNode</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">CSession</span>;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MsgNode</span>(<span class="type">char</span> * msg, <span class="type">short</span> max_len):_total_len(max_len + HEAD_LENGTH),_cur_len(<span class="number">0</span>)&#123;</span><br><span class="line">        _data = <span class="keyword">new</span> <span class="type">char</span>[_total_len<span class="number">+1</span>]();</span><br><span class="line">        <span class="built_in">memcpy</span>(_data, &amp;max_len, HEAD_LENGTH);</span><br><span class="line">        <span class="built_in">memcpy</span>(_data+ HEAD_LENGTH, msg, max_len);</span><br><span class="line">        _data[_total_len] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">MsgNode</span>(<span class="type">short</span> max_len):_total_len(max_len),_cur_len(<span class="number">0</span>) &#123;</span><br><span class="line">        _data = <span class="keyword">new</span> <span class="type">char</span>[_total_len <span class="number">+1</span>]();</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">MsgNode</span>() &#123;</span><br><span class="line">        <span class="keyword">delete</span>[] _data;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Clear</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ::<span class="built_in">memset</span>(_data, <span class="number">0</span>, _total_len);</span><br><span class="line">        _cur_len = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">short</span> _cur_len;</span><br><span class="line">    <span class="type">short</span> _total_len;</span><br><span class="line">    <span class="type">char</span>* _data;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>​	如上，这里不会进行分析，我们直接来进入我们对应的服务器端在接收到一段来自底层的数据包是需要进行的处理逻辑吧。</p>
+<p>​	首先对于服务器的结构，我们需要对其接受对应的数据包的逻辑进行一些优化。首先可以先来添加几个独立的结构</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//收到的消息结构</span></span><br><span class="line">std::shared_ptr&lt;MsgNode&gt; _recv_msg_node;</span><br><span class="line"><span class="type">bool</span> _b_head_parse;</span><br><span class="line"><span class="comment">//收到的头部结构</span></span><br><span class="line">std::shared_ptr&lt;MsgNode&gt; _recv_head_node;</span><br></pre></td></tr></table></figure>
+
+<p>​	在上述代码中，创建了一个智能指针管理对应的接受头部的节点，另一个智能指针管理对应的信息的节点，还有一个用来标识当前是否已经解析完对应的头部信息。同时需要一个对于客户端和服务器端双端都进行约束的条件，这里设置了对应的数据包的长度和数据头的长度，单位长度为1字节</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MAX_LENGTH  1024*2</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HEAD_LENGTH 2</span></span><br></pre></td></tr></table></figure>
+
+<p>​	接下来是一段大长段代码，一点点进行分析吧</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">CSession::HandleRead</span><span class="params">(<span class="type">const</span> boost::system::error_code&amp; error, <span class="type">size_t</span>  bytes_transferred, std::shared_ptr&lt;CSession&gt; shared_self)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>​	首先我们需要知道该函数的调用时机，对于该函数来说，我们在外部注册其为在ASIO框架接受到外部的数据包并进行读取时的回调函数，请注意，我们这里使用的外部注册函数是<code>async_read_some</code>函数，即在每次调用到对应的读取函数后都会进行一次回调函数，这里正是对应的回调逻辑。</p>
+<p>​	再明确一下这里的参数意义。第一个<code>const boost::system::error_code&amp; error</code>代表由框架自行处理时会返回的错误码，无需太过在意，主要是第二个参数<code>size_t  bytes_transferred</code>，这个参数是在本次读取中框架在缓冲区中读取到的数据的长度，第三个参数不必在意，是为了解决我们前面的生命周期的问题的。</p>
+<p>​	首先来进入到我们这里面的逻辑，首先就是一个简单的错误检测，略过。接下来是一个循环判断，由其来进行对应的当前剩余未处理的字节长的表示判断。这里为什么会有这个我们之后再说。先进入我们的处理逻辑</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">if (!_b_head_parse) &#123;</span><br><span class="line">	//收到的数据不足头部大小</span><br><span class="line">	if (bytes_transferred + _recv_head_node-&gt;_cur_len &lt; HEAD_LENGTH) &#123;</span><br><span class="line">		memcpy(_recv_head_node-&gt;_data + _recv_head_node-&gt;_cur_len, _data+ copy_len, bytes_transferred);</span><br><span class="line">		_recv_head_node-&gt;_cur_len += bytes_transferred;</span><br><span class="line">		::memset(_data, 0, MAX_LENGTH);</span><br><span class="line">		_socket.async_read_some(boost::asio::buffer(_data, MAX_LENGTH), </span><br><span class="line">			std::bind(&amp;CSession::HandleRead, this, std::placeholders::_1, std::placeholders::_2, shared_self));</span><br><span class="line">		return;</span><br><span class="line">	&#125;</span><br><span class="line">	//收到的数据比头部多</span><br><span class="line">	//头部剩余未复制的长度</span><br><span class="line">	int head_remain = HEAD_LENGTH - _recv_head_node-&gt;_cur_len;</span><br><span class="line">	memcpy(_recv_head_node-&gt;_data + _recv_head_node-&gt;_cur_len, _data+copy_len, head_remain);</span><br><span class="line">	//更新已处理的data长度和剩余未处理的长度</span><br><span class="line">	copy_len += head_remain;</span><br><span class="line">	bytes_transferred -= head_remain;</span><br><span class="line">	//获取头部数据</span><br><span class="line">	short data_len = 0;</span><br><span class="line">	memcpy(&amp;data_len, _recv_head_node-&gt;_data, HEAD_LENGTH);</span><br><span class="line">	cout &lt;&lt; &quot;data_len is &quot; &lt;&lt; data_len &lt;&lt; endl;</span><br><span class="line">	//头部长度非法</span><br><span class="line">	if (data_len &gt; MAX_LENGTH) &#123;</span><br><span class="line">		std::cout &lt;&lt; &quot;invalid data length is &quot; &lt;&lt; data_len &lt;&lt; endl;</span><br><span class="line">		_server-&gt;ClearSession(_uuid);</span><br><span class="line">		return;</span><br><span class="line">	&#125;</span><br><span class="line">	_recv_msg_node = make_shared&lt;MsgNode&gt;(data_len);</span><br><span class="line"></span><br><span class="line">	//消息的长度小于头部规定的长度，说明数据未收全，则先将部分消息放到接收节点里</span><br><span class="line">	if (bytes_transferred &lt; data_len) &#123;</span><br><span class="line">		memcpy(_recv_msg_node-&gt;_data + _recv_msg_node-&gt;_cur_len, _data + copy_len, bytes_transferred);</span><br><span class="line">		_recv_msg_node-&gt;_cur_len += bytes_transferred;</span><br><span class="line">		::memset(_data, 0, MAX_LENGTH);</span><br><span class="line">		_socket.async_read_some(boost::asio::buffer(_data, MAX_LENGTH), </span><br><span class="line">			std::bind(&amp;CSession::HandleRead, this, std::placeholders::_1, std::placeholders::_2, shared_self));</span><br><span class="line">		//头部处理完成</span><br><span class="line">		_b_head_parse = true;</span><br><span class="line">		return;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	memcpy(_recv_msg_node-&gt;_data + _recv_msg_node-&gt;_cur_len, _data + copy_len, data_len);</span><br><span class="line">	_recv_msg_node-&gt;_cur_len += data_len;</span><br><span class="line">	copy_len += data_len;</span><br><span class="line">	bytes_transferred -= data_len;</span><br><span class="line">	_recv_msg_node-&gt;_data[_recv_msg_node-&gt;_total_len] = &#x27;\0&#x27;;</span><br><span class="line">	cout &lt;&lt; &quot;receive data is &quot; &lt;&lt; _recv_msg_node-&gt;_data &lt;&lt; endl;</span><br><span class="line">	//此处可以调用Send发送测试</span><br><span class="line">	Send(_recv_msg_node-&gt;_data, _recv_msg_node-&gt;_total_len);</span><br><span class="line">	//继续轮询剩余未处理数据</span><br><span class="line">	_b_head_parse = false;</span><br><span class="line">	_recv_head_node-&gt;Clear();</span><br><span class="line">	if (bytes_transferred &lt;= 0) &#123;</span><br><span class="line">		::memset(_data, 0, MAX_LENGTH);</span><br><span class="line">		_socket.async_read_some(boost::asio::buffer(_data, MAX_LENGTH), </span><br><span class="line">			std::bind(&amp;CSession::HandleRead, this, std::placeholders::_1, std::placeholders::_2, shared_self));</span><br><span class="line">		return;</span><br><span class="line">	&#125;</span><br><span class="line">	continue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	该段函数是我在对应的头数据包未完成对应的头部解析时会进行的逻辑处理，而这个是通过我们前面的头部处理标识量进行控制的。在进入该处理块之后。我们需要做的就是去读取数据包中的数据去进行更多的我们头部数据的读取构建。首先，我们需要去判断当前的本次读取中的数据包中是否能够支持我们本次的头部数据包的构建以此来进行进一步的数据包的分流。</p>
+<p>​	这里只需要一个简单的判断，即判断当前头部数据包中的数据长度以及该次读取中的数据长度总和是否大于规定的头部数据包的长度，这里即通过<code>if (bytes_transferred + _recv_head_node-&gt;_cur_len &lt; HEAD_LENGTH)</code>来进行控制的。当程序满足当前条件时，意味着当前收到的数据以及已有的数据头不足以构建我们的头部信息，此时我们需要做什么呢？停下来想一想……首先，即使当前数据包不够信息，我们也不能够丢弃，我们需要把当前读取到的所有剩余数据拷贝到对应的头部数据结构中。需要注意的是，在这里我们添加了对应的copy_len偏移，在此时我们看不出其有什么作用，接下来我们会看到的。</p>
+<p>​	在进行对应的数据往头部数据包中的拷贝之后，我们需要进行对应的头部数据结构体的一些信息的更新，在这里即是对应的结构的头部信息的已有长度的更新。接下来想一想处理逻辑应该是什么。既然我们当前的数据包以及被读取处理完毕，那么本次读取就应该作废了，我们接下来应该做的是关闭这次读取并且再次开启一次读取事件的注册(需要注意的是，虽然在这里没有给出，但是在对应的读取时间绑定的回调函数中，还是我们现在的这个HandleRead执行流)。有了前面的基础，你应该也能理解这里的操作会出现怎么样的行为。</p>
+<p>​	简单模拟一下，在这种情况下，在程序成功执行完本次读取的解析以及对应的头部结构体的数据更新之后，该程序会重新注册一个写函数以及对应的回调函数，接着，再次触发写时间，由框架调度再次进入这个HandleRead的执行流当中。此时由于我们前面没有更新对应的头部处理标志，所以这里还是会进入对应的处理逻辑中。</p>
+<p>​	但是在这一次中，我们去假设，<code>if (bytes_transferred + _recv_head_node-&gt;_cur_len &lt; HEAD_LENGTH)</code>在本次的逻辑处理中不再满足，换句话说，在本次中，读取的字节长度至少能够满足我们接下来的头部信息的构建，也就是所谓的<code>&gt;=HEAD_LENGTH</code>。那么我们先来猜测一下之类的处理逻辑，显然是应该先把我们的头部信息给构建完毕，然后去处理我们接下来可能存在的未处理的数据。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> head_remain = HEAD_LENGTH - _recv_head_node-&gt;_cur_len;</span><br><span class="line"><span class="built_in">memcpy</span>(_recv_head_node-&gt;_data + _recv_head_node-&gt;_cur_len, _data+copy_len, head_remain);</span><br><span class="line"><span class="comment">//更新已处理的data长度和剩余未处理的长度</span></span><br><span class="line">copy_len += head_remain;</span><br><span class="line">bytes_transferred -= head_remain;</span><br><span class="line"><span class="comment">//获取头部数据</span></span><br><span class="line"><span class="type">short</span> data_len = <span class="number">0</span>;</span><br><span class="line"><span class="built_in">memcpy</span>(&amp;data_len, _recv_head_node-&gt;_data, HEAD_LENGTH);</span><br><span class="line">cout &lt;&lt; <span class="string">&quot;data_len is &quot;</span> &lt;&lt; data_len &lt;&lt; endl;</span><br><span class="line"><span class="comment">//头部长度非法</span></span><br><span class="line"><span class="keyword">if</span> (data_len &gt; MAX_LENGTH) &#123;</span><br><span class="line">                std::cout &lt;&lt; <span class="string">&quot;invalid data length is &quot;</span> &lt;&lt; data_len &lt;&lt; endl;</span><br><span class="line">                _server-&gt;<span class="built_in">ClearSession</span>(_uuid);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line">_recv_msg_node = <span class="built_in">make_shared</span>&lt;MsgNode&gt;(data_len);</span><br></pre></td></tr></table></figure>
+
+<p>​	首先，我们先去判断在当前的情况下对应的头部构建的所需字节，这个可以通过简单的约定头部长度减去对应的已有信息长度去进行处理。接下就是一个简单的偏移地址复制和部分信息的更新。这里你可能会疑惑一点，既然这里已经完成了对应的头部信息的构建，为什么这里不直接对于标志进行更新？别急，再等一会。</p>
+<p>​	接下来就到了我们的下一个处理环节，在我们构建完对应的头部节点之后，我们需要对其中蕴含的信息进行处理，这里的由于我们基础的设计就只是在头部中附上对应的数据块的大小，所以我们这里只需要将对应的数据进行读取然后进行解析即可。我们来看一下这里的处理方式。我们这里考虑直接将其拷贝到一个地址中，该地址所代表的是一个short变量，由于我们的头部长度只有2字节，所以我们的short长度是完全可以容纳的。在这里拷贝之后，我们需要了解的一点只是这里的数据读取其实就是对应的数据解析形式的不同，当我们完成拷贝之后，我们就已经完成了一个变量的构造，可以对其进行一个正常的使用。</p>
+<p>​	接下来我们对其进行了一个简单的错误检测，判断当前的数据包长度是否超出了我们约定的长度，如果非法，直接删除回话。否则我们就可以继续进行我们接下来的网络数据包的处理了。</p>
+<p>​	</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">_recv_msg_node = <span class="built_in">make_shared</span>&lt;MsgNode&gt;(data_len);</span><br><span class="line"></span><br><span class="line"><span class="comment">//消息的长度小于头部规定的长度，说明数据未收全，则先将部分消息放到接收节点里</span></span><br><span class="line"><span class="keyword">if</span> (bytes_transferred &lt; data_len) &#123;</span><br><span class="line">	<span class="built_in">memcpy</span>(_recv_msg_node-&gt;_data + _recv_msg_node-&gt;_cur_len, _data + copy_len, bytes_transferred);</span><br><span class="line">	_recv_msg_node-&gt;_cur_len += bytes_transferred;</span><br><span class="line">	<span class="built_in">memset</span>(_data, <span class="number">0</span>, MAX_LENGTH);</span><br><span class="line">	_socket.<span class="built_in">async_read_some</span>(boost::asio::<span class="built_in">buffer</span>(_data, MAX_LENGTH), </span><br><span class="line">	std::<span class="built_in">bind</span>(&amp;CSession::HandleRead, <span class="keyword">this</span>, std::placeholders::_1, std::placeholders::_2, shared_self));</span><br><span class="line">	<span class="comment">//头部处理完成</span></span><br><span class="line">	_b_head_parse = <span class="literal">true</span>;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	在成功确定我们需要对数据包中的剩余数据进行处理之后，我们首先要创建一个根据我们前面的头部长度中储存的大小来储存的消息结构，即这里的<code>_recv_msg_node = make_shared&lt;MsgNode&gt;(data_len);</code>再接下来的处理逻辑其实就跟我们一开始的整个读取逻辑的进入没有什么区别了，这里就简单自己了解一下即可。不再进行说明。</p>
+<p>​	接下来跟头部处理一样，如果此时剩余的数据能够完全构建我们的数据包结构，那么我们还需要对于剩余的数据进行一次再次的HandleRead对调处理。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">memcpy</span>(_recv_msg_node-&gt;_data + _recv_msg_node-&gt;_cur_len, _data + copy_len, data_len);</span><br><span class="line">_recv_msg_node-&gt;_cur_len += data_len;</span><br><span class="line">copy_len += data_len;</span><br><span class="line">bytes_transferred -= data_len;</span><br><span class="line">_recv_msg_node-&gt;_data[_recv_msg_node-&gt;_total_len] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">cout &lt;&lt; <span class="string">&quot;receive data is &quot;</span> &lt;&lt; _recv_msg_node-&gt;_data &lt;&lt; endl;</span><br><span class="line"><span class="comment">//此处可以调用Send发送测试</span></span><br><span class="line"><span class="built_in">Send</span>(_recv_msg_node-&gt;_data, _recv_msg_node-&gt;_total_len);</span><br><span class="line"><span class="comment">//继续轮询剩余未处理数据</span></span><br><span class="line">_b_head_parse = <span class="literal">false</span>;</span><br><span class="line">_recv_head_node-&gt;<span class="built_in">Clear</span>();</span><br><span class="line"><span class="keyword">if</span> (bytes_transferred &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">	::<span class="built_in">memset</span>(_data, <span class="number">0</span>, MAX_LENGTH);</span><br><span class="line">	_socket.<span class="built_in">async_read_some</span>(boost::asio::<span class="built_in">buffer</span>(_data, MAX_LENGTH), </span><br><span class="line">	std::<span class="built_in">bind</span>(&amp;CSession::HandleRead, <span class="keyword">this</span>, std::placeholders::_1, std::placeholders::_2, shared_self));</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">continue</span>;</span><br></pre></td></tr></table></figure>
+
+<p>​	在这里有一点你可能在初次看到时会感到疑惑的点，就是这里的拷贝<code>memcpy(_recv_msg_node-&gt;_data + _recv_msg_node-&gt;_cur_len, _data + copy_len, data_len);</code>为什么会按照固定的长度data_len进行拷贝。停下来想一想……</p>
+<p>​	原因在于这个执行流所在的外部一层执行流中，回想一下此时处在哪里，是处在对应的if判断成立，也就是说当前已经处理了对应的头部文件并且执行到这里的<code>bytes_transferred</code>已经被更新为了当前剩余的未读取数据长度了。此时还能进入这里的执行流意味着剩余的长度一定能够支持我们的整段的数据段的读取，而且由于我们这里是位于头部信息为完成构造的大前提下的，这个前提的隐藏信息就是我们当前的数据段是一个为空的情况。这也是为什么我们这里的拷贝直接使用这种构造的原因。当然，这里保留了对应的</p>
+<p> <code>+ _recv_msg_node-&gt;_cur_len</code>操作，从我个人观点来看其是可以删去的，但是为了一种可读性可以进行保留，至于删除该操作是否会导致一些问题，我在之后再确认一下。</p>
+<p>​	在这里，我们进行了对应的内存信息的数据块拷贝之后，我们需要进行一些额外的处理，还记得现在应该是一个什么状态吗。此时对应的数据包已经被读取了对应的头部信息。同时，其剩余的信息能够支撑起对应的数据包的构建，在这里就同时支撑起了对应的数据包的构建。那么在此时我们来考虑一下当前剩余的缓存区的数据的状态。其只会存在俩种情况，剩余未读取数据为空，或者在构建完我们此次的数据块之后还留存着一些数据未进行处理。但是本质上，这俩种情况都应该导致一种状态的转移，就是此时应该转移成一个头数据块和内容数据块均未构建的情况，即我们在一开始进入该HandleRead函数的情况。我们这里的节点清理以及对应的回调函数绑定可以提现该行为。</p>
+<p>​	接下来注意另一种情况，即这里会进入continue执行流的情况。当进入该执行流时，就意味着当前剩余的缓存区数据还不为空，换句话说，就是在处理完一个完整的数据头的构建以及对应的数据包的处理之后，还存在未处理的数据，此时在逻辑上该段数据是一个新数据包的数据头信息。那么此时的状态就像什么呢，没错，就像我们在一个数据包刚进行对应的HandleRead处理一致，所以我们这里直接使用了对应的<code>continue</code>使得程序直接跳回到了程序入口处的处理逻辑省去了退出去重新注册以及对应的调度开销。</p>
+
       
     </div>
 
@@ -287,7 +316,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.2-modernSQL(nested)/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/04/06/%E7%BD%91%E7%BB%9C/event.1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -303,7 +332,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.2-modernSQL(nested)/" class="post-title-link" itemprop="url">Modern SQL-NESTED</a>
+            <a href="/2025/04/06/%E7%BD%91%E7%BB%9C/event.1/" class="post-title-link" itemprop="url">逻辑杂谈(1.0.1)</a>
         </h2>
 
         <div class="post-meta">
@@ -312,115 +341,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
+              
 
-              <time title="Created: 2025-02-23 21:51:15" itemprop="dateCreated datePublished" datetime="2025-02-23T21:51:15+08:00">2025-02-23</time>
+              <time title="Created: 2025-04-06 21:51:15 / Modified: 21:24:03" itemprop="dateCreated datePublished" datetime="2025-04-06T21:51:15+08:00">2025-04-06</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-03-05 20:07:38" itemprop="dateModified" datetime="2025-03-05T20:07:38+08:00">2025-03-05</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>3.6k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>3 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="嵌套查询"><a href="#嵌套查询" class="headerlink" title="嵌套查询"></a>嵌套查询</h1><p>​	有一说一，modernSQL的内容是真的多，甚至于我都不想继续了，不过这些其实都还无所谓，毕竟现在也还只是停留在理论阶段，还没有开始真正的上手。</p>
-<p>​	在之前我们接触到的都是一些单个查询语句的情况，但是有时候这种单层的结构不能满足我们的需求。自然而然，多层也就是嵌套查询也就出现了。这种查询方式其实很好理解。就是将一个查询语句的输出作为另外一个查询语句的一个子句的输入。在格式上表现出来的其实就是一个查询中包含着另外的查询。通常情况下，这种架构下的查询语句很难优化。而且一般来说，这种嵌套查询，可以出现在任何一个子句中，只要你这样做存在着抽象价值。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.2-modernSQL(nested)/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/23/%E7%BD%91%E7%BB%9C/asio%E7%BB%88%E7%AB%AF/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/23/%E7%BD%91%E7%BB%9C/asio%E7%BB%88%E7%AB%AF/" class="post-title-link" itemprop="url">ASIO-ENDPOINT</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-02-23 21:51:15" itemprop="dateCreated datePublished" datetime="2025-02-23T21:51:15+08:00">2025-02-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-04-02 22:07:52" itemprop="dateModified" datetime="2025-04-02T22:07:52+08:00">2025-04-02</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -456,29 +380,18 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <blockquote>
-<p>前情提醒，在本次学习中，我使用的代码将会是llfc大佬的代码，因为实在是懒的敲，这段博客可以视为是我个人的一个笔记。具体的可以去看llfc大佬的个人博客喵</p>
-</blockquote>
-<h2 id="终端节点"><a href="#终端节点" class="headerlink" title="终端节点"></a>终端节点</h2><p>​	在网络编程中，联系端对端的基础单位是一个套接字，对于asio来说，其实现了一层自己的框架，或者说规则。其对于使用其来开发的网络编程中进行了一系列的封装。在这其中，终端该概念，就是基于套接字进行的封装。但是需要注意的是，终端节点本身并不是一个套接字，只有对其进行进一步的包装，其才能成为一个合格的套接字。</p>
-<p>​	我们来看到对应的创建终端节点的代码。正如在之前的tinyweb去创建一个套接字的前置工作一样，我们这里也需要对于终端节点的构造进行一些前置准备。简单来说，为了生成一个终端节点，我们需要先去包装一个ip地址以及对应的窗口。类比对应的getaddrinfo系统调用即使前俩个参数的信息。那么对于ip地址的构建，其又存在着什么规则呢，请看看下面源码。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">client_end_point</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::string raw_ip_address = <span class="string">&quot;127.4.8.1&quot;</span>;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">short</span> port_num=<span class="number">3333</span>;</span><br><span class="line">    boost::system::error_code ec;</span><br><span class="line">    asio::ip::address ip_address = asio::ip::<span class="built_in">make_address</span>(raw_ip_address,ec);</span><br><span class="line">    <span class="keyword">if</span>(ec.<span class="built_in">value</span>()!=<span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        std::cout&lt;&lt;<span class="string">&quot;Failed to parse the IP adderss,Error code = &quot;</span>&lt;&lt;ec.<span class="built_in">value</span>()&lt;&lt;<span class="string">&quot;.Message is &quot;</span>&lt;&lt;ec.<span class="built_in">message</span>();</span><br><span class="line">        <span class="keyword">return</span> ec.<span class="built_in">value</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    asio::ip::<span class="function">tcp::endpoint <span class="title">ep</span><span class="params">(ip_address,port_num)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​	这里以客户端的终端节点创建为例，在创建节点前，我们需要优先知道所需要连接的服务器端的ip地址。有了这个ip地址，再配合我们自己声明的一个用于储存错误代码的<code>boost::system::error_code</code>成员，我们可以进行<code>make_address</code>函数的调用。该函数位于<code>asio::ip</code>域下，使用一个ip地址和一个错误储存码来构建一个在asio中合格意义的ip地址。</p>
+          <hr>
 <blockquote>
-<p>​	前面的传入ip地址只是一个字符串，直接使用其来进行通信具有太多的风险，使用类来对其进行包装能使得程序更加健壮。</p>
+<p>本文中进行了对于另外一篇文章的简单总结和简化，可以在阅读完这篇文章之后去进行另外一篇文章的阅读，即逻辑杂谈（1）</p>
 </blockquote>
-<p>​	对于第二个参数，顾名思义，其是一个错误储存码，储存着在该次创建过程中的状态信息，当且仅当在函数正常返回时返回0.对于这种简单的错误处理，之后将不再进行赘述。</p>
-<p>​	在创建完一个封装完毕的ip地址之后，我们可以使用其来构建我们的ip地址。在asio中，相对于之前直接使用c系统调用来进行创建的最大不同点是，我们在这里不必再对其进行一些属性信息在传递参数上的设置。更简单的。C++实现的asio通过类作用域来进行一个区分，这样既显式的指出了我们在创建一个终端节点时的繁琐，而且大大提高了使用的连接的可读性。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">asio::ip::<span class="function">tcp::endpoint <span class="title">ep</span><span class="params">(ip_address,port_num)</span></span>;</span><br></pre></td></tr></table></figure>
-
-<p>​	在该类对象创建中，通过传入一个ip地址和对应的端口号，我们可以对其进行一个绑定，由于这是一个客户端，所以这里指定的其实就是对应的服务器端的服务提供位置。除此之外，还可以看到，在该类成员构造之前，我们使用了一系列的类作用域限定符。通过<code>ip::tcp::endpoint</code>这种层次上的逻辑，我们不难推断出在该终端节点中我们使用的协议以及该成员变量的用处。</p>
-<p>​	接下来来看到对应与客户端节点的服务器端节点的创建，正如一般的网络编程的服务器端设置比客户端设置简单一样。对应的服务器端由于使用的端口地址被固定为了本地地址，所以这里的终端节点的创建也更加简单。但是，这是基于简单的实现的。在asio或者更加现代的网络库中，对于机器监听的设置更加灵活。对于一个进程所请求的监听设置，其可能不再局限于一个</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span>  <span class="title">server_end_point</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">// Step 1. Here we assume that the server application has</span></span><br><span class="line">    <span class="comment">//already obtained the protocol port number.</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">short</span> port_num = <span class="number">3333</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Step 2. Create special object of asio::ip::address class</span></span><br><span class="line">    <span class="comment">// that specifies all IP-addresses available on the host. Note</span></span><br><span class="line">    <span class="comment">// that here we assume that server works over IPv6 protocol.</span></span><br><span class="line">    asio::ip::address ip_address = asio::ip::address_v6::<span class="built_in">any</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Step 3.</span></span><br><span class="line">    asio::ip::<span class="function">tcp::endpoint <span class="title">ep</span><span class="params">(ip_address, port_num)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Step 4. The endpoint is created and can be used to </span></span><br><span class="line">    <span class="comment">// specify the IP addresses and a port number on which </span></span><br><span class="line">    <span class="comment">// the server application wants to listen for incoming </span></span><br><span class="line">    <span class="comment">// connections.</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​	在这里，我们需要对于一个计算机上的ip地址再进行一下分析。在很多情况下，我们其实都认为一个计算机存在一个自己唯一的ip地址。事实上也确实如此，但是！这是相对于整个互联网网络来说的。对于一个计算机本身，其还存在着一系列的用于本身的测试等作用的地址，就比如我们很熟悉的本地回环地址<code>localhost</code>。这个回环地址与计算机在公网上的地址是不一样的。</p>
-<p>​	回到我们这里的服务器端的地址的构建，这里其实本质上是将所有的本地使用的地址都绑定到了对应的类结构上了。这个可以去查看对应的<code>asio::ip::address</code>源码去了解。对应的，一但使用any进行对应的服务器ip地址的构建，其将能够接受来自本机上所有不同属性的请求。就比如，来自本地的IPV6协议网络请求，来自局域网和公网的网络请求等。但是，这并不意味着使用any绑定后该进程能够拦截所有来自外部的请求。对应的请求还是只能传输给对应的端口。这里也就是不必关心出现问题的原因。</p>
-<p>​	在创建出对应的IP地址之后，接下来的终端节点创建工作与客户端无异，这里就直接跳过了。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/04/06/%E7%BD%91%E7%BB%9C/event.1/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -498,7 +411,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/04/06/%E7%BD%91%E7%BB%9C/event/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -514,7 +427,193 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/" class="post-title-link" itemprop="url">Modern SQL-STRING</a>
+            <a href="/2025/04/06/%E7%BD%91%E7%BB%9C/event/" class="post-title-link" itemprop="url">逻辑杂谈(1)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-04-06 21:51:15 / Modified: 12:45:47" itemprop="dateCreated datePublished" datetime="2025-04-06T21:51:15+08:00">2025-04-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.8k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="杂谈"><a href="#杂谈" class="headerlink" title="杂谈"></a>杂谈</h1><p>​	在本文中，不会对于一个时间进行详细的深入，而是对于一些我了解到的一些机制进行一些简单的分析。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/04/06/%E7%BD%91%E7%BB%9C/event/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/04/04/%E7%BD%91%E7%BB%9C/async/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/04/04/%E7%BD%91%E7%BB%9C/async/" class="post-title-link" itemprop="url">ASYNC</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-04-04 21:51:15 / Modified: 19:34:49" itemprop="dateCreated datePublished" datetime="2025-04-04T21:51:15+08:00">2025-04-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>5.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>5 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="异步读写"><a href="#异步读写" class="headerlink" title="异步读写"></a>异步读写</h1><blockquote>
+<p>​	接下来主要了解一下对于ASIO中关于异步读写的模型，前情提醒，由于我是跟着另外一个博客学习的，所以自己的理解上面可能存在着一些错误的地方，如果知道，请斧正。</p>
+</blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/04/04/%E7%BD%91%E7%BB%9C/async/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/04/01/%E7%BD%91%E7%BB%9C/tiny/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/04/01/%E7%BD%91%E7%BB%9C/tiny/" class="post-title-link" itemprop="url">Tiny-Web</a>
         </h2>
 
         <div class="post-meta">
@@ -524,14 +623,112 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2025-02-23 21:51:15" itemprop="dateCreated datePublished" datetime="2025-02-23T21:51:15+08:00">2025-02-23</time>
+              <time title="Created: 2025-04-01 21:51:15" itemprop="dateCreated datePublished" datetime="2025-04-01T21:51:15+08:00">2025-04-01</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-03-05 21:15:06" itemprop="dateModified" datetime="2025-03-05T21:15:06+08:00">2025-03-05</time>
+                <time title="Modified: 2025-04-02 20:11:26" itemprop="dateModified" datetime="2025-04-02T20:11:26+08:00">2025-04-02</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>12k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>11 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="TINY-WEB"><a href="#TINY-WEB" class="headerlink" title="TINY WEB"></a>TINY WEB</h1><p>​	基于CSAPP的课本教程，我实现了一个简单的服务器demo。该demo仅仅只有250行，但是存在着一个服务器所必须的简单的提供服务的功能，在这里对其进行一个简单的复盘。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/04/01/%E7%BD%91%E7%BB%9C/tiny/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/03/19/%E6%95%B0%E6%8D%AE%E5%BA%93/8-%E4%BE%9D%E8%B5%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/03/19/%E6%95%B0%E6%8D%AE%E5%BA%93/8-%E4%BE%9D%E8%B5%96/" class="post-title-link" itemprop="url">依赖</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-03-19 16:51:15" itemprop="dateCreated datePublished" datetime="2025-03-19T16:51:15+08:00">2025-03-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-04-08 21:22:00" itemprop="dateModified" datetime="2025-04-08T21:22:00+08:00">2025-04-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -540,6 +737,101 @@
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="关系数据库设计"><a href="#关系数据库设计" class="headerlink" title="关系数据库设计"></a>关系数据库设计</h1><p>略去前置知识，保留一些比较重要的知识，不保证连贯性，需要自行阅读书本后再来进行串联起来</p>
+<hr>
+<h2 id="关系模式的分解"><a href="#关系模式的分解" class="headerlink" title="关系模式的分解"></a><strong>关系模式的分解</strong></h2><p>在数据库设计中，<strong>分解（Decomposition）</strong>是指将一个关系模式拆分为多个子模式，以减少冗余、消除数据异常，并提高数据一致性。</p>
+<hr>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/03/19/%E6%95%B0%E6%8D%AE%E5%BA%93/8-%E4%BE%9D%E8%B5%96/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/03/12/OS/2-paging/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/03/12/OS/2-paging/" class="post-title-link" itemprop="url">Paging</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-03-12 16:51:15 / Modified: 22:41:37" itemprop="dateCreated datePublished" datetime="2025-03-12T16:51:15+08:00">2025-03-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
                 </span>
             </span>
 
@@ -568,10 +860,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h1><p>​	在SQL中，自然也存在字符串这种元素。一般来说，SQL使用单引号**’ ‘**来标识这是一个字符串，同时在SQL标准中，数据库对于字符串大小写应该是一个敏感的状态。但是，很多数据库系统中，包括但不限于MySQL和SQL Server中，对于这些个标准都是存在一些选择的。例如在MySQL中，其对于字符串的大小写就是不敏感的，当然，你可以在MySQL中去使用对于的标准设置语句去进行调整。不过种种这些，都是一些小玩意，在使用具体的数据库时去进行适当的调整即可，没必要去进行一个个的深入了解。</p>
+          <h1 id="Paging"><a href="#Paging" class="headerlink" title="Paging"></a>Paging</h1><p>​	此篇是在我在OSTEP中看到内存虚拟化分页这一章时所遇到的。需要注意的是，此篇写时我还有点感冒后遗症，脑袋不大清晰，有些地方逻辑会存在混乱，谅解吧。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2025/02/23/%E6%95%B0%E6%8D%AE%E5%BA%93/1.1-modernSQL(string)/#more" rel="contents">
+              <a class="btn" href="/2025/03/12/OS/2-paging/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -596,7 +888,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/03/10/OS/1-syscall/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -612,7 +904,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL/" class="post-title-link" itemprop="url">Modern SQL</a>
+            <a href="/2025/03/10/OS/1-syscall/" class="post-title-link" itemprop="url">System Call</a>
         </h2>
 
         <div class="post-meta">
@@ -622,14 +914,114 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2025-02-17 21:51:15" itemprop="dateCreated datePublished" datetime="2025-02-17T21:51:15+08:00">2025-02-17</time>
+              <time title="Created: 2025-03-10 16:51:15" itemprop="dateCreated datePublished" datetime="2025-03-10T16:51:15+08:00">2025-03-10</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-03-05 21:14:58" itemprop="dateModified" datetime="2025-03-05T21:14:58+08:00">2025-03-05</time>
+                <time title="Modified: 2025-03-12 19:06:42" itemprop="dateModified" datetime="2025-03-12T19:06:42+08:00">2025-03-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>1.3k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="系统调用的本质解析"><a href="#系统调用的本质解析" class="headerlink" title="系统调用的本质解析"></a>系统调用的本质解析</h1><h2 id="1-为什么系统调用看起来像过程调用？"><a href="#1-为什么系统调用看起来像过程调用？" class="headerlink" title="1. 为什么系统调用看起来像过程调用？"></a>1. 为什么系统调用看起来像过程调用？</h2><p>在《OSTEP》一书中，提到了一个有趣的问题：为什么系统调用在高级语言层面上看起来像普通的过程调用？</p>
+<p>要理解这个问题，需要认识到计算机程序的本质：无论是操作系统（OS）还是用户程序，它们在运行时都是对数据的处理，而数据的处理依赖于 CPU 执行的底层指令。因此，我们可以从 <strong>数据</strong> 和 <strong>指令</strong> 这两个维度来分析系统调用的特殊性。</p>
+<hr>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/03/10/OS/1-syscall/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/" class="post-title-link" itemprop="url">Storage_Files & Pages</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-02-27 16:51:15" itemprop="dateCreated datePublished" datetime="2025-02-27T16:51:15+08:00">2025-02-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-03-05 21:15:34" itemprop="dateModified" datetime="2025-03-05T21:15:34+08:00">2025-03-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -647,14 +1039,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>3.4k</span>
+              <span>6.2k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>3 mins.</span>
+              <span>6 mins.</span>
             </span>
 
         </div>
@@ -666,10 +1058,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="Modern-SQL"><a href="#Modern-SQL" class="headerlink" title="Modern SQL"></a>Modern SQL</h1><h2 id="数据库系统"><a href="#数据库系统" class="headerlink" title="数据库系统"></a>数据库系统</h2><p><img src="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL/image-20250217233059625.png" alt="image-20250217233059625"></p>
+          <h1 id="储存管理"><a href="#储存管理" class="headerlink" title="储存管理"></a>储存管理</h1><h2 id="前情回顾"><a href="#前情回顾" class="headerlink" title="前情回顾"></a><strong>前情回顾</strong></h2><p>​	接下来，我将跟着15445的进度跳过中间的中级SQL和高级SQL和其他一些对于数据库的优化操作，直接跳到书籍的第三章节中来。正如15445在课程中所说的，这门课程主要是为了让我们了解一个数据库系统到底是什么，而不是了解数据库系统怎么来进行使用。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/1.0-modernSQL/#more" rel="contents">
+              <a class="btn" href="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/2-databaseStorage_Files/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -694,7 +1086,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/0-%E4%BB%8B%E7%BB%8D/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/3-databaseStorage_Log/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -710,7 +1102,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/0-%E4%BB%8B%E7%BB%8D/" class="post-title-link" itemprop="url">数据库介绍</a>
+            <a href="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/3-databaseStorage_Log/" class="post-title-link" itemprop="url">Storage_Logs-Structure Merge Trees & Tuples</a>
         </h2>
 
         <div class="post-meta">
@@ -720,14 +1112,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2025-02-17 21:51:15" itemprop="dateCreated datePublished" datetime="2025-02-17T21:51:15+08:00">2025-02-17</time>
+              <time title="Created: 2025-02-27 16:51:15" itemprop="dateCreated datePublished" datetime="2025-02-27T16:51:15+08:00">2025-02-27</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-03-05 21:14:12" itemprop="dateModified" datetime="2025-03-05T21:14:12+08:00">2025-03-05</time>
+                <time title="Modified: 2025-03-05 21:15:42" itemprop="dateModified" datetime="2025-03-05T21:15:42+08:00">2025-03-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -745,14 +1137,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>557</span>
+              <span>6.2k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>1 mins.</span>
+              <span>6 mins.</span>
             </span>
 
         </div>
@@ -764,412 +1156,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h1><p>​	在这一个分类中，将记录我的数据库学习过程，主要是个人在学习15-445网课的思考，敬请期待吧，没什么好说的，让我们开始吧。之后有什么要补充的将会在这篇文章中进行补充(如果没忘的话)。</p>
+          <h1 id="Storage"><a href="#Storage" class="headerlink" title="Storage"></a>Storage</h1><h1 id="Tuple-Oriented-Storage"><a href="#Tuple-Oriented-Storage" class="headerlink" title="Tuple-Oriented Storage"></a>Tuple-Oriented Storage</h1><p>​	在前面，我们初步了解了一种数据在底层的组织形式，在这里我们考虑一个问题，即使我们知道了一个数据的存在，我们需要怎么去找到这个数据呢？</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2025/02/17/%E6%95%B0%E6%8D%AE%E5%BA%93/0-%E4%BB%8B%E7%BB%8D/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/16/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E6%A8%A1%E7%89%88/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/16/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E6%A8%A1%E7%89%88/" class="post-title-link" itemprop="url">类模版</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-02-16 08:51:15" itemprop="dateCreated datePublished" datetime="2025-02-16T08:51:15+08:00">2025-02-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-28 15:10:24" itemprop="dateModified" datetime="2025-02-28T15:10:24+08:00">2025-02-28</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>5.6k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>5 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="模版"><a href="#模版" class="headerlink" title="模版"></a>模版</h1><p>​	模版是C++中一个相对重要的特性了，直接来吧</p>
-<h2 id="类模版"><a href="#类模版" class="headerlink" title="类模版"></a>类模版</h2><p>​	由于这种东西还是得上手去敲，所以我们在这里对很多内容将会进行简化。</p>
-<p>​	模版这种东西最直观的作用就是进行方法与所使用的数据类型之间的解耦，使得在设计方法时能够更加专注于特定功能的方法的构建而不必要去关注所使用的数据类型。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/02/16/C++%E5%AD%A6%E4%B9%A0/%E7%B1%BB%E6%A8%A1%E7%89%88/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/15/C++%E5%AD%A6%E4%B9%A0/%E9%AB%98%E7%B2%BE%E5%BA%A6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/15/C++%E5%AD%A6%E4%B9%A0/%E9%AB%98%E7%B2%BE%E5%BA%A6/" class="post-title-link" itemprop="url">迭代器与部分类回顾</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-02-15 17:51:15" itemprop="dateCreated datePublished" datetime="2025-02-15T17:51:15+08:00">2025-02-15</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-28 22:34:15" itemprop="dateModified" datetime="2025-02-28T22:34:15+08:00">2025-02-28</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">算法</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>1.1k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>1 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="高精度"><a href="#高精度" class="headerlink" title="高精度"></a>高精度</h1><h2 id="加法"><a href="#加法" class="headerlink" title="加法"></a>加法</h2><p>​	高精度的加法主要是逐位的加，在大于10时向前进位即可，需要注意的就是需要一开始进行位的补齐，以方便后续的运算。</p>
-<p>​	主要就是以下几个要点:</p>
-<ul>
-<li>对于进行运算的俩个字符串的位进行补齐，统一之后的位计算</li>
-<li>对于每个位进行简单加法运算的时候需要注意进位的时机</li>
-<li>对于运算后可能的额外位别给忘了</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/02/15/C++%E5%AD%A6%E4%B9%A0/%E9%AB%98%E7%B2%BE%E5%BA%A6/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/15/C++%E5%AD%A6%E4%B9%A0/%E8%BF%AD%E4%BB%A3%E5%99%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/15/C++%E5%AD%A6%E4%B9%A0/%E8%BF%AD%E4%BB%A3%E5%99%A8/" class="post-title-link" itemprop="url">迭代器与部分类回顾</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-02-15 17:51:15" itemprop="dateCreated datePublished" datetime="2025-02-15T17:51:15+08:00">2025-02-15</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-02-28 15:10:38" itemprop="dateModified" datetime="2025-02-28T15:10:38+08:00">2025-02-28</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>3.2k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>3 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>该篇是在对于std标准库的迭代器初步接触时所写，只是一些基本的常识以及对于部分类知识的回顾</p>
-<h1 id="迭代器"><a href="#迭代器" class="headerlink" title="迭代器"></a>迭代器</h1><h2 id="初步了解"><a href="#初步了解" class="headerlink" title="初步了解"></a>初步了解</h2><p>​	迭代器本身其实并没有什么特殊的，我们需要先从它存在的意义开始了解，对于一个迭代器，其的存在意义就是为一系列的容器提供一个通用的接口。通过这个接口，我们能够实现一系列的操作。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/02/15/C++%E5%AD%A6%E4%B9%A0/%E8%BF%AD%E4%BB%A3%E5%99%A8/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/" class="post-title-link" itemprop="url">DB环境构建</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-02-15 17:51:15" itemprop="dateCreated datePublished" datetime="2025-02-15T17:51:15+08:00">2025-02-15</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-03-13 11:20:34" itemprop="dateModified" datetime="2025-03-13T11:20:34+08:00">2025-03-13</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/JAVA/" itemprop="url" rel="index"><span itemprop="name">JAVA</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>1.2k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>1 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="数据库环境构建"><a href="#数据库环境构建" class="headerlink" title="数据库环境构建"></a>数据库环境构建</h1><p>​	对于一个普通的java项目，想要实现对于数据库操作的支持，及连接数据库以及对于数据库的增删查改等。需要一下几个操作(可能存在的操作)</p>
-<p>​</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/02/15/java/1-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%8E%AF%E5%A2%83%E6%9E%84%E5%BB%BA/#more" rel="contents">
+              <a class="btn" href="/2025/02/27/%E6%95%B0%E6%8D%AE%E5%BA%93/3-databaseStorage_Log/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1193,7 +1183,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/index.html/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/index.html/">1</a><span class="page-number current">2</span><a class="page-number" href="/index.html/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/index.html/page/5/">5</a><a class="extend next" rel="next" href="/index.html/page/3/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/index.html/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/index.html/">1</a><span class="page-number current">2</span><a class="page-number" href="/index.html/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/index.html/page/7/">7</a><a class="extend next" rel="next" href="/index.html/page/3/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -1261,20 +1251,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">50</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/category/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tag/">
           
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -1306,7 +1296,7 @@
           <h3 class="widget-title">Tag Cloud</h3>
           <div id="myCanvasContainer" class="widget tagcloud">
               <canvas width="250" height="250" id="resCanvas" style="width=100%">
-                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li></ul>
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag">操作系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">3</span></li></ul>
               </canvas>
           </div>
       </div>
@@ -1361,13 +1351,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">Symbols count total: </span>
-    <span title="Symbols count total">162k</span>
+    <span title="Symbols count total">215k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">Reading time total &asymp;</span>
-    <span title="Reading time total">2:27</span>
+    <span title="Reading time total">3:16</span>
 </div>
 
         

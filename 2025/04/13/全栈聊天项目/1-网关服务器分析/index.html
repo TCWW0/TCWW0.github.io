@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="项目架构分析​	在本文中，我将基于一个项目的结构进行一些分析，目的是为了清晰自己对于一个项目的熟悉。避免在之后不断扩展时丢失对于整个项目的掌控性。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="架构分析">
+<meta property="og:url" content="https://tcww0.github.io/2025/04/13/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/1-%E7%BD%91%E5%85%B3%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="项目架构分析​	在本文中，我将基于一个项目的结构进行一些分析，目的是为了清晰自己对于一个项目的熟悉。避免在之后不断扩展时丢失对于整个项目的掌控性。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-13T12:09:19.000Z">
+<meta property="article:modified_time" content="2025-04-13T01:56:22.254Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="项目">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://tcww0.github.io/2025/04/13/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/1-%E7%BD%91%E5%85%B3%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%88%86%E6%9E%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>架构分析 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/04/13/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/1-%E7%BD%91%E5%85%B3%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          架构分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-04-13 20:09:19 / Modified: 09:56:22" itemprop="dateCreated datePublished" datetime="2025-04-13T20:09:19+08:00">2025-04-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E9%A1%B9%E7%9B%AE/" itemprop="url" rel="index"><span itemprop="name">项目</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>13k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>11 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="项目架构分析"><a href="#项目架构分析" class="headerlink" title="项目架构分析"></a>项目架构分析</h1><p>​	在本文中，我将基于一个项目的结构进行一些分析，目的是为了清晰自己对于一个项目的熟悉。避免在之后不断扩展时丢失对于整个项目的掌控性。</p>
+<span id="more"></span>
+
+<h2 id="入口"><a href="#入口" class="headerlink" title="入口"></a>入口</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;CServer.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">try</span> &#123;</span><br><span class="line">		<span class="type">unsigned</span> <span class="type">short</span> port = <span class="built_in">static_cast</span>&lt;<span class="type">unsigned</span> <span class="type">short</span>&gt;(<span class="number">8080</span>);</span><br><span class="line">		net::io_context ioc&#123; <span class="number">1</span> &#125;;</span><br><span class="line">		boost::<span class="function">asio::signal_set <span class="title">signals</span><span class="params">(ioc, SIGINT, SIGTERM)</span></span>;</span><br><span class="line">		signals.<span class="built_in">async_wait</span>([&amp;ioc](<span class="type">const</span> boost::system::error_code&amp; error, <span class="type">int</span> signal_number) &#123;</span><br><span class="line">			<span class="keyword">if</span> (error) &#123;</span><br><span class="line">				<span class="keyword">return</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			ioc.<span class="built_in">stop</span>();</span><br><span class="line">		&#125;);</span><br><span class="line">		std::<span class="built_in">make_shared</span>&lt;CServer&gt;(ioc, port)-&gt;<span class="built_in">Start</span>();</span><br><span class="line">		std::cout &lt;&lt; <span class="string">&quot;GateServer listen the port &quot;</span> &lt;&lt; port &lt;&lt; std::endl;</span><br><span class="line">		ioc.<span class="built_in">run</span>();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">catch</span> (std::exception <span class="type">const</span>&amp; e)</span><br><span class="line">	&#123;</span><br><span class="line">		std::cerr &lt;&lt; <span class="string">&quot;Error: &quot;</span> &lt;&lt; e.<span class="built_in">what</span>() &lt;&lt; std::endl;</span><br><span class="line">		<span class="keyword">return</span> EXIT_FAILURE;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	这里是一个十分经典且简单的服务器启动流程，使用ASIO内部的信号已经事件驱动机制来实现优雅退出。并没有什么好说的。在这个入口逻辑中，我们需要知道的是其在错误处理逻辑的防御性编程之后，其进行了一个对应的服务器的启动，我们接下来来看这里的启动逻辑。</p>
+<h2 id="高层网关CServer"><a href="#高层网关CServer" class="headerlink" title="高层网关CServer"></a>高层网关CServer</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">CServer::Start</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> self = <span class="built_in">shared_from_this</span>();</span><br><span class="line">	_acceptor.<span class="built_in">async_accept</span>(_socket, [self](beast::error_code ec) &#123;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="comment">//出错放弃该连接并监听其他连接</span></span><br><span class="line">			<span class="keyword">if</span> (ec) &#123;</span><br><span class="line">				<span class="comment">//self-&gt;Start();</span></span><br><span class="line">				std::cout &lt;&lt; <span class="string">&quot;Accept error: &quot;</span> &lt;&lt; ec.<span class="built_in">message</span>() &lt;&lt; std::endl;</span><br><span class="line">				<span class="keyword">return</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">			<span class="comment">//创建新连接，并且创建HttpConnection管理该连接</span></span><br><span class="line">			std::<span class="built_in">make_shared</span>&lt;HttpConnection&gt;(std::<span class="built_in">move</span>(self-&gt;_socket))-&gt;<span class="built_in">Start</span>();</span><br><span class="line"></span><br><span class="line">			<span class="comment">//继续监听</span></span><br><span class="line">			self-&gt;<span class="built_in">Start</span>();</span><br><span class="line"></span><br><span class="line">		&#125;<span class="built_in">catch</span> (std::exception&amp; exp) &#123;</span><br><span class="line">			std::cerr &lt;&lt; <span class="string">&quot;Exception: &quot;</span> &lt;&lt; exp.<span class="built_in">what</span>() &lt;&lt; std::endl;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>​	在这个启动函数中，可以看到，其本身并不复杂，本质就是一个监听套接字的创建以及对应的监听行为注册。这里需要注意的是对于异步监听的回调函数的注册。这里使用的是匿名函数来实现回调逻辑的。并且这里通过传递一个自身对象来延长对象的生命周期避免被杀死。这里的回调处理逻辑中使用了又一次的匿名构造去实现对应的请求处理。由于我们本身设计的其实是一个Http服务器，所谓我们在设计中是存在一个HttpConnection类来处理所有的来自外部的请求的，一但出现一个请求，就单独创建一个对应的处理类进行处理。</p>
+<p>​	但是这里其实存在一个问题，不知道你有没有看到，下面是给出的.h文件以及修改后的start方法，自行查找现有的错误逻辑处。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;const.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;HttpConnection.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CServer</span> :<span class="keyword">public</span> std::enable_shared_from_this&lt;CServer&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="built_in">CServer</span>() = <span class="keyword">delete</span>;</span><br><span class="line">	<span class="built_in">CServer</span>(boost::asio::io_context&amp; ioc, <span class="type">unsigned</span> <span class="type">short</span>&amp; port);</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">Start</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	tcp::acceptor _acceptor;</span><br><span class="line">	net::io_context&amp; _ioc;</span><br><span class="line">	tcp::socket _socket; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>修改后的start方法</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">CServer::Start</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> self = <span class="built_in">shared_from_this</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 使用智能指针管理每个新的 socket</span></span><br><span class="line">	<span class="keyword">auto</span> new_socket = std::<span class="built_in">make_shared</span>&lt;tcp::socket&gt;(_ioc);</span><br><span class="line"></span><br><span class="line">	_acceptor.<span class="built_in">async_accept</span>(*new_socket, [self,new_socket](beast::error_code ec) &#123;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="comment">//出错放弃该连接并监听其他连接</span></span><br><span class="line">			<span class="keyword">if</span> (ec) &#123;</span><br><span class="line">				<span class="comment">//self-&gt;Start();</span></span><br><span class="line">				std::cout &lt;&lt; <span class="string">&quot;Accept error: &quot;</span> &lt;&lt; ec.<span class="built_in">message</span>() &lt;&lt; std::endl;</span><br><span class="line">				<span class="keyword">return</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">			<span class="comment">//创建新连接，并且创建HttpConnection管理该连接</span></span><br><span class="line">			std::<span class="built_in">make_shared</span>&lt;HttpConnection&gt;(std::<span class="built_in">move</span>(*new_socket))-&gt;<span class="built_in">Start</span>();</span><br><span class="line"></span><br><span class="line">			<span class="comment">//继续监听</span></span><br><span class="line">			self-&gt;<span class="built_in">Start</span>();</span><br><span class="line"></span><br><span class="line">		&#125;<span class="built_in">catch</span> (std::exception&amp; exp) &#123;</span><br><span class="line">			std::cerr &lt;&lt; <span class="string">&quot;Exception: &quot;</span> &lt;&lt; exp.<span class="built_in">what</span>() &lt;&lt; std::endl;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>请注意，这里是基于当前有限的逻辑流中去实现的逻辑，如果看源码，你会发现其中并没有创建新的套接字进行对应的传递，而这种操作的原因涉及到了对应的套接字的传递方式。简单说一下，就是通过俩次std::move方法来实现一个套接字的控制逻辑的转交</p>
+</blockquote>
+<p>​	好了，到此为止，我们理清了目前服务器的简单逻辑。在主函数中去启动对应的高层网关服务器。接着，其会将逻辑流转到对应的<code>CServer</code>的执行流，在<code>start</code>函数中，其会进行对应的异步监听事件的调用，注册对应的处理函数，由于我们职责的解耦，所以我们这里的逻辑其实就是将对应的连接套接字交给对应的<code>HttpConnection</code>类进行对应的处理。</p>
+<p>​	此时，由于我们在设计上的职责的解耦，此时提到的多层调用结构将不必关心我们这里的连接套接字，其会交由对应的处理类进行处理，我们还需要做的就是重新注册我们的对应监听逻辑来实现一个逻辑的闭环，实现服务器的不断监听。对于现有的俩层的分析结束。接下来需要看到我们的对于连接套接字进行处理的<code>HttpConnection</code>处理逻辑。</p>
+<h2 id="HttpConnection逻辑处理"><a href="#HttpConnection逻辑处理" class="headerlink" title="HttpConnection逻辑处理"></a>HttpConnection逻辑处理</h2><p>​	对于该类，我们在设计上希望其能实现的功能是对于来自外部的请求的处理。我们前面已经了解到，在高层逻辑结束后，该类所收到的其实是一个成功与客户端建立起连接的监听套接字。接下来该类将可以通过该套接字与客户端之间进行通信，同时将不必再去关注其他的高层逻辑。</p>
+<p>​	接下来，我们来看到对应的类设计模块</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">pragma</span> once</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;const.h&quot;</span></span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HttpConnection</span> :<span class="keyword">public</span> std::enable_shared_from_this&lt;HttpConnection&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">LoginSystem</span>;</span><br><span class="line">	<span class="built_in">HttpConnection</span>(tcp::socket socket);</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">Start</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">CheckDeadline</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">WriteResponse</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">HandleReq</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">PreParseGetParam</span><span class="params">()</span></span>;</span><br><span class="line">	tcp::socket _socket;</span><br><span class="line">	beast::flat_buffer _buffer&#123; <span class="number">8192</span> &#125;;</span><br><span class="line">	http::request&lt;http::dynamic_body&gt; _request;</span><br><span class="line">	http::response&lt;http::dynamic_body&gt;_response;</span><br><span class="line">	<span class="comment">//使用花括号使用时能够以更好的可读性的格式进行列出</span></span><br><span class="line">	net::steady_timer deadline_&#123; _socket.<span class="built_in">get_executor</span>(),std::chrono::<span class="built_in">seconds</span>(<span class="number">60</span>) &#125;;</span><br><span class="line"></span><br><span class="line">	std::string _get_url;			<span class="comment">//储存要解析的url</span></span><br><span class="line">	std::unordered_map&lt;std::string, std::string&gt; _get_params;	<span class="comment">//储存本次在参数解析中解析出的参数列表</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>​	首先需要再强调一点，在网络编程中，由于使用裸指针可能导致的对象过期而导致的严重内存问题，所以一般来说都是使用的智能指针来进行内存管理。但是智能指针在异步设计的一些函数本身也存在一些问题。因为异步函数是不会立刻被调用的，所以如果我们不注意对应的智能指针的引用计数变化，则可能会导致智能指针管理的对象会在一些不希望的地方就直接被析构掉。所以有一个很朴素的思想。对于所有需要用到一个智能指针所管理着的对象的回调函数，我们都往其中去传递一个智能指针的对象来增加我们的引用计数来保证我们的生命周期，这样能够保证在函数调用时智能指针的引用计数永远不可能为0，也就是说在回调函数使用对应的对象管理着的指针时，其永远有效。</p>
+<p>​	当然，这里也需要一个额外的帮助，就是ASIO对于它底层的事件队列中过期事件的处理，如果一个连接关闭了，有关其的所有事件都应该从队列中清除。这样我们对应的智能指针的引用计数才能够减少为0，对应的对象才能够被清除。否则，其会永远留存在内存中，导致我们的内存泄漏。</p>
+<p>​	这里也就是为什么我们经常能够看到继承<code>public std::enable_shared_from_this&lt;HttpConnection&gt;</code>的类出现的原因，有了这个，我们才能够对于类本身进行一个智能指针对象的拷贝，具体的可以自己去了解。</p>
+<hr>
+<blockquote>
+<p>​	接下来我们来看到这个类的设计逻辑。</p>
+</blockquote>
+<p>​	对于该类，我们需要的是对应的来自套接字的请求的逻辑处理，这其中最基本的应该是我们的读写处理，只有基于读写的操作才能够实现我们的双端通信。由于我们使用的是基于<code>beast</code>网络库的<code>http</code>实现，所以这里也就直接创建了对应的成员</p>
+<h3 id="启动逻辑"><a href="#启动逻辑" class="headerlink" title="启动逻辑"></a>启动逻辑</h3><p>​	首先来看到一个有意思的构造函数，其能够解决我们前面为什么不使用一个新的套接字也能够实现CServer的套接字紧缺的问题。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HttpConnection::<span class="built_in">HttpConnection</span>(tcp::socket socket) :_socket(std::<span class="built_in">move</span>(socket))&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	接下来是我们的<code>http</code>处理类的逻辑执行入口<code>start</code>函数</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpConnection::Start</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> self = <span class="built_in">shared_from_this</span>();</span><br><span class="line">	http::<span class="built_in">async_read</span>(_socket, _buffer, _request, [self](beast::error_code ec,std::<span class="type">size_t</span> bytes_transferred) &#123;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> (ec) &#123;</span><br><span class="line">				std::cout &lt;&lt; <span class="string">&quot;Http read error is &quot;</span> &lt;&lt; ec.<span class="built_in">what</span>() &lt;&lt; std::endl;</span><br><span class="line">				<span class="keyword">return</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			boost::<span class="built_in">ignore_unused</span>(bytes_transferred);</span><br><span class="line">			self-&gt;<span class="built_in">HandleReq</span>();</span><br><span class="line">			self-&gt;<span class="built_in">CheckDeadline</span>();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">catch</span> (std::exception&amp; ec) &#123;</span><br><span class="line">			std::cout &lt;&lt; <span class="string">&quot;exception is &quot;</span> &lt;&lt; ec.<span class="built_in">what</span>() &lt;&lt; std::endl;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>​	我们来分析一下这个函数的调用逻辑。对于外部，其会在创建一个由智能指针管理着的类对象后直接调用这里的<code>Start</code>逻辑。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">std::<span class="built_in">make_shared</span>&lt;HttpConnection&gt;(std::<span class="built_in">move</span>(*new_socket))-&gt;<span class="built_in">Start</span>();</span><br></pre></td></tr></table></figure>
+
+<p>​	此时我们的套接字在一系列的逻辑转移中已经成功绑定到了对应的建立起连接的套接字上了。也就是说我们接下来的所有读写操作，都是直接对于对应的连接套接字进行的。对于这里的异步读函数逻辑，其传递了一个缓冲区进行数据的接受，指定了最终的数据写入位置。这里我们还需要一点beast的基础，对于<code>http::request&lt;http::dynamic_body&gt; _request;</code>对象，其是一个容器，内部储存的是一个http报文请求，具体的格式自行了解。这里只需要了解的是，在http通信中，客户端发送过来的应该是一个标准的http请求，那么服务器端就能够基于该请求去直接解析对应的数据，而<code>beast</code>网络库为我们完成了对应的解析逻辑的封装。也就是说，在一个正确运行的http服务器之下，我们的<code>_socket</code>中开头的http请求内容将会被储存到我们的<code>_request</code>结构中去。</p>
+<p>​	在接受处理完对应的数据之后，其应该处理的是对应的回调函数。在该回调函数中，其进行了一定的防御式编程。我们主要注意到我们的<code>self-&gt;HandleReq(); self-&gt;CheckDeadline();</code>逻辑，其是对于我们的http请求的逻辑处理以及对于该次连接中我们的处理事件，如果一个请求的处理事件过长，我们直接判断其为恶意的，并且直接断开该连接。这里就显示这样简单的处理。</p>
+<hr>
+<blockquote>
+<p>​	了解完我们的Http处理类对于一些基础逻辑的设计之后，我们需要来进行对应的数据包处理逻辑</p>
+</blockquote>
+<h3 id="处理逻辑"><a href="#处理逻辑" class="headerlink" title="处理逻辑"></a>处理逻辑</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpConnection::HandleReq</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">//设置回答的版本，关于HTTP回答头的部分通用属性</span></span><br><span class="line">	_response.<span class="built_in">version</span>(_request.<span class="built_in">version</span>());</span><br><span class="line">	_response.<span class="built_in">keep_alive</span>(<span class="literal">false</span>);</span><br><span class="line">	<span class="keyword">if</span> (_request.<span class="built_in">method</span>() == http::verb::get) &#123;</span><br><span class="line">		<span class="built_in">PreParseGetParam</span>();</span><br><span class="line">		<span class="comment">//我们的LoginSystem中预先注册了一些URL所匹配的事务，如果没有，则会返回false</span></span><br><span class="line">		<span class="type">bool</span> success=LoginSystem::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">HandleGet</span>(_get_url, <span class="built_in">shared_from_this</span>());</span><br><span class="line">		<span class="keyword">if</span> (!success) &#123;</span><br><span class="line">			_response.<span class="built_in">result</span>(http::status::not_found);</span><br><span class="line">			_response.<span class="built_in">set</span>(http::field::content_type, <span class="string">&quot;type/plain&quot;</span>);</span><br><span class="line">			beast::<span class="built_in">ostream</span>(_response.<span class="built_in">body</span>()) &lt;&lt; <span class="string">&quot;url not found\r\n&quot;</span>;</span><br><span class="line">			<span class="built_in">WriteResponse</span>();</span><br><span class="line">			<span class="keyword">return</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		_response.<span class="built_in">result</span>(http::status::ok);</span><br><span class="line">		_response.<span class="built_in">set</span>(http::field::server, <span class="string">&quot;GateServer&quot;</span>);</span><br><span class="line">		<span class="built_in">WriteResponse</span>();</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (_request.<span class="built_in">method</span>() == http::verb::post) &#123;</span><br><span class="line">		<span class="built_in">PreParseGetParam</span>();</span><br><span class="line">		<span class="type">bool</span> success = LoginSystem::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">HandlePost</span>(_request.<span class="built_in">target</span>(), <span class="built_in">shared_from_this</span>());</span><br><span class="line">		<span class="keyword">if</span> (!success) &#123;</span><br><span class="line">			_response.<span class="built_in">result</span>(http::status::not_found);</span><br><span class="line">			_response.<span class="built_in">set</span>(http::field::content_type, <span class="string">&quot;type/plain&quot;</span>);</span><br><span class="line">			beast::<span class="built_in">ostream</span>(_response.<span class="built_in">body</span>()) &lt;&lt; <span class="string">&quot;url not found\r\n&quot;</span>;</span><br><span class="line">			<span class="built_in">WriteResponse</span>();</span><br><span class="line">			<span class="keyword">return</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		_response.<span class="built_in">result</span>(http::status::ok);</span><br><span class="line">		_response.<span class="built_in">set</span>(http::field::server, <span class="string">&quot;GateServer&quot;</span>);</span><br><span class="line">		<span class="built_in">WriteResponse</span>();</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	明确一下本函数的功能，其是为了在该处理类在接收解析完对应的http请求之后，进行我们的更加具体的逻辑处理。其最终的目的是构建出一个能够发送给客户端的数据包。</p>
+<p>​	在该处理函数中，我们进行了一定的逻辑分流，其先基于我们当前的一些需求设置了一些回复报头的属性，这部分可以自行进行定制，这里的硬编码对于部分人来说可能会看起来很难受。接下来，我们前面已经提到，我们的_rquest中已经储存了对应的http请求头中的一些格式信息，其中就包括了我们当前的请求类型，到底是一个GET类型还是一个POST类型。这里进行了一次分流，后续可能考虑独立出对应的处理逻辑。</p>
+<blockquote>
+<p>​	无论是在对应的GET逻辑，POST逻辑，还是之后可能扩展的一系列逻辑中，其本质的处理方式都时大差不差的，所以这里只取出一种来进行分析</p>
+</blockquote>
+<p>​	我们来看到对应的GET处理逻辑</p>
+<p>​	其内部的设计其实很简单，因为我们其实把具体的逻辑处理又给分发出去了，这是我们接下来需要了解的地方。在当前的逻辑中，我们会现对于整个<code>HTTP</code>请求中的<code>URI</code>进行解析，其中会包括一系列的解析函数，有兴趣可以自己分析一下。在解析完对应的<code>URI</code>之后，我们使用其中的<code>URL</code>进行对应的逻辑处理，由于我们这里的请求是<code>GET</code>类型。逻辑上分发的任务应该只是对应的静态资源的获取，所以这里直接传递了对应的<code>url</code>给我们的<code>LoginSystem</code>类对象。</p>
+<p>​	该方法会返回一个<code>bool</code>值标识该操作是否成功实现了对应的功能，我们接下来会根据对应的状态来设计我们的回复报文，这块的逻辑设计自行分析。这一块先这样简单的理解，接下来我们需要进入<code>LoginSystem</code>来观察到底的实现逻辑是怎么样的。</p>
+<h3 id="LoginSystem逻辑处理"><a href="#LoginSystem逻辑处理" class="headerlink" title="LoginSystem逻辑处理"></a>LoginSystem逻辑处理</h3><p>​	前文提到，我们在外部需要调用<code>LoginSystem</code>类来进行一些额外的底层逻辑的处理。对于该类，其的职责很明确，就是实现对于外部发送来的信息的解析已经处理，这系列信息将会是有关登录逻辑的。就比如我们登录验证码的收发等等，但是这里先不必深入如此。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">pragma</span> once</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;const.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HttpConnection</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> std::function&lt;<span class="type">void</span>(std::shared_ptr&lt;HttpConnection&gt;)&gt;HttpHandler;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LoginSystem</span> :<span class="keyword">public</span> Singleton&lt;LoginSystem&gt;</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">Singleton</span>&lt;LoginSystem&gt;;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	~<span class="built_in">LoginSystem</span>();</span><br><span class="line">	<span class="function"><span class="type">bool</span> <span class="title">HandleGet</span><span class="params">(std::string path,std::shared_ptr&lt;HttpConnection&gt; con)</span></span>;</span><br><span class="line">	<span class="function"><span class="type">bool</span> <span class="title">HandlePost</span><span class="params">(std::string path, std::shared_ptr&lt;HttpConnection&gt; con)</span></span>;</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">RegGet</span><span class="params">(std::string,HttpHandler handler)</span></span>;</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">RegPost</span><span class="params">(std::string url, HttpHandler handler)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="built_in">LoginSystem</span>();</span><br><span class="line">	std::map&lt;std::string, HttpHandler&gt;_post_handlers;</span><br><span class="line">	std::map&lt;std::string, HttpHandler&gt; _get_handlers;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>​	对于该类的处理，我们使用单例来实现对象的创建。毕竟在一个系统中并不需要多个登录类来对于我们处理逻辑的分流(至少我们这里不需要)。对于其内部的逻辑，其实是一种类似的事件驱动机制，就相当于外部会传入一些数据，该类将这些数据转换为一些有关的触发逻辑，然后根据这些触发逻辑在类内进行对应的逻辑跳转。</p>
+<p>​	我们来看到该类的核心</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">LoginSystem::<span class="built_in">LoginSystem</span>()</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">RegGet</span>(<span class="string">&quot;/get_test&quot;</span>, [](std::shared_ptr&lt;HttpConnection&gt; connection) &#123;</span><br><span class="line">		beast::<span class="built_in">ostream</span>(connection-&gt;_response.<span class="built_in">body</span>()) &lt;&lt; <span class="string">&quot;receive get_test req&quot;</span>;</span><br><span class="line">		<span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">auto</span>&amp; elem : connection-&gt;_get_params) &#123;</span><br><span class="line">			i++;</span><br><span class="line">			beast::<span class="built_in">ostream</span>(connection-&gt;_response.<span class="built_in">body</span>()) &lt;&lt; <span class="string">&quot;\nparam &quot;</span> &lt;&lt; i &lt;&lt; <span class="string">&quot;:key is &quot;</span> &lt;&lt; elem.first;</span><br><span class="line">			beast::<span class="built_in">ostream</span>(connection-&gt;_response.<span class="built_in">body</span>()) &lt;&lt; <span class="string">&quot;\nparam &quot;</span> &lt;&lt; i &lt;&lt; <span class="string">&quot;:value is &quot;</span> &lt;&lt; elem.second &lt;&lt; std::endl;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">RegPost</span>(<span class="string">&quot;/get_varifycode&quot;</span>, [](std::shared_ptr&lt;HttpConnection&gt;connection) &#123;</span><br><span class="line">		<span class="keyword">auto</span> body_str = boost::beast::<span class="built_in">buffers_to_string</span>(connection-&gt;_request.<span class="built_in">body</span>().<span class="built_in">data</span>());</span><br><span class="line">		std::cout &lt;&lt; <span class="string">&quot;received body id &quot;</span> &lt;&lt; body_str &lt;&lt; std::endl;</span><br><span class="line">		connection-&gt;_response.<span class="built_in">set</span>(http::field::content_type, <span class="string">&quot;text/json&quot;</span>);</span><br><span class="line">		Json::Value root;</span><br><span class="line">		Json::Reader reader;</span><br><span class="line">		Json::Value src_root;</span><br><span class="line">		<span class="type">bool</span> parse_success = reader.<span class="built_in">parse</span>(body_str,src_root);</span><br><span class="line">		<span class="keyword">if</span> (!parse_success) &#123;</span><br><span class="line">			std::cout &lt;&lt; <span class="string">&quot;Failed to parse JSON data!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">			root[<span class="string">&quot;error&quot;</span>] = ErrorCodes::Error_Json;</span><br><span class="line">			std::string jsonStr = root.<span class="built_in">toStyledString</span>();</span><br><span class="line">			beast::<span class="built_in">ostream</span>(connection-&gt;_response.<span class="built_in">body</span>()) &lt;&lt; jsonStr;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//将合法的JSON加载到对应的root中去</span></span><br><span class="line">		<span class="keyword">if</span> (!src_root.<span class="built_in">isMember</span>(<span class="string">&quot;email&quot;</span>))</span><br><span class="line">		&#123;</span><br><span class="line">			std::cout &lt;&lt; <span class="string">&quot;Failed to parse JSON data!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">			root[<span class="string">&quot;error&quot;</span>] = ErrorCodes::Error_Json;</span><br><span class="line">			std::string jsonStr = root.<span class="built_in">toStyledString</span>();</span><br><span class="line">			beast::<span class="built_in">ostream</span>(connection-&gt;_response.<span class="built_in">body</span>()) &lt;&lt; jsonStr;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">auto</span> email = src_root[<span class="string">&quot;email&quot;</span>].<span class="built_in">asString</span>();</span><br><span class="line">		std::cout &lt;&lt; <span class="string">&quot;email is &quot;</span> &lt;&lt; email &lt;&lt; std::endl;</span><br><span class="line">		root[<span class="string">&quot;error&quot;</span>] = <span class="number">0</span>;</span><br><span class="line">		root[<span class="string">&quot;email&quot;</span>] = src_root[<span class="string">&quot;email&quot;</span>];</span><br><span class="line">		std::string jsonStr = root.<span class="built_in">toStyledString</span>();</span><br><span class="line">		beast::<span class="built_in">ostream</span>(connection-&gt;_response.<span class="built_in">body</span>()) &lt;&lt; jsonStr;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	这里的处理逻辑是根据我们的高层规定去限制的，就比如Http请求的格式是GET,那么域名所紧跟着的内容就应该是串对应的资源地址，总总这些，都是我们高层协议的一部分。为了更好的分析，我们来使用<code>RegPost</code>的逻辑进行分析，对于该方法，其实需要了解我们类内是怎么设计对应的注册函数的。如下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">LoginSystem::RegGet</span><span class="params">(std::string url, HttpHandler handler)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	_get_handlers.<span class="built_in">insert</span>(<span class="built_in">make_pair</span>(url, handler));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">LoginSystem::RegPost</span><span class="params">(std::string url, HttpHandler handler)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	_post_handlers.<span class="built_in">insert</span>(<span class="built_in">make_pair</span>(url, handler));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	其实就是简单的将我们的对应的URL与可调用对象进行一次键值对的关联，通过解析用户输入的URI来实现URL的传输，进而来触发我们这里的处理逻辑。</p>
+<p>​	回到我们的<code>RegPost</code>处理逻辑。其现在的逻辑处理相对简单，就是对于当前连接的请求体数据进行一次解析，由于我们程序内部的使用都是面向一个字符串的，所以需要使用方法将我们的字节流数据转换为我们可以使用的字符串数据。接着我们根据对应的类型再去设置一些回复报文的信息。再然后，我们使用转换后的字符串流信息来进行解析，其内包含的即是客户端所发送来的信息，一但该解析过程中出现错误或者最终的解析结果中存在一些我们规定之外的数据。我们往其中写入一些错误信息并返回。如果各种都没有发生错误，这里简单的使用一个回写进行测试并返回。</p>
+<p>​	最后再来处理一下<code>Handle</code>系列函数的逻辑，这里只是简单的进行我们注册在映射逻辑中的方法的调用</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">LoginSystem::HandleGet</span><span class="params">(std::string path, std::shared_ptr&lt;HttpConnection&gt; con)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (_get_handlers.<span class="built_in">find</span>(path) == _get_handlers.<span class="built_in">end</span>()) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	_get_handlers[path](con);</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">LoginSystem::HandlePost</span><span class="params">(std::string path, std::shared_ptr&lt;HttpConnection&gt; con)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (_post_handlers.<span class="built_in">find</span>(path) == _post_handlers.<span class="built_in">end</span>()) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	_post_handlers[path](con);</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	通过这些，实现了一种简单的事件驱动。</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​	接下来进行一下这里的整个程序逻辑的简短分析。</p>
+<p>​	首先，其简单的启动一个服务器，然后将逻辑转向我们的<code>CServer</code>类，在该类中，我们启动了一个监听套接字并绑定了对应的回调函数。在回调函数中，我们实现了更一步的逻辑转移，将来自客户端的连接转移到对应的<code>HttpConnection</code>中去，由其来进行处理，其内部会进行我们<code>http</code>报文的解析以及<code>http</code>回复报文的构建。在这其中，会存在着来自<code>LoginSystem</code>模块的协助，对应的<code>HttpConnection</code>需要改模块来实现对应的逻辑实现，也就是说，该类进行的操作是一些简单的解析以及逻辑处理的分发。使得各个模块各司其职，逐渐构建其一个健壮的<code>HTTP</code>服务器。</p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2025/04/13/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/1-%E7%BD%91%E5%85%B3%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%88%86%E6%9E%90/" title="架构分析">https://tcww0.github.io/2025/04/13/全栈聊天项目/1-网关服务器分析/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 项目</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/10/%E7%BD%91%E7%BB%9C/multiThread/" rel="prev" title="线程模型">
+      <i class="fa fa-chevron-left"></i> 线程模型
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/15/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/2-redis%E5%BA%94%E7%94%A8/" rel="next" title="redis了解">
+      redis了解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">项目架构分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A5%E5%8F%A3"><span class="nav-number">1.1.</span> <span class="nav-text">入口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E5%B1%82%E7%BD%91%E5%85%B3CServer"><span class="nav-number">1.2.</span> <span class="nav-text">高层网关CServer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HttpConnection%E9%80%BB%E8%BE%91%E5%A4%84%E7%90%86"><span class="nav-number">1.3.</span> <span class="nav-text">HttpConnection逻辑处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E9%80%BB%E8%BE%91"><span class="nav-number">1.3.1.</span> <span class="nav-text">启动逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E9%80%BB%E8%BE%91"><span class="nav-number">1.3.2.</span> <span class="nav-text">处理逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LoginSystem%E9%80%BB%E8%BE%91%E5%A4%84%E7%90%86"><span class="nav-number">1.3.3.</span> <span class="nav-text">LoginSystem逻辑处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag">操作系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">3</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">215k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">3:16</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : 'e9347a4f8e27b23ef4963f02b5afa385',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
