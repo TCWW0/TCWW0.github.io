@@ -23,15 +23,15 @@
     var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="Redis 自动结构调优机制与用户接口视图一、整体概述Redis 在内部为不同数据结构提供了一套 自动结构优化机制，其目的是在保证性能和内存效率的前提下，自动选择合适的底层结构。这种机制对用户是 完全透明的，开发者在使用时无需关注底层细节，只需专注于对外暴露的接口。  二、用户层面的“三层视图”我们可以将 Redis 中的数据结构在用户侧抽象为三层：  第一层：顶层键值对 Redis 键空间中的">
+  <meta name="description" content="Redis 自动结构调优机制与用户接口视图一、整体概述Redis 在内部为不同数据结构提供了一套 自动结构优化机制，其目的是在保证性能和内存效率的前提下，自动选择合适的底层结构。这种机制对用户是 完全透明的，开发者在使用时无需关注底层细节，只需专注于对外暴露的接口。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="redis了解">
 <meta property="og:url" content="https://tcww0.github.io/2025/04/15/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/2-redis%E5%BA%94%E7%94%A8/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Redis 自动结构调优机制与用户接口视图一、整体概述Redis 在内部为不同数据结构提供了一套 自动结构优化机制，其目的是在保证性能和内存效率的前提下，自动选择合适的底层结构。这种机制对用户是 完全透明的，开发者在使用时无需关注底层细节，只需专注于对外暴露的接口。  二、用户层面的“三层视图”我们可以将 Redis 中的数据结构在用户侧抽象为三层：  第一层：顶层键值对 Redis 键空间中的">
+<meta property="og:description" content="Redis 自动结构调优机制与用户接口视图一、整体概述Redis 在内部为不同数据结构提供了一套 自动结构优化机制，其目的是在保证性能和内存效率的前提下，自动选择合适的底层结构。这种机制对用户是 完全透明的，开发者在使用时无需关注底层细节，只需专注于对外暴露的接口。">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2025-04-15T00:09:19.000Z">
-<meta property="article:modified_time" content="2025-04-15T00:41:12.141Z">
+<meta property="article:modified_time" content="2025-07-06T14:24:07.773Z">
 <meta property="article:author" content="TCWW">
 <meta property="article:tag" content="项目">
 <meta name="twitter:card" content="summary">
@@ -216,10 +216,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2025-04-15 08:09:19 / Modified: 08:41:12" itemprop="dateCreated datePublished" datetime="2025-04-15T08:09:19+08:00">2025-04-15</time>
+              <time title="Created: 2025-04-15 08:09:19" itemprop="dateCreated datePublished" datetime="2025-04-15T08:09:19+08:00">2025-04-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-07-06 22:24:07" itemprop="dateModified" datetime="2025-07-06T22:24:07+08:00">2025-07-06</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -264,6 +270,8 @@
       
         <hr>
 <h1 id="Redis-自动结构调优机制与用户接口视图"><a href="#Redis-自动结构调优机制与用户接口视图" class="headerlink" title="Redis 自动结构调优机制与用户接口视图"></a>Redis 自动结构调优机制与用户接口视图</h1><h2 id="一、整体概述"><a href="#一、整体概述" class="headerlink" title="一、整体概述"></a>一、整体概述</h2><p>Redis 在内部为不同数据结构提供了一套 <strong>自动结构优化机制</strong>，其目的是在保证性能和内存效率的前提下，自动选择合适的底层结构。这种机制对用户是 <strong>完全透明的</strong>，开发者在使用时无需关注底层细节，只需专注于对外暴露的接口。</p>
+<span id="more"></span>
+
 <hr>
 <h2 id="二、用户层面的“三层视图”"><a href="#二、用户层面的“三层视图”" class="headerlink" title="二、用户层面的“三层视图”"></a>二、用户层面的“三层视图”</h2><p>我们可以将 Redis 中的数据结构在用户侧抽象为三层：</p>
 <ol>
@@ -463,7 +471,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-count">64</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -508,7 +516,7 @@
           <h3 class="widget-title">Tag Cloud</h3>
           <div id="myCanvasContainer" class="widget tagcloud">
               <canvas width="250" height="250" id="resCanvas" style="width=100%">
-                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag">操作系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">4</span></li></ul>
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag">操作系统</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">6</span></li></ul>
               </canvas>
           </div>
       </div>
@@ -563,13 +571,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">Symbols count total: </span>
-    <span title="Symbols count total">218k</span>
+    <span title="Symbols count total">236k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">Reading time total &asymp;</span>
-    <span title="Reading time total">3:18</span>
+    <span title="Reading time total">3:34</span>
 </div>
 
         
