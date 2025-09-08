@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Distributed lock本节进行项目中分布式锁的使用的分析 ​	分布式锁是一种跨进程的保护全局共享资源的一种机制，实际上与普通的锁本身没有什么本质上的不同，只是视角不同，普通的锁最多也只是在进程内部，对于线程共享，协程共享等资源的保护，而分布式锁，其是在对于一些复杂分布式场景下的资源的保护。实现起来跟OS课上了解的基本锁实现没有什么区别，难度不大。因此，分布式锁的使用实际上不在于如何设计之">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式锁分析">
+<meta property="og:url" content="https://tcww0.github.io/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Distributed lock本节进行项目中分布式锁的使用的分析 ​	分布式锁是一种跨进程的保护全局共享资源的一种机制，实际上与普通的锁本身没有什么本质上的不同，只是视角不同，普通的锁最多也只是在进程内部，对于线程共享，协程共享等资源的保护，而分布式锁，其是在对于一些复杂分布式场景下的资源的保护。实现起来跟OS课上了解的基本锁实现没有什么区别，难度不大。因此，分布式锁的使用实际上不在于如何设计之">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/image-20250906141759990.png">
+<meta property="og:image" content="https://tcww0.github.io/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/image-20250906152003463.png">
+<meta property="article:published_time" content="2025-09-06T00:09:19.000Z">
+<meta property="article:modified_time" content="2025-09-06T11:21:19.014Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="项目">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/image-20250906141759990.png">
+
+<link rel="canonical" href="https://tcww0.github.io/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>分布式锁分析 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式锁分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-09-06 08:09:19 / Modified: 19:21:19" itemprop="dateCreated datePublished" datetime="2025-09-06T08:09:19+08:00">2025-09-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E9%A1%B9%E7%9B%AE/" itemprop="url" rel="index"><span itemprop="name">项目</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Distributed-lock"><a href="#Distributed-lock" class="headerlink" title="Distributed lock"></a><strong>Distributed lock</strong></h1><p>本节进行项目中分布式锁的使用的分析</p>
+<p>​	分布式锁是一种跨进程的保护全局共享资源的一种机制，实际上与普通的锁本身没有什么本质上的不同，只是视角不同，普通的锁最多也只是在进程内部，对于线程共享，协程共享等资源的保护，而分布式锁，其是在对于一些复杂分布式场景下的资源的保护。实现起来跟OS课上了解的基本锁实现没有什么区别，难度不大。因此，分布式锁的使用实际上不在于如何设计之上，而是在于为何使用，不使用可以吗，为了达成分布式锁的效果，是否存在别的更加简单的机制能够实现同样的效果呢？</p>
+<p>​	下面从多个问题方面进行分析。</p>
+<span id="more"></span>
+
+<h2 id="1-为什么要锁？"><a href="#1-为什么要锁？" class="headerlink" title="1. 为什么要锁？"></a>1. 为什么要锁？</h2><p>在本次分析中，我们围绕一个核心需求: <strong>单点登录</strong>。为什么要实现单点登录？首先是需要考虑到一个IM系统的特殊性，一般来说，IM软件是比较私密的软件，不会期望你一个账户能够多人同时在线，这样可能会导致一些潜在的信息泄露，就比如在你当前无感知的情况下存在一个用户登录了你的账户来窃取信息。当然，市面上存在一个其他的设计，就比如微信，其能够支持同个账户多台设备的同时登录，但是，对应的设备本身是存在区别的，就比如其允许的实际上是手机app，PC端，IPad端的同时登录，但是对于手机端，PC端这种，其同一时间只允许一个用户登录，这是一个IM所应该具有的基本素质。</p>
+<p>对于为什么要保持单点登录，我们再来分析一个更加明确的场景，还是先前的账户被窃取时另外一端在你在线或不在线登录的时候，用户期望的是什么？用户一定期望能够识别这种被窃取的行为，此时其会尝试去找回账户等动作，此时对应的关注点会在于账户窃取者的身上，而不是对应的IM运营方身上，这也是对于设计者本身的保护。我们应该提供一种保障，一种至少能够让用户识别当前账户是否安全的机制。更加抽象一点，我们期望的是一具完整的尸体能够让我们能够分析问题，而不是一具消失的尸体。</p>
+<p>而且实际上我们如果考虑后续移植APP端的话，会存在一个重要的场景，就比如如果手机APP端在不断的移动中基站变量，此时对应的IP已经改变，如何来保证对应的服务正确提供，此时就需要涉及到一个无损迁移，这个也涉及到一个异地登录的场景，虽然只是物理上移动导致的，但是本质上也是一种异地登录的需求(类似场景就比如高铁或火车上的移动)。当然，这个场景会更加复杂，其涉及到如何无损的迁移或保持连接，暂且不在本次的考虑范围中，本次先考虑简单的异地登录逻辑即可。</p>
+<p>回过头来。在明确单点登录这个需求之后，我们需要考虑如何来实现它。首先我们需要来回顾一下登录的流程</p>
+<img src="/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/image-20250906141759990.png" alt="image-20250906141759990" style="zoom:80%;">
+
+<p>在初始时刻，客户端通过携带登录的账户密码信息去到GateServer请求登录，GateServer收到该请求会回解析该数据并通过grpc向StatusServer请求一个合法的ChatServer信息。而StatusServer本身的这个查询ChatServer信息过程以及登录流程会涉及到集群内Redis的数据的查询和修改。在处理成功后，通过层层冒泡将数据返回给client，client依据这些信息来进行后续的ChatServer的TCP连接，注意在建立连接的这段过程中，会涉及到一些复杂状态的修改，因为实际上我们前面StatusServer的处理流程中只是简单的负载均衡查询连接数较少的一个服务器，没有进行更加复杂的操作。后续可以考虑将对应的处理分离到StatusServer中，这里为了简单，放置到ChatServer的处理中。</p>
+<p>在这其中，最重要的是StatusServer与Redis的通信，这其中涉及到了部分共享信息的修改，这涉及到一系列的敏感情况，需要详细分析，这也是为什么需要分布式锁的一个因素，后续进行对于实际场景的分析应该能够更加清晰。</p>
+<h2 id="2-异地登录场景分析"><a href="#2-异地登录场景分析" class="headerlink" title="2.异地登录场景分析"></a>2.异地登录场景分析</h2><p>在本次的分析中，由于个人能力问题，只专注于一个场景的分析，对应的本次考虑的场景是<strong>双端并发登录</strong>与<strong>踢人竞态</strong>场景。</p>
+<p>在当前的项目设计中，存在一个token机制，当一个数据中UID为x的用户登录请求打到对应的StatusServer中时，该StatusServer会生成一份token并且将其设置到对应的Redis中，实际上，该次过程中的设置是一个并发操作，可能存在多个RPC连接同时发起，可能会导致一个UID为x的用户的多次设置Token，并尝试携带各自的Token都进行登录，这在当前的系统中是可能的，如果被攻击，攻击者通过同一个用户来批量发起请求，此时就可能导致这种并发情况，不过这种情况是可以接受的。这是由于Redis本身的命令执行线程是一个单线程操作，并发到达的命令其并不会出现一种中间状态。最后这种攻击的结构只会是存在最后一次物理写入的Token作为该UID的token值。</p>
+<p>那么，这种情况对于我们是否存在影响呢，或者说，我们是否需要进行处理呢，目前来说，其实有点风险。当用户携带其从GateServer最终得到的数据尝试去进行登录的时候，对应的ChatServer的校验逻辑目前只是进行一个token的匹配，实际上存在一种可能的情况，当对应的Redis修改请求串行中夹杂了某一次ChatServer的获取Token请求，而本次获取请求的最近一次Token设置刚好设置的就是本次校验所对应的Token时，此时就能够通过，以此类推，实际上可能存在多个客户端在严重并发压力下的同时登录情况下。当然，这种情况非常极端，其需要满足多个条件，其一是对应的登录请求是恶意且批量的，其二是对应的请求处理非常快，甚至于对应的RTT等使得用户连接ChatServer的RTT和ChatServer通信Redis的RTT等加起来赶上了前面某次特定登录请求的命令执行。</p>
+<p>给上述分析总结一段简短的分析</p>
+<p>在<strong>高并发或恶意请求</strong>场景下：</p>
+<ul>
+<li>A 请求写入 token1</li>
+<li>B 请求写入 token2</li>
+<li>C 请求在 token2 写入前读到 token1，并继续去 ChatServer 验证</li>
+<li>结果 token1 和 token2 都有机会在不同客户端上被用来登录。</li>
+</ul>
+<p>实际上，这是非常极端的一种情况，并不在本次探讨的范围内，所以我们可以在本次先假定这种Token登录的并发请求暂且不会出现上面那种情况，我们可以先假设我们的系统要求的是一种最终一致性的模型。</p>
+<p>下面就更加可能的场景进行分析，我们先考虑一种最普通的场景，当UID为1的用户成功登录后，该用户用其的用户信息在另外一个设备上尝试登录，在当前的设计中，我们初步设定只允许一个UID代表的用户只能同时登录一个设备。此时，我们就需要完善一个踢人逻辑。</p>
+<p><strong>多端登录踢人竞态</strong></p>
+<p><img src="/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/image-20250906152003463.png" alt="image-20250906152003463"></p>
+<p>直接观察多服务端登录时可能的竞态情况，对于单服务器登录时的竞态在多服分析后自然也就清晰了。</p>
+<p>优先明确当前的几个前提条件：</p>
+<ul>
+<li>一个UID为x的设备已经登录，在另外一个设备中，另外一个UID也为x的设备也尝试登录</li>
+<li>当前已登录的设备已经处在一个完整的登录状态，而待登录设备处于一种等待与Server建立连接的状态</li>
+</ul>
+<p>上诉流程图基本解释了在异地登录时所需要执行的基本操作，接下来就可能的竞态场景进行分析。当Server2查询到当前系统Redis中已经存在一个login_x的KV对的时候，其断定此时该用户已经在系统中存在登录的账户。本次系统设计以最后一次登录为准，因此会踢掉当前系统中已经存在的用户而保留当前新登录的用户。为了踢掉该用户，其需要执行下列步骤：</p>
+<ul>
+<li>查看当前已登录的改用户所在的服务器信息，判断是否为本服，对应的存在不同的逻辑</li>
+<li>若该用户当前位于本服务器上，此时与上图中的逻辑大致相同，只是省去了grpc间的通信，直接处理对应的socket关闭和key删除逻辑即可。如果是在它服上，则通过grpc进行通知，并执行对应相同的逻辑踢人即可</li>
+<li>在服务器收到对端服务器成功踢人之后，进入常规的逻辑即可，写入对应的登录信息并进行常规的业务逻辑。</li>
+</ul>
+<p>接下俩针对于多服登录时的踢人逻辑进行详细分析。</p>
+<p>当一个服务器收到需要踢人的请求后，其会去查找当前服务器中挂载的session，并向客户端发送一个close信号，注意此处不能由服务器本身进行close，否则可能出现TimeWait现象。然后其需要去修改Redis信息，将该用户所对应的信息进行删除，由于是调用的Redis服务，所以该次操作实际上只是投递了一个删除请求信息，在收到Redis的ACK信息后就返回了，然后其需要通过gRPC通知踢人请求发起者，该发起者收到后也会向Redis中发起一次请求，该请求本次是尝试对于key进行写入。</p>
+<p>注意，在本个踢人流程中，我们对于Redis的操作，实际上只是投递了请求过去，实际上Redis内部是同步执行还是异步执行后返回的ACK信息，我们并无法保证，或者说，不能够依赖于其的保证，避免后续的Redis的迭代中由于其同步异步逻辑的切换导致的问题。所以我们需要以一种最坏的情况进行假设，就假设Redis本身是一个异步执行的逻辑，其会在收到请求后直接ACK，内部再切实执行。那么此时就可能存在下面的可能竞态。</p>
+<p>我们知道，Redis内部的逻辑执行模块是单线程，但是其网络接收模块是多线程的。在多线程接受单线程处理的情况下，实际上我们不能够保证我们Server1的信息处理一定能够在Server2的处理之前完成。如果Server2发出的请求实际的排队在了Server1的请求之前，那么Redis的最终一致性将会导致该Key:login_TCWW在Redis中为空，这是不可接受的。这是因为实际上我们的业务逻辑中存在一个时序性，我们的写入新Key的这个逻辑需要严格串行在删除旧Key这个操作之后。然而由于当前是一个跨进程的操作，所以无锁的情况下难以保证，所以需要引入一个机制来保证这俩个操作的串行性。这也就是我们引入分布式锁的基础动机。</p>
+<p>当前我们的需求是通过一种机制来保证删除Key的操作严格位于写入Key的操作之前。此时，分布式锁基本是最简单的方法。考虑将对应的key的修改权限锁住，由于本身删除key的请求一定严格先于删除key的请求到达。所以其一定能够优先获取到锁，由此能够人为的跨进程的维护一种先后顺序。对于此处的需求，使用分布式锁就能够轻松的解决。</p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/" title="分布式锁分析">https://tcww0.github.io/2025/09/06/全栈聊天项目/7-distributedLock/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 项目</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/08/26/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/1-abstract/" rel="prev" title="文本摘抄">
+      <i class="fa fa-chevron-left"></i> 文本摘抄
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Distributed-lock"><span class="nav-number">1.</span> <span class="nav-text">Distributed lock</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E9%94%81%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">1. 为什么要锁？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%BC%82%E5%9C%B0%E7%99%BB%E5%BD%95%E5%9C%BA%E6%99%AF%E5%88%86%E6%9E%90"><span class="nav-number">1.2.</span> <span class="nav-text">2.异地登录场景分析</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">71</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">7</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">258k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">3:55</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : 'b7f706cc9b9eadfbf3f9e8911387be3f',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
