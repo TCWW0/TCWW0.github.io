@@ -23,20 +23,23 @@
     var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="本文中进行了对于另外一篇文章的简单总结和简化，可以在阅读完这篇文章之后去进行另外一篇文章的阅读，即逻辑杂谈（1）">
+  <meta name="description" content="Distributed lock紧接上文，进行跨服登录中涉及到的分布式锁分析">
 <meta property="og:type" content="article">
-<meta property="og:title" content="逻辑杂谈(1.0.1)">
-<meta property="og:url" content="https://tcww0.github.io/2025/04/06/%E7%BD%91%E7%BB%9C/event.1/index.html">
+<meta property="og:title" content="分布式锁分析(2)">
+<meta property="og:url" content="https://tcww0.github.io/2025/09/07/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/8-distributedLock2/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="本文中进行了对于另外一篇文章的简单总结和简化，可以在阅读完这篇文章之后去进行另外一篇文章的阅读，即逻辑杂谈（1）">
+<meta property="og:description" content="Distributed lock紧接上文，进行跨服登录中涉及到的分布式锁分析">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2025-04-06T13:51:15.000Z">
-<meta property="article:modified_time" content="2025-04-06T13:24:03.282Z">
+<meta property="og:image" content="https://tcww0.github.io/2025/09/07/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/8-distributedLock2/image-20250909222513337.png">
+<meta property="og:image" content="https://tcww0.github.io/2025/09/07/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/8-distributedLock2/image-20250909222513337.png">
+<meta property="article:published_time" content="2025-09-07T00:09:19.000Z">
+<meta property="article:modified_time" content="2025-09-10T13:04:39.890Z">
 <meta property="article:author" content="TCWW">
-<meta property="article:tag" content="网络">
+<meta property="article:tag" content="项目">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2025/09/07/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/8-distributedLock2/image-20250909222513337.png">
 
-<link rel="canonical" href="https://tcww0.github.io/2025/04/06/%E7%BD%91%E7%BB%9C/event.1/">
+<link rel="canonical" href="https://tcww0.github.io/2025/09/07/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/8-distributedLock2/">
 
 
 <script id="page-configurations">
@@ -49,7 +52,7 @@
   };
 </script>
 
-  <title>逻辑杂谈(1.0.1) | Hexo</title>
+  <title>分布式锁分析(2) | Hexo</title>
   
 
 
@@ -192,7 +195,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/04/06/%E7%BD%91%E7%BB%9C/event.1/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/09/07/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/8-distributedLock2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -207,7 +210,7 @@
     
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          逻辑杂谈(1.0.1)
+          分布式锁分析(2)
         </h1>
 
         <div class="post-meta">
@@ -216,17 +219,23 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2025-04-06 21:51:15 / Modified: 21:24:03" itemprop="dateCreated datePublished" datetime="2025-04-06T21:51:15+08:00">2025-04-06</time>
+              <time title="Created: 2025-09-07 08:09:19" itemprop="dateCreated datePublished" datetime="2025-09-07T08:09:19+08:00">2025-09-07</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-09-10 21:04:39" itemprop="dateModified" datetime="2025-09-10T21:04:39+08:00">2025-09-10</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                  <a href="/category/%E9%A1%B9%E7%9B%AE/" itemprop="url" rel="index"><span itemprop="name">项目</span></a>
                 </span>
             </span>
 
@@ -243,14 +252,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>2.8k</span>
+              <span>6.5k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>3 mins.</span>
+              <span>6 mins.</span>
             </span>
 
         </div>
@@ -262,79 +271,101 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <hr>
-<blockquote>
-<p>本文中进行了对于另外一篇文章的简单总结和简化，可以在阅读完这篇文章之后去进行另外一篇文章的阅读，即逻辑杂谈（1）</p>
-</blockquote>
+        <h1 id="Distributed-lock"><a href="#Distributed-lock" class="headerlink" title="Distributed lock"></a><strong>Distributed lock</strong></h1><p>紧接上文，进行跨服登录中涉及到的分布式锁分析</p>
 <span id="more"></span>
 
-<h1 id="Boost-Asio-的异步机制初探：启动时机与传输时机"><a href="#Boost-Asio-的异步机制初探：启动时机与传输时机" class="headerlink" title="Boost.Asio 的异步机制初探：启动时机与传输时机"></a>Boost.Asio 的异步机制初探：启动时机与传输时机</h1><h2 id="启动时机"><a href="#启动时机" class="headerlink" title="启动时机"></a>启动时机</h2><p>在最近的异步读写实例中，我注意到一些值得深入理解的点。其中最重要的一点，就是“异步驱动的执行者是谁”。</p>
-<h3 id="框架的本质"><a href="#框架的本质" class="headerlink" title="框架的本质"></a>框架的本质</h3><p>学过 Qt 的人应该清楚，<strong>框架和库的区别</strong>非常关键：</p>
+<p>首先，先来分析在当前的服务中，需要在跨服登录中进行分析处理的场景</p>
+<p>下面给出一个在未进行分布式锁定同步情况下的一个可能场景</p>
+<p><img src="/2025/09/07/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/8-distributedLock2/image-20250909222513337.png" alt="image-20250909222513337"></p>
+<p>在详细分析前，先明确当前场景与需求：当多个用户并发登录时，需要考虑数据流动情况。这里假设这些用户并非同一 uid，而是普通的并发登录。  </p>
+<p>回顾架构设计：系统包含一个 GateServer、一个 StatusServer、多个 ChatServer。拆分多个 ChatServer 是为水平扩展和负载均衡，目前的策略仅为统计每个 ChatServer 的连接数。要保证负载均衡能起作用，就必须分析其中可能的竞态。本文借助分布式锁的视角进一步分析。  </p>
+<p>负载均衡策略：当 Client 获取到 ChatServer 信息并建立长连接时，ChatServer 会更新 Redis 中的连接数。核心依赖于：  </p>
 <ul>
-<li><strong>库（Library）</strong>：由开发者主动调用函数完成任务。</li>
-<li><strong>框架（Framework）</strong>：由框架主动调用你写的逻辑，开发者只需补充局部的业务处理。</li>
+<li>StatusServer 从 Redis 读取 LoginCount 并选择负载最小的服务器；  </li>
+<li>ChatServer 在连接建立或销毁时更新 LoginCount。</li>
 </ul>
-<p>ASIO 也是一种典型的框架思维。在同步逻辑中，我们仍然主动调用 API，而异步逻辑中，我们仅仅<strong>注册想要的行为</strong>，执行权则交由 ASIO 来驱动。</p>
-<h3 id="框架的执行逻辑"><a href="#框架的执行逻辑" class="headerlink" title="框架的执行逻辑"></a>框架的执行逻辑</h3><p>ASIO 内部维护了一个事件循环（<code>io_context</code>），它类似线程池的轮询机制，框架通过它来调度各类 I&#x2F;O 事件。而对于使用者来说，最重要的，是<strong>明确事件循环的启动与执行时机</strong>。</p>
-<p>来看下面这段代码：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;boost/asio.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Session.h&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        boost::asio::io_context _ioc;</span><br><span class="line">        <span class="function">Server <span class="title">s</span><span class="params">(_ioc, <span class="number">10086</span>)</span></span>;</span><br><span class="line">        _ioc.<span class="built_in">run</span>();  <span class="comment">// 真正启动服务器的时机</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">catch</span> (std::exception&amp; e) &#123;</span><br><span class="line">        std::cerr &lt;&lt; <span class="string">&quot;Exception: &quot;</span> &lt;&lt; e.<span class="built_in">what</span>() &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>注意，<code>_ioc.run()</code> 才是服务器的真正启动点，而不是 <code>Server</code> 构造函数。我们不建议将 <code>run</code> 封装进构造函数中——那样会违反<strong>单一职责原则</strong>，造成耦合。</p>
-<h3 id="异步状态机的思想"><a href="#异步状态机的思想" class="headerlink" title="异步状态机的思想"></a>异步状态机的思想</h3><p>理解 ASIO 的异步机制，本质上就是理解<strong>状态转移</strong>的过程。</p>
-<p>状态机的抽象：函数执行流的每一个位置，视为程序的一个状态；当执行跳转到下一个函数，就发生了一次“状态转移”。</p>
-<p>我们来看实际代码：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">Server::<span class="built_in">Server</span>(boost::asio::io_context&amp; ioc, <span class="type">short</span> port)</span><br><span class="line">    : _ioc(ioc), _acceptor(_ioc, tcp::<span class="built_in">endpoint</span>(tcp::<span class="built_in">v4</span>(), port)) &#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Server start success on port: &quot;</span> &lt;&lt; port &lt;&lt; std::endl; </span><br><span class="line">    <span class="built_in">start_accept</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Server::start_accept</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Session* new_session = <span class="keyword">new</span> <span class="built_in">Session</span>(_ioc);</span><br><span class="line">    _acceptor.<span class="built_in">async_accept</span>(new_session-&gt;<span class="built_in">getSocket</span>(), </span><br><span class="line">        std::<span class="built_in">bind</span>(&amp;Server::handle_accept, <span class="keyword">this</span>, new_session, std::placeholders::_1));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Server::handle_accept</span><span class="params">(Session* new_session, <span class="type">const</span> boost::system::error_code&amp; error)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!error) &#123;</span><br><span class="line">        new_session-&gt;<span class="built_in">Start</span>();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">delete</span> new_session;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">start_accept</span>(); <span class="comment">// 注册下一次接收逻辑，实现循环</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="状态转移过程推演"><a href="#状态转移过程推演" class="headerlink" title="状态转移过程推演"></a>状态转移过程推演</h3><ol>
-<li><strong>构造函数中</strong>调用 <code>start_accept()</code>，首次注册异步接收。</li>
-<li><strong>异步函数 <code>async_accept</code> 不会阻塞</strong>，而是向 <code>io_context</code> 注册一个状态转移：<ul>
-<li>触发点：客户端发起连接。</li>
-<li>转移点：执行 <code>handle_accept</code>。</li>
-</ul>
+<hr>
+<p>​	</p>
+<h2 id="登录流程推导"><a href="#登录流程推导" class="headerlink" title="登录流程推导"></a>登录流程推导</h2><p>为了使得流程清晰，我们来重新推理一遍用户的登录流程来跟踪数据流动</p>
+<ol>
+<li>Client 登录请求 → GateServer  </li>
+<li>GateServer → StatusServer 请求可用 ChatServer  </li>
+<li>StatusServer 从 Redis 获取 LoginCount，返回最小负载服务器  </li>
+<li>GateServer 将结果返回给客户端  </li>
+<li>Client 与 ChatServer 建立长连接  </li>
+<li>ChatServer 更新 Redis 中 LoginCount，并初始化</li>
+</ol>
+<p>此时，我们能够清晰的看到，在整个登录流程中，为了支持负载均衡，核心由StatusServer对于Redis的LoginCount域的读取和ChatServer对于LoginCount域的写入合作提供，所以我们需要保证这俩者能够符合我们预想的逻辑。但是这个实际上比较难以思考，实际上，由于没有接触过，我也只能够根据他人对于该类场景的分析来排查对应的竞态条件，本文来对于该类竞态场景进行二次分析。</p>
+<p>在一次登录流程中，我们观察到，在用户发起登录请求到获取到登录所必须的信息，获取到必须的信息到真正成功的登录之间，都存在着一段时间窗口，这是由于一系列的网络通信导致的。在Client1获取到登录信息尝试登录到真正登录成功更新连接数信息这段时间内，可能存在任一用户尝试登录。此时可能会出现一种竞态条件，假设初始连接数都为(0,0)，那么此时StatusServer返回的服务器信息都会是ChatServer1的信息。如果一个新连接在另外一个已获取到ChatServer1信息但是尚未建立起连接更新连接数时将请求打到了StatusServer上，并成功获取返回了一个ChatServer信息。那么此时可能存在俩种情况，StatusServer可能返回ChatServer1的信息，也可能返回ChatServer2的信息。为什么呢？</p>
+<p>如前文所说，这是由于一个登录用户在获取到服务器信息到实际登录更新服务器连接数之间存在一个时间窗口所致。我们这里先不考虑直接在StatusServer中更新连接数，具体为什么可以交由个人自己考虑。那么，既然存在这个时间窗口，那么任一登录请求都可能在这个窗口内到达StatusServer获取服务器信息，此时由于先前的登录请求可能还未实际的更新，所以StatusServer实际查到的LoginCount域中数据还是(0,0)的情况，此时期望中的负载均衡操作就会被打破。</p>
+<p>但是，实际上存在一个问题，要实现一种机制来排除这种竞态是比较麻烦的。我们考虑对应的StatusServer返回信息一直到ChatServer成功登录的时间窗口跨越的时间，其中涉及到了<code>StatusServer-&gt;GateServer，GateServer-&gt;Client，Client-&gt;ChatServer，ChatServer-&gt;Redis</code>，这一整个网络链条，而一次普通的登录请求所要考虑的网络链条为<code>Client-&gt;GateServer,GateServer-&gt;StatusServer,StatusServer-&gt;Redis</code>。实际上后一个链条想要位于前一条链条的子集是相当容易的。但是，注意，我没能力，我目前懒的实现一种机制实现一种互斥，使得对应的一次先到达的StatusServer获取信息的登录请求最终的处理能够位于另外一个先发起的登录请求获取服务器信息之前。或者说，目前要实现起来过于麻烦，其需要涉及到一系列的跨服信息传递，需要后续继续进行进一步的详细分析。</p>
+<p>我们这里先按下不表，如果存在一个可能的实现，欢迎交流。</p>
+<p>由于我们决定目前先不解决对应的一个登录请求位于另外一个已处理一般的登录请求的窗口中，所以为了能够继续推进问题，我们需要进行一些假设和约束。我们假设对应的登录流程的最后ChatServer对于Redis的写能够与对应的Client初始登录中的StatusServer对于Redis中的读产生竞态，而不是位于一段完全的窗口范围内，或者说，更加严格一点，对应的一个<code>StatusServer-&gt;GateServer，GateServer-&gt;Client，Client-&gt;ChatServer，ChatServer-&gt;Redis</code>这个链条的RTT比起<code>Client-&gt;GateServer,GateServer-&gt;StatusServer,StatusServer-&gt;Redis</code>的RTT要短，或者说，壁布对应的RTT长。在我看来，在这种假设下，对应的后续的登录总归不至于产生前文中产生的难以解决的竞态，即使这种假设在目前看来不甚合理，但是可待后续机制补充来解决。</p>
+<blockquote>
+<p>由于个人能力以及为了遵守KISS，个人不考虑在一开始就引入考虑过分复杂的场景，目前的想法是先通过假设来约定对应的时间窗口的重合情况，使得对应的并发可控，实际上这只是理论上的分析，实际中不会给我如此的宽容。就比如，这里的上文中考虑到的一个新登录请求在某一个请求还位于其写入Redis的整个窗口是在高并发下并发发生的，但是我在当前阶段并不考虑解决，从小的做起，后续如果积累足够，我再考虑回过头来将这里的逻辑给补全。</p>
+</blockquote>
+<p>实际上，我当前要实现的负载均衡若想要能够实现其的统计，其必须依托于一个假设。即，一个登录请求对于Redis的影响的可见性必须位于另外一个在时序上落后于它的登录请求之前。什么意思呢，就是对应的登录请求最终登录到ChatServer并改变LoginCount域中的数值必须强一致的位于一个时序上在该请求初始发起时的时序。但是，正如前文所说，这是相当难以实现的。真要实现一种强一致性，我们必须封锁相当长的一个逻辑流程，相对来说这是不太容易接受的。所以我们这里先不考虑在初期就实现一种强一致支持的负载均衡操作。</p>
+<p>为了能够继续推进问题，我们需要对于当前的系统进行一些严格的假设来缩小考虑的范围。提取上文所说的俩个登录链条。</p>
+<p>时间窗口1：<code>StatusServer-&gt;GateServer，GateServer-&gt;Client，Client-&gt;ChatServer，ChatServer-&gt;Redis</code></p>
+<p>时间窗口2：<code>Client-&gt;GateServer,GateServer-&gt;StatusServer,StatusServer-&gt;Redis</code></p>
+<ul>
+<li><p>不考虑窗口2的并发情况</p>
+<p>在系统中，我们考虑以实际登录到ChatServer的Session数作为一个Server的负载情况。如果我们考虑这一段的并发，我们会有一个很简单的解决方案，将对应的连接数更新直接放置到对应的StatusServer的登录逻辑中。但是，这样会存在一种问题，就是客户端在收到对应的服务器信息之后，实际上可能不会连接到对应的ChatServer服务器上，对于客户端来说，这种场景自然不会频繁发生。但是如果是通过一些程序发起的连接呢。可能存在一些恶意的请求会通过talnet等程序尝试进行登录请求但是不进行后续的流程，我们如果将这类连接也直接统计到对应的连接数中，可能会导致一种恶意的请求使得StatusServer误判，进而导致负载均衡服务根本发生不了作用。即使我们这里先不考虑对于这种攻击的解决方案，我们也先不考虑将连接数统计耦合到StatusServer-&gt;Redis这个流程中。接下来讨论为什么不考虑窗口2的并发情况，正如前面所说，对应的窗口2实际上所能做的只是获取当前快照下的连接数信息并且给出局部最优，窗口2并发的情况会导致这段窗口时间内的所有请求最终可能打到同一个服务器上。对于我个人来说，这个场景稍微可以接受，考虑对于这中并发请求发生时如果进行锁等互斥行为，其会导致最后的登录体验会有较大的延迟，与其考虑这段时间可能带来的一个服务器的突发负载，我更倾向于保证这种小峰值期的客户端登录体验。当然，我们后续可以采取一种更加优雅的方式，就比如引入一个消息队列中间件，将对应的登录请求实际上按照一定的时间区间来批次获取，并对于这些并发的请求，继续在内部进行轮转来分配服务器信息，这种能够保证服务器针对于突发请求也有一定的负载均衡的能力。</p>
 </li>
-<li><strong>一旦客户端连接建立</strong>，<code>handle_accept</code> 被框架调用，状态转移发生。</li>
-<li>在 <code>handle_accept</code> 结束时再次调用 <code>start_accept()</code>，重新注册下一次接收逻辑。</li>
-</ol>
-<p>这就构成了一个<strong>回环式状态转移</strong>的循环。</p>
+<li><p>对于窗口1与窗口2之间的并发，需要约束对应的窗口重叠</p>
+<p>对于窗口1，首先需要明确一点，关于窗口1所涵盖的流程，在对应的ChatServer收到对应的连接请求之前，我们是无法区分到底其是没有发起后续的连接请求还是请求正在网络传输中，与其费心费力来检测这种现象，考虑在初期直接假设这个窗口不是竞态发生处。因此，我们不进行<code>StatusServer-&gt;GateServer，GateServer-&gt;Client，Client-&gt;ChatServer</code>这段的并发分析。只进行最终<code>ChatServer-&gt;Redis</code>与<code>Client-&gt;GateServer,GateServer-&gt;StatusServer,StatusServer-&gt;Redis</code>的并发分析。</p>
+</li>
+</ul>
+<p>上面是我们对应的假设，通过这些假设，我们能够进行一些比较简单的分析。但是，这些都是一些假设，只依赖于这些假设会导致在服务器集群的不断运行中偏差逐渐严重，如果不加以矫正，对应的负载均衡操作根本上就是一个笑话。所以，我们需要一种兜底机制来作为一种不断修改偏差的方法。在我目前的构想中，我们考虑使用一种服务器之间的心跳机制来作为这种数据的修正。考虑每个ChatServer在每一段时间后统计本机上已经连接的Session数，这个数量即是当前服务器的负载。每次统计后，将这段数据上报到Redis中。也就是说，对应的服务器的负载依赖于ChatServer的不断心跳来逐渐修正，对应的允许存在一段不一致的窗口期，这段窗口期就是ChatServer的心跳时间，在这段时间内，我们允许StatusServer使用的数据可以进行一定的偏移导致一定的负载不均衡。但是对应的每次一定需要能够在下一次心跳时上报能够收敛到一个快照。在这种设计下，对应的大用户量只要不是在短时间内突发登录，那么最终一定不会发散到特别离谱，对应的每次心跳总归能够收敛一些负载。</p>
 <hr>
-<h2 id="传输时机"><a href="#传输时机" class="headerlink" title="传输时机"></a>传输时机</h2><p>当客户端发起连接请求之后，服务器将进入下一阶段的处理——数据的接收与处理。</p>
-<h3 id="套接字的创建与替换"><a href="#套接字的创建与替换" class="headerlink" title="套接字的创建与替换"></a>套接字的创建与替换</h3><p>你需要知道：<strong>服务器并不会直接使用监听套接字来接收数据</strong>，而是由操作系统生成新的连接套接字来处理数据。监听套接字的职责仅是监听并接收连接请求。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">_acceptor.<span class="built_in">async_accept</span>(new_session-&gt;<span class="built_in">getSocket</span>(), </span><br><span class="line">    std::<span class="built_in">bind</span>(&amp;Server::handle_accept, <span class="keyword">this</span>, new_session, std::placeholders::_1));</span><br></pre></td></tr></table></figure>
+<h1 id="Distributed-lock（精简版）"><a href="#Distributed-lock（精简版）" class="headerlink" title="Distributed lock（精简版）"></a><strong>Distributed lock</strong>（精简版）</h1><p>紧接上文，进行跨服登录中涉及到的分布式锁分析</p>
+<!--more-->
 
-<p>在一次状态转移中：</p>
+<p>首先，先来分析在当前服务中，跨服登录涉及到的分布式锁场景。</p>
+<p>下面给出一个未进行分布式锁同步情况下的可能场景：</p>
+<p><img src="/2025/09/07/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/8-distributedLock2/image-20250909222513337.png" alt="image-20250909222513337"></p>
+<p>在详细分析前，先明确当前场景与需求：当多个用户并发登录时，需要考虑数据流动情况。这里假设这些用户并非同一 uid，而是普通的并发登录。  </p>
+<p>回顾架构设计：系统包含一个 GateServer、一个 StatusServer、多个 ChatServer。拆分多个 ChatServer 是为水平扩展和负载均衡，目前的策略仅为统计每个 ChatServer 的连接数。要保证负载均衡能起作用，就必须分析其中可能的竞态。本文借助分布式锁的视角进一步分析。  </p>
+<p>负载均衡策略：当 Client 获取到 ChatServer 信息并建立长连接时，ChatServer 会更新 Redis 中的连接数。核心依赖于：  </p>
 <ul>
-<li>操作系统在监听套接字接收请求后，会创建新的连接套接字。</li>
-<li><code>async_accept</code> 中的 <code>new_session-&gt;getSocket()</code> 会成为数据传输的新载体。</li>
-<li>此时，程序注册的 <code>handle_accept()</code> 就绑定到了这条连接上。</li>
+<li>StatusServer 从 Redis 读取 LoginCount 并选择负载最小的服务器；  </li>
+<li>ChatServer 在连接建立或销毁时更新 LoginCount。</li>
 </ul>
-<h3 id="数据如何传输？"><a href="#数据如何传输？" class="headerlink" title="数据如何传输？"></a>数据如何传输？</h3><p>操作系统接收到数据后：</p>
-<ol>
-<li>数据首先到达 TCP 的内核缓冲区。</li>
-<li>然后通过 OS 的内部机制，映射到与该连接对应的套接字缓冲区。</li>
-<li>如果程序注册了对应的读取逻辑（比如 <code>async_read_some</code>），那么就会触发下一步的状态转移。</li>
-</ol>
-<p>但如果<strong>没有注册任何读取逻辑</strong>，则这些数据将被视为无用并被丢弃，造成资源浪费。</p>
-<h3 id="状态转移链的维护"><a href="#状态转移链的维护" class="headerlink" title="状态转移链的维护"></a>状态转移链的维护</h3><p>在一次状态处理后，我们常常会再次注册下一次状态转移，例如：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">start_accept</span>();</span><br></pre></td></tr></table></figure>
-
-<p>这一点非常重要，因为 <strong>每一个异步操作只会注册一次状态转移</strong>。触发一次后就失效，如果不再注册，则程序不会再响应新的事件。</p>
 <hr>
-<h2 id="错误处理与双重析构风险"><a href="#错误处理与双重析构风险" class="headerlink" title="错误处理与双重析构风险"></a>错误处理与双重析构风险</h2><p>在复杂的网络逻辑中，存在如下风险：</p>
+<h2 id="登录流程推导-1"><a href="#登录流程推导-1" class="headerlink" title="登录流程推导"></a>登录流程推导</h2><p>用户登录流程如下：  </p>
 <ol>
-<li>客户端断开连接。</li>
-<li>程序逻辑触发某个会话的销毁，同时又注册了新的状态处理。</li>
-<li>客户端发送 <code>FIN</code> 包，ASIO 响应后再次触发状态处理逻辑。</li>
-<li>如果新状态中尝试访问已销毁的会话对象，会造成 <strong>双重析构</strong> 或 <strong>悬空指针</strong>，进而可能导致服务器崩溃。</li>
+<li>Client 登录请求 → GateServer  </li>
+<li>GateServer → StatusServer 请求可用 ChatServer  </li>
+<li>StatusServer 从 Redis 获取 LoginCount，返回最小负载服务器  </li>
+<li>GateServer 将结果返回给客户端  </li>
+<li>Client 与 ChatServer 建立长连接  </li>
+<li>ChatServer 更新 Redis 中 LoginCount，并初始化</li>
 </ol>
-<p>因此，<strong>生命周期管理</strong> 是异步编程中最难也最重要的部分。需要确保每一个异步回调的对象都在有效生命周期内。</p>
-<hr>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li>异步机制的核心是“<strong>状态转移</strong>”。</li>
-<li>每一个异步函数注册的其实是一次触发式的状态变换。</li>
-<li><code>io_context.run()</code> 是整个框架执行的起点。</li>
-<li>状态转移必须在每次处理后主动注册下一次，以实现循环。</li>
-<li>错误处理需要特别注意对象生命周期，避免析构冲突。</li>
+<p>从流程可见，负载均衡依赖 StatusServer 的读取与 ChatServer 的写入配合。但二者存在时间窗口，可能出现竞态。  </p>
+<p>例如，初始连接数为 (0,0)，当 Client1 获取 ChatServer1 信息但尚未更新连接数时，Client2 请求到达 StatusServer。此时 Redis 中仍是 (0,0)，StatusServer 可能再次返回 ChatServer1，从而破坏负载均衡。  </p>
+<p>要消除这种竞态较麻烦，因为涉及从获取服务器信息到真正建立连接的整个窗口：  </p>
+<ul>
+<li><code>StatusServer-&gt;GateServer-&gt;Client-&gt;ChatServer-&gt;Redis</code><br>而普通登录链路是：  </li>
+<li><code>Client-&gt;GateServer-&gt;StatusServer-&gt;Redis</code></li>
 </ul>
+<p>前者窗口包含后者，不易保证时序一致。要完全解决需跨服互斥，但目前我没有实现能力，也过于复杂，所以暂不处理。  </p>
+<p>为了推进分析，做以下假设：认为 ChatServer 最终写 Redis 的操作可能与 StatusServer 读 Redis 产生竞态，但忽略整个窗口的重叠问题。换言之，假设 <code>ChatServer-&gt;Redis</code> 的 RTT 短于 <code>StatusServer-&gt;Redis</code> 的 RTT，从而竞态范围仅限 Redis 的读写。虽然这一假设并不完全合理，但可以作为初期简化。  </p>
+<blockquote>
+<p>出于个人能力限制和 KISS 原则，暂不考虑过分复杂的情况，先基于假设控制并发范围。未来再补充更严格的机制。  </p>
+</blockquote>
+<hr>
+<h2 id="时间窗口拆分"><a href="#时间窗口拆分" class="headerlink" title="时间窗口拆分"></a>时间窗口拆分</h2><p>提取两段窗口：  </p>
+<ul>
+<li>窗口1：<code>StatusServer-&gt;GateServer-&gt;Client-&gt;ChatServer-&gt;Redis</code>  </li>
+<li>窗口2：<code>Client-&gt;GateServer-&gt;StatusServer-&gt;Redis</code></li>
+</ul>
+<h3 id="忽略窗口2并发"><a href="#忽略窗口2并发" class="headerlink" title="忽略窗口2并发"></a>忽略窗口2并发</h3><p>系统以实际连接到 ChatServer 的 Session 数作为负载。如果直接在 StatusServer 更新连接数，可能被恶意请求利用（发起请求但不建连，导致误判）。因此不耦合在 StatusServer。</p>
+<p>至于窗口2内部并发，会导致短时间内多个请求打到同一服务器，但相比加锁带来的延迟，我更愿意接受小范围的负载不均衡，以保证用户体验。后续可以考虑用消息队列中间件批量分配，改善突发登录的均衡性。 </p>
+<h3 id="约束窗口1与窗口2的重叠"><a href="#约束窗口1与窗口2的重叠" class="headerlink" title="约束窗口1与窗口2的重叠"></a>约束窗口1与窗口2的重叠</h3><p>在窗口1中，<code>ChatServer-&gt;Redis</code> 前的部分不可区分是“未建连”还是“在路上”，因此不考虑该并发，仅分析最终的 <code>ChatServer-&gt;Redis</code> 与 <code>StatusServer-&gt;Redis</code> 间的竞态。  </p>
+<hr>
+<h2 id="兜底机制"><a href="#兜底机制" class="headerlink" title="兜底机制"></a>兜底机制</h2><p>上述假设只能缩小分析范围，若长期依赖，偏差会积累，导致负载均衡失效。因此需要兜底机制：  </p>
+<p>考虑通过心跳机制矫正。每个 ChatServer 定期统计自身 Session 数并上报到 Redis，作为实际负载数据。这样即使短期内存在不一致，最终也会收敛，避免负载发散。  </p>
+<p>只要不是极端的突发登录场景，心跳修正能维持整体的均衡性。 </p>
 <hr>
 
     </div>
@@ -355,7 +386,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>Post link: </strong>
-    <a href="https://tcww0.github.io/2025/04/06/%E7%BD%91%E7%BB%9C/event.1/" title="逻辑杂谈(1.0.1)">https://tcww0.github.io/2025/04/06/网络/event.1/</a>
+    <a href="https://tcww0.github.io/2025/09/07/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/8-distributedLock2/" title="分布式锁分析(2)">https://tcww0.github.io/2025/09/07/全栈聊天项目/8-distributedLock2/</a>
   </li>
   <li class="post-copyright-license">
     <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
@@ -367,7 +398,7 @@
       <footer class="post-footer">
           
           <div class="post-tags">
-              <a href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 网络</a>
+              <a href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 项目</a>
           </div>
 
         
@@ -376,13 +407,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2025/04/06/%E7%BD%91%E7%BB%9C/event/" rel="prev" title="逻辑杂谈(1)">
-      <i class="fa fa-chevron-left"></i> 逻辑杂谈(1)
+    <a href="/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/" rel="prev" title="分布式锁分析(1)">
+      <i class="fa fa-chevron-left"></i> 分布式锁分析(1)
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2025/04/06/%E7%BD%91%E7%BB%9C/stickyBag/" rel="next" title="粘包">
-      粘包 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -442,7 +470,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Boost-Asio-%E7%9A%84%E5%BC%82%E6%AD%A5%E6%9C%BA%E5%88%B6%E5%88%9D%E6%8E%A2%EF%BC%9A%E5%90%AF%E5%8A%A8%E6%97%B6%E6%9C%BA%E4%B8%8E%E4%BC%A0%E8%BE%93%E6%97%B6%E6%9C%BA"><span class="nav-number">1.</span> <span class="nav-text">Boost.Asio 的异步机制初探：启动时机与传输时机</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%97%B6%E6%9C%BA"><span class="nav-number">1.1.</span> <span class="nav-text">启动时机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E6%9C%AC%E8%B4%A8"><span class="nav-number">1.1.1.</span> <span class="nav-text">框架的本质</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E7%9A%84%E6%89%A7%E8%A1%8C%E9%80%BB%E8%BE%91"><span class="nav-number">1.1.2.</span> <span class="nav-text">框架的执行逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E7%8A%B6%E6%80%81%E6%9C%BA%E7%9A%84%E6%80%9D%E6%83%B3"><span class="nav-number">1.1.3.</span> <span class="nav-text">异步状态机的思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%BD%AC%E7%A7%BB%E8%BF%87%E7%A8%8B%E6%8E%A8%E6%BC%94"><span class="nav-number">1.1.4.</span> <span class="nav-text">状态转移过程推演</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%A0%E8%BE%93%E6%97%B6%E6%9C%BA"><span class="nav-number">1.2.</span> <span class="nav-text">传输时机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A5%97%E6%8E%A5%E5%AD%97%E7%9A%84%E5%88%9B%E5%BB%BA%E4%B8%8E%E6%9B%BF%E6%8D%A2"><span class="nav-number">1.2.1.</span> <span class="nav-text">套接字的创建与替换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E4%BC%A0%E8%BE%93%EF%BC%9F"><span class="nav-number">1.2.2.</span> <span class="nav-text">数据如何传输？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%BD%AC%E7%A7%BB%E9%93%BE%E7%9A%84%E7%BB%B4%E6%8A%A4"><span class="nav-number">1.2.3.</span> <span class="nav-text">状态转移链的维护</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E4%B8%8E%E5%8F%8C%E9%87%8D%E6%9E%90%E6%9E%84%E9%A3%8E%E9%99%A9"><span class="nav-number">1.3.</span> <span class="nav-text">错误处理与双重析构风险</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Distributed-lock"><span class="nav-number">1.</span> <span class="nav-text">Distributed lock</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%99%BB%E5%BD%95%E6%B5%81%E7%A8%8B%E6%8E%A8%E5%AF%BC"><span class="nav-number">1.1.</span> <span class="nav-text">登录流程推导</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Distributed-lock%EF%BC%88%E7%B2%BE%E7%AE%80%E7%89%88%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">Distributed lock（精简版）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%99%BB%E5%BD%95%E6%B5%81%E7%A8%8B%E6%8E%A8%E5%AF%BC-1"><span class="nav-number">2.1.</span> <span class="nav-text">登录流程推导</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E7%AA%97%E5%8F%A3%E6%8B%86%E5%88%86"><span class="nav-number">2.2.</span> <span class="nav-text">时间窗口拆分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BF%BD%E7%95%A5%E7%AA%97%E5%8F%A32%E5%B9%B6%E5%8F%91"><span class="nav-number">2.2.1.</span> <span class="nav-text">忽略窗口2并发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%A6%E6%9D%9F%E7%AA%97%E5%8F%A31%E4%B8%8E%E7%AA%97%E5%8F%A32%E7%9A%84%E9%87%8D%E5%8F%A0"><span class="nav-number">2.2.2.</span> <span class="nav-text">约束窗口1与窗口2的重叠</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%9C%E5%BA%95%E6%9C%BA%E5%88%B6"><span class="nav-number">2.3.</span> <span class="nav-text">兜底机制</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -679,7 +707,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'comments',
       owner       : 'TCWW0',
       admin       : ['TCWW0'],
-      id          : '9bcc45945b8a7e851c2794608a940128',
+      id          : '0ece122a28a41623dce93e88c5ae978f',
         language: 'zh-CN',
       distractionFreeMode: true
     });
