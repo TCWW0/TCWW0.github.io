@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="TinyCoro Lab2在本节中，我们将根据对应的TinyCoro的Lab2的内容来进行一次对应的LSM的熟悉以及各方面的一次总结还有我在本次Lab2中获取到的感悟。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TinyCoro及杂谈">
+<meta property="og:url" content="https://tcww0.github.io/2025/10/08/OS/3-LSM/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="TinyCoro Lab2在本节中，我们将根据对应的TinyCoro的Lab2的内容来进行一次对应的LSM的熟悉以及各方面的一次总结还有我在本次Lab2中获取到的感悟。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2025/10/08/OS/3-LSM/image-20251008210755342.png">
+<meta property="og:image" content="https://tcww0.github.io/2025/10/08/OS/3-LSM/image-20251008220145138.png">
+<meta property="article:published_time" content="2025-10-08T12:51:15.000Z">
+<meta property="article:modified_time" content="2025-10-08T14:34:52.910Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="OS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2025/10/08/OS/3-LSM/image-20251008210755342.png">
+
+<link rel="canonical" href="https://tcww0.github.io/2025/10/08/OS/3-LSM/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>TinyCoro及杂谈 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/10/08/OS/3-LSM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TinyCoro及杂谈
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-10-08 20:51:15 / Modified: 22:34:52" itemprop="dateCreated datePublished" datetime="2025-10-08T20:51:15+08:00">2025-10-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>6.9k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>6 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="TinyCoro-Lab2"><a href="#TinyCoro-Lab2" class="headerlink" title="TinyCoro Lab2"></a>TinyCoro Lab2</h1><p>在本节中，我们将根据对应的TinyCoro的Lab2的内容来进行一次对应的LSM的熟悉以及各方面的一次总结还有我在本次Lab2中获取到的感悟。</p>
+<span id="more"></span>
+
+<h2 id="协程生命周期管理"><a href="#协程生命周期管理" class="headerlink" title="协程生命周期管理"></a>协程生命周期管理</h2><p>​	在本次Lab2中，我遇到了一个难题，”需要怎么来理解engine，context组件对于协程生命周期的管理”。该问题是主导我们如何实现后续的各个逻辑的核心。其的回答将会影响我们来如何设计engine对于协程任务的推进，如何设计context如何驱动engine推进所有的协程Task。</p>
+<p>​	在开始之前，我们需要先来对于一些现有层次进行抽象以及隔离。首先，对于当前的实现来说，<strong>engine</strong>在逻辑上的地位是一把”武器”，通过它，我们能够驱动一个或多个协程任务的执行流的执行。但是，其本身并不知道如何使用其所拥有的性质，也就是其不知道如何来驱动一个协程的运行，其所能够实现的，是对于各个基本的逻辑单元，就比如协程各个状态之间的转化的桥梁的建模。我们能够通过它来驱动一些关键流程的前进。</p>
+<p>​	其次，context就是上文中提到的”我们”。如果将engine类比为”武器”，那么context就是士兵。context能够利用”武器”去实现一系列的行为，在这里，所谓的行为包括但不限于驱动一个协程从提交到退出的整个行为等。所以，其相对于engine来说是一种调度者的角色，负责调度我们何时应该驱动engine执行什么行为，以及需要做什么来维护整个逻辑链条并不出错。</p>
+<h3 id="Engine简略"><a href="#Engine简略" class="headerlink" title="Engine简略"></a>Engine简略</h3><p>​	对于Engine来说，其最核心的任务为驱动协程计算任务以及IO任务。在协程中，所谓的计算任务本质上就是对于一个已准备就绪的协程进行resume，然后其会自动跑在CPU的栈帧中进行计算；而对于IO任务，协程需要提交给Engine，由Engine本身来帮忙推进IO任务并在完成之后通过协程就绪。</p>
+<p>​	此时我们可以给Engine的功能下一个粗略但够用的定义，通过对于Engine的api调用，我们能够驱动提交给Engine的协程的运行。因为一个协程本质上就是由一系列计算任务和IO任务形成的，所以通过合适的调用对应的api，我们就能够推动对应的已经投递到Engine内的协程任务的执行。我们下面给出几个实际上实现的api所提供的抽象。</p>
+<ul>
+<li><strong>submit_task</strong> Engine暴露给外部的往内部提交一个任务的接口</li>
+<li><strong>exec_one_task</strong> 驱动Engine执行其协程就绪队列中下一个任务的计算任务执行</li>
+<li><strong>poll_submit</strong> 驱动Engine执行IO任务，一次调用会驱动Engine进行一次内部的IO事件检测，包括提交待提交的IO，处理已完成的IO。需要注意，一次poll_submit的调用实际上可能会产出一些新的Task，这点特别需要注意。</li>
+</ul>
+<p>​	上诉三个api即为Engine的核心api，除此之外还存在一系列的重要的api。接下来在对于Context如何与Engine交互中会逐渐提及。下面给出其中最重要的poll_submit的实现。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">engine::poll_submit</span><span class="params">()</span> <span class="keyword">noexcept</span> -&gt; <span class="type">void</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// TODO[lab2a]: Add you codes</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 1、提交当前存在的IO</span></span><br><span class="line">    <span class="built_in">do_io_submit</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2、等待已经完成的IO，需要注意，实际上可能不存在完成的IO</span></span><br><span class="line">    <span class="comment">// 需要配合对应的代理类中的eventfd来判断阻塞判断</span></span><br><span class="line">    <span class="comment">// 阻塞判断能够使得线程可以让出CPU，但是需要考虑如何使得唤醒条件确实为存在IO事件完成</span></span><br><span class="line">    <span class="keyword">auto</span> ret = m_upxy.<span class="built_in">wait_eventfd</span>();</span><br><span class="line">    <span class="keyword">if</span>(!<span class="built_in">wake_by_cqe</span>(ret))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3、处理已经完成的IO</span></span><br><span class="line">    <span class="keyword">auto</span> num = m_upxy.<span class="built_in">peek_batch_cqe</span>(m_urc.<span class="built_in">data</span>(), m_running_io.<span class="built_in">load</span>(std::memory_order_acquire));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(num!=<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;num;i++)&#123;</span><br><span class="line">            <span class="built_in">handle_cqe_entry</span>(m_urc[i]);</span><br><span class="line">            m_urc[i]=<span class="literal">nullptr</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        m_upxy.<span class="built_in">cq_advance</span>(num);</span><br><span class="line">        m_running_io.<span class="built_in">fetch_sub</span>(num,std::memory_order_acq_rel);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Context核心"><a href="#Context核心" class="headerlink" title="Context核心"></a>Context核心</h2><p>​	对于Context来说，其核心任务在于如何巧妙组合Engine中的api来驱动协程任务的完整推进，同时保证不丢失任何一个协程任务。我们本次的分析核心就在于Context这里的核心任务，在当前的设计中，我们通过Context的一个核心api来封装了整个流程，所以我们接下来的分析重点会集中在对于该api实现的思路以及对应的逻辑上。</p>
+<p>​	下面给出实际的代码</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">context::run</span><span class="params">(stop_token token)</span> <span class="keyword">noexcept</span> -&gt; <span class="type">void</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (!token.<span class="built_in">stop_requested</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 1. 处理 IO 完成（可能生成新的 runnable 协程）</span></span><br><span class="line">        m_engine.<span class="built_in">poll_submit</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. Drain 所有就绪任务</span></span><br><span class="line">        <span class="keyword">while</span> (m_engine.<span class="built_in">ready</span>())</span><br><span class="line">        &#123;</span><br><span class="line">            m_engine.<span class="built_in">exec_one_task</span>();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 整个生命周期覆盖，如果为false，自然退出</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">empty_wait_task</span>())&#123;</span><br><span class="line">            <span class="built_in">m_stop_cb</span>();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 防止空转占满 CPU，可后续替换为自适应 backoff</span></span><br><span class="line">        std::this_thread::<span class="built_in">yield</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>该api的逻辑实际上很简洁。首先是驱动Engine处理器所持有的IO事件，然后推进协程计算任务的进行，最后判断当前Context是否已经已经满足退出条件或者休眠等其他状态，并执行不同的逻辑。看起来很简单。但是，实际上会存在很多的细节需要处理。而这些细节的核心围绕着一点，<strong>如何来正确的维护一个协程任务的声明周期</strong>。</p>
+<p>我们首先来给出结果基础的抽象层级，对应的<strong>empty_wait_task</strong>判断当前的Context是否满足退出条件，对应的<strong>m_stop_cb</strong>为当一个<strong>Context</strong>退出时的资源清理逻辑。同时我们来说明当前期望的context退出逻辑，当对应的context投递的所有的协程任务都执行完毕之后才能够退出。所以其中退出的核心条件为如何判断当前的context中确实已经完全执行完毕对应的任务。</p>
+<p>为了避免文字描述上的抽象，对于这种生命周期的管理，我们需要来使用一种更加形象的语言来描述，这里选择使用FSM来对于一个协程的生命周期进行描述。</p>
+<h2 id="协程生命周期"><a href="#协程生命周期" class="headerlink" title="协程生命周期"></a>协程生命周期</h2><p><img src="/2025/10/08/OS/3-LSM/image-20251008210755342.png" alt="协程生命周期FSM"></p>
+<p>​	在本次的设计中，我将一个协程在程序中的流转是所位于的状态定义为了三种，分别为”Ready”,”Running”,”Suspend”。</p>
+<ul>
+<li>“Ready”代表着协程此时已经准备就绪，能够通过一次resume来跨越上一次导致阻塞的调度点。</li>
+<li>“Running”代表协程此时正在CPU上执行计算任务</li>
+<li>“Suspend”代表协程此时已经阻塞，正在等待某个条件满足，在本次的Lab代码中，这个条件一般就是某次IO操作的完成</li>
+</ul>
+<p>​	此时，我们将整个协程的声明周期划分为了这三者，为了来验证当前的实现中是否已经能够完整的管理协程的生命周期，我们需要来分析一遍整个Engine和Context中对于整个生命周期的覆盖和管理情况。</p>
+<p>​	首先我们需要来看到其中的退出条件，你需要理解为什么退出条件实际上是对应的判断协程的生命周期是否被完整的管理的关键。下面是当前context中对于退出条件的检测。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">context::empty_wait_task</span><span class="params">()</span> <span class="keyword">noexcept</span> -&gt; <span class="type">bool</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> m_ref_cnt.<span class="built_in">load</span>(std::memory_order_acquire) == <span class="number">0</span> </span><br><span class="line">    		&amp;&amp; m_engine.<span class="built_in">ready</span>() == <span class="literal">false</span> &amp;&amp; m_engine.<span class="built_in">empty_io</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面给出其中几个变量在代码中的建模含义</p>
+<ul>
+<li><strong>m_ref_cnt</strong>			当前context中处于Suspend态的协程的数量</li>
+<li><strong>m_engine.ready()</strong>          当前engine中处于Ready态的协程的数量</li>
+<li><strong>m_engine.empty_io()</strong>    当前engine是否残留未处理的IO事件(待提交IO以及已完成未处理IO)</li>
+</ul>
+<p>接下来我们来看这几个变量如何能够来涵盖整个生命周期管理的，分析对应的代表含义以及为什么需要存在。我们将从现有的engine和context对于生命周期的覆盖入手，来建模各个变量。</p>
+<h4 id="Engine覆盖的生命周期"><a href="#Engine覆盖的生命周期" class="headerlink" title="Engine覆盖的生命周期"></a><strong>Engine覆盖的生命周期</strong></h4><p>​	在Engine中，我们存在多个成员，包括如下几个</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mpmc_queue&lt;coroutine_handle&lt;&gt;&gt; m_task_queue; </span><br><span class="line">std::atomic&lt;<span class="type">size_t</span>&gt; m_wait_submit_io;       </span><br><span class="line">std::atomic&lt;<span class="type">size_t</span>&gt; m_running_io;          </span><br></pre></td></tr></table></figure>
+
+<p>其中的各个成员在逻辑上其实就是一个协程在某个特定阶段下的代表，从观察者角度来看的话，实际上这些成员统计的是出于某个特定状态下的协程的数量。</p>
+<p><strong>m_task_queue</strong>成员的作用是储存当前已经就绪了的协程句柄并提供用于后续的resume操作的对象。所以其的was_size()成员属性反映的实际上就是当前处于<strong>Ready</strong>态的协程数量。<strong>m_wait_submit_io</strong>反映的是当前的Engine中等待被io_uring接受的IO事件，m_running_io反映的是当前Engine中已经完成，但是还没有被处理的IO事件。这俩者共同反映了在一个协程进入Suspend态后的内部状态转移。对于外部来说，通过这俩个状态，我们就能够观察当前位于Suspend态的协程数量。</p>
+<p>综上，通过对于这些成员的统计，我们能够观察到位于Engine中，位于一些特定状态下的数量。包括了我们上面所提到的”Ready”态和”Suspend”态。</p>
+<p>由此，我们根据这种状态的统计生成了俩个api，如下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">engine::empty_io</span><span class="params">()</span> <span class="keyword">noexcept</span> -&gt; <span class="type">bool</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> !m_wait_submit_io&amp;&amp;!m_running_io;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">engine::ready</span><span class="params">()</span> <span class="keyword">noexcept</span> -&gt; <span class="type">bool</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> !m_task_queue.<span class="built_in">was_empty</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过对于这俩个api的调用，我们能够观察到当前执行引擎中的部分协程，但是由于我们还还没有涵盖整个生命周期，所以还是会存在一些遗漏的协程。如果我们只根据上面这俩个api就进行对应的退出判断。势必会导致部分协程被遗漏，甚至于导致内存泄漏以及UB行为。所以我们需要在一些其他地方进行对应的补偿。在TinyCoro中，即是通过<strong>Context</strong>来对于协程的监控进行补偿。</p>
+<h4 id="Context覆盖的声明周期"><a href="#Context覆盖的声明周期" class="headerlink" title="Context覆盖的声明周期"></a>Context覆盖的声明周期</h4><p>​	如果你对于生命周期的管理足够敏感，你应该能够注意到，在上面Engine中，所观测到的实际上只是切实的位于对应的”Ready”态和”Suspend”态中的协程，那么，对于那些位于状态转换中的协程呢，对应的是否有能够正确的统计到，或者说，当前的是否能够成功的补偿到这一部分的统计。这是你所需要思考的内容。接下来我们进入Context是如何对于前文中遗漏的协程生命周期监控进行补偿的。</p>
+<p>​	我们需要回过头来看到Context‘中的核心函数**”run”**。在这个函数中，我们可以看到一个比较有趣的实现，如果你足够敏感，你应该能够观察到这里实际上覆盖了一个状态，就是对应的”Running”态。在”run”中的第二步实际上是一种在本循环内执行所有Running态协程的行为。通过在本循环内执行该函数，我们能够提供一种保证，在对应的声明周期管理中，所有的”Running”态协程都能够被正确的执行，统计，以及转移。其中存在一个有趣的点，就是其是如何保证对应的涉及到”Running”态的转移能够不被遗漏的，你可能需要阅读engine和context的实现来理解。</p>
+<p>​	好，接下来我们先来进行一次阶段性的总结，在当前的分析中，我们看到了Engine统计了位于”Ready”态和”Suspend”态的协程数量，而Context通过在核心流程上包裹对应的”Running”态协程实现了对应的位于”Running”态和处于涉及到”Running”态的俩条状态转移路线的监控。回顾一下我们前面的<strong>协程生命周期FSM图</strong>。在该图中，我们还缺乏一条关键路径没有统计，就是对应的”Suspend”态向”Ready”态的状态转移。为了完善对于协程的统计来实现安全的退出，我们势必需要完善对应这条路径上的协程数量的监控，为此，我们需要分析到底什么时候会触发这条路径以及我们如何来监控这条路径。</p>
+<p>​	下面给出一个可能的并发竞态流程</p>
+<p><img src="/2025/10/08/OS/3-LSM/image-20251008220145138.png" alt="错漏协程场景"></p>
+<p>​	上图清晰的给出了如果我们没有对于该流程进行对应的监控时可能出现的统计的问题。在当前的设计中，一个Suspend态往对应的Ready态的转换并不是原子的，其涉及到取出sqe中的信息，解析其中的结构，调用其中的元信息并将其重新注入到就绪队列中，要是整体的监控流程监控到的**”2”**下的快照，那么其会认为当前任务已经结束，其会尝试停止对应的Context，但是实际上我们仍然存在一个正在搬运过程中的协程句柄，如果这次Context的停止导致了整体的Context的销毁，那么会导致对应的状态转移的终点将会导致一种未知的场景，也就是UB，即使幸运的，这次并没有进行对应的销毁，重新成功注入了队列中完成了状态的转移。但是这种语义是我们想要的吗？我们必须将并发以最坏的场景进行构想，所以我们必须监控这个流程中的协程数量。</p>
+<p>​	为此，我们引入了一个引用计数的概念。我们尝试将这个流程中的协程使用一个引用计数留下一个钩子，只要存在这个钩子的值非0，Context就能够知道当前仍然存在一个状态转移中的协程，那么其就不会尝试进行自毁。如果我们能够更加的对于这种钩子进行精确的统计，那么我们就能够更好的使得Context感知当前的工作协程，并避免误判导致的各种UB。具体的更加详细的分析，你需要自己来进行分析以及理解。</p>
+<p>​	接下来我们来分析我们应该如何来设计这种钩子。期望中的钩子自然是在对应的这条状态转移路径上的增减时进行统计，但是实际上这是很难做到的，可以自己考虑一下如何实现。在本次设计中，我们考虑扩大对应的钩子范围，我们在一个协程即将进入对应的”Suspend”态时就进行Context对于位于该路径上的协程数的++，在一个协程已经从”Suspend”态转移到“Ready”态后，就将对应的钩子数–。通过使用这种粗粒度的引用计数的统计，我们成功实现了对于该状态转移路径上的协程数量的钩子统计，并成功取得了想要的效果。而且这种对于外部的心智负担并不大，这受益于C++中的协程实现，其中的对于一个协程运行阶段的各种拆分允许我们在特定对应阶段进行一定的逻辑的注入，你可以分析一下我们实际上需要在哪里进行对应的引用计数的修改。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​	对于本次Lab，其中最令人痛苦以及着迷的是我们到底需要如何来正确管理对应的协程的生命周期来使得能够正确的统计协程来使得Engine和Context能够真正的在任务执行完毕之后进行退出，不由于错漏而早退导致UB。而为了能够分析当前到底实现了什么功能，一个FSM建模对于生命周期这种模型来说是十分吻合的，特别就如这里，我们通过将一个协程的生命周期建模为一系列的状态以及状态间转移，再在这些状态和中间状态进行监控，我们实现了对于整体的持有协程数量的监控。这种使用建模来解析复杂模型的思路不失为一种好的方法。</p>
+<p>​	实际上，在很多其他方面也能够看到FSM的身影，特别是在网络这方面。对于网络中的可靠网络传输等，由于设计到一系列复杂的实现，单纯使用文字俩描述是很麻烦且难以理解的，此时一个FSM就是”一图胜千言”。我们能够通过对于FSM的观察来分析当前的实现中涵盖了哪些重要的状态节点以及状态路径。是否存在错漏的路径，以及是否存在隐含的路径等待我们来发现以及建模等等。总而言之，当遇到一些难以分析的问题时。不妨尝试先分析出该问题的本质，然后尝试对于这个本质进行对应的状态机的建模。就比如我们上文为了解决这个Lab2的优雅退出对于整个协程生命周期的建模一样，只要我们实际上的FSM确实能够涵盖整体的流程，然后依照这个状态机进行实现，那么总归能够找到破题的思路。</p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2025/10/08/OS/3-LSM/" title="TinyCoro及杂谈">https://tcww0.github.io/2025/10/08/OS/3-LSM/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/OS/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> OS</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/09/19/%E5%88%86%E5%B8%83%E5%BC%8F/0.2-memcache-fb/" rel="prev" title="惊群效应">
+      <i class="fa fa-chevron-left"></i> 惊群效应
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#TinyCoro-Lab2"><span class="nav-number">1.</span> <span class="nav-text">TinyCoro Lab2</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%8F%E7%A8%8B%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%AE%A1%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">协程生命周期管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Engine%E7%AE%80%E7%95%A5"><span class="nav-number">1.1.1.</span> <span class="nav-text">Engine简略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Context%E6%A0%B8%E5%BF%83"><span class="nav-number">1.2.</span> <span class="nav-text">Context核心</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%8F%E7%A8%8B%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">1.3.</span> <span class="nav-text">协程生命周期</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Engine%E8%A6%86%E7%9B%96%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">Engine覆盖的生命周期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Context%E8%A6%86%E7%9B%96%E7%9A%84%E5%A3%B0%E6%98%8E%E5%91%A8%E6%9C%9F"><span class="nav-number">1.3.0.2.</span> <span class="nav-text">Context覆盖的声明周期</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">276k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">4:11</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : 'c3acdfaf34da4fab61e47f5ae6ccccbd',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

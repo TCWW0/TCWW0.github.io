@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本文进行对于Scaling Memcache at Facebook一文的部分内容摘取">
+<meta property="og:type" content="article">
+<meta property="og:title" content="惊群效应">
+<meta property="og:url" content="https://tcww0.github.io/2025/09/19/%E5%88%86%E5%B8%83%E5%BC%8F/0.2-memcache-fb/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文进行对于Scaling Memcache at Facebook一文的部分内容摘取">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-09-19T04:51:15.000Z">
+<meta property="article:modified_time" content="2025-09-19T15:17:56.764Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="分布式">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://tcww0.github.io/2025/09/19/%E5%88%86%E5%B8%83%E5%BC%8F/0.2-memcache-fb/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>惊群效应 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/09/19/%E5%88%86%E5%B8%83%E5%BC%8F/0.2-memcache-fb/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          惊群效应
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-09-19 12:51:15 / Modified: 23:17:56" itemprop="dateCreated datePublished" datetime="2025-09-19T12:51:15+08:00">2025-09-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E5%88%86%E5%B8%83%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">分布式</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文进行对于<strong>Scaling Memcache at Facebook</strong>一文的部分内容摘取</p>
+<span id="more"></span>
+
+<h2 id="旁路缓存-look-aside-cache-的场景"><a href="#旁路缓存-look-aside-cache-的场景" class="headerlink" title="旁路缓存(look-aside cache)的场景"></a>旁路缓存(look-aside cache)的场景</h2><p>系统的架构是不断衍化的，在初期，可能通过一个服务器即能够撑住所有的静态页面，动态资源，数据等资源的提供，但是随着用户量和需求的不断变动，逐渐单机承载不下，就需要不断的扩展各个服务的性能。其中，对于储存服务的一种较好扩展，自然也就是旁路缓存(look-aside cache).</p>
+<p>下面先将对应的数据规模局限在有数千个服务器组成的集群上</p>
+<p>在如此大规模的集群之下，对应的应用侧的请求也具有一定的特征，其对于一个页面的拉取，通常来说并不像个人搭建的小网站一样只拉取几个资源。此时对应的一个热门页面的请求的元素拉取量甚至于能够到达500+的数量级。在这种数量级下，如果去减少对应的获取item的延迟将会是提高用户体验至关重要的一环。</p>
+<p>在这种情况下，势必需要引入缓存，即MemCache层，对应的应用侧的服务器也需要不断与这些服务器之间通信来获取可能存在的缓存信息。但是可以想象，如果每个应用侧服务器都需要与MemCache服务器通信，对应的状态管理将会膨胀到<strong>N*M</strong>的程度，此时对于网络来说，如果存在一端的错误，容易导致<strong>incast congestion</strong>。同时，在这种多对多的情况下，任意一个节点的抖动，都容易导致成为整个系统的瓶颈。在这种系统中，replication不一定能够解决问题，获取其能够解决一个单点瓶颈的场景，但是同时其也会引入更为复杂的状态管理。所以我们需要一种更加合适或者说更加详细的机制来补偿当前为了提供大规模服务的缺陷。</p>
+<h2 id="Reducing-Latency"><a href="#Reducing-Latency" class="headerlink" title="Reducing Latency"></a>Reducing Latency</h2><p>由于服务的本质问题，对于一个webServer与各个MemCache之间的通信，我们是无法避免的，但是这些庞杂的通信中，存在着一些无用的通信，如果能够在应用侧发起的时候就检测到，那么就不必向没有数据的服务器发起信息了，自然能够减少一些网络压力。此时就需要一种方法，来让应用侧了解到其如果想获取一个数据，其需要去往哪个MemCache服务器能够直接获取。在论文中，为了实现这一种视图，使用了多种方法协同。其中，在数据分布方面，其使用一致性哈希来保证数据的分布可追踪，但是这种机制不是其索引对应的key所在的MemCache的服务器的机制。严格来说，可能是我对于论文阅读不够深入，我没有找到对应的关于这方面的描述。</p>
+<p>不过就我个人猜测而言，其可能存在一种通过一致性哈希产生的结果来形成的表，其中储存的是一个key与储存的MemCache之间的映射关系。在McRouter需要去查找一个key时，可以通过该类数据机构来直接向某个MemCache定向发送，不必再向全部的MemCache服务器广播请求。</p>
+<blockquote>
+<p>Items are distributed across the memcached servers through consistent hashing [22].Thus web servers have to routinely communicate with <em>many</em> memcached servers to satisfy a user request. As a result, <em>all</em> web servers communicate with every memcached server in a short period of time.This <em>all-to-all</em> communication pattern can cause incast congestion [30] or allow a single server to become the bottleneck for many web servers. Data replication often alleviates the single-server bottleneck but leads to significant memory inefficiencies in the common case.</p>
+</blockquote>
+<p><strong>批处理</strong></p>
+<p>在减少延迟这一方面，论文中提出了使用合并请求来提高响应的做法，其思路也很清晰，就是通过在Client侧维护一个DAG图。图中储存的是哪些key可以并发的获取，Client侧可以根据这个信息来合并key请求，这种批处理的思想很常见，不过这里的这种应用场景倒是给了我们一个启发。就是对于一些零散的请求，寻找一种方式来尝试合并，更直白点，批处理的方式是一种提高资源的利用率的不错方法。</p>
+<p><strong>协议选择</strong></p>
+<p>如果以网络中的层次来看，上面的批处理是在应用层上的优化。接下来，论文中提出了在网络层上的优化，相对来说也很简单，就是更具重要程度，来对于各种操作所使用的协议来进行抉择。对于一些不敏感的操作，就比如get操作，其使用了UDP，对于set和delete操作，其使用了TCP。相对来说，确实引入了一定的复杂度，不过这种复杂度实现起来倒也还行，而且相对来说，其所提高的那几个百分点的性能，是非常重要的，回顾一下前文提到的系统体量和用户量，这小小几个百分点所实际上代表的数据量其实已经很大了。</p>
+<p><strong>拥堵控制</strong></p>
+<p>恰如计算机网络一书中的阐述流程，在前面进行了一定的分析后，系统进入了流量大小的分析。由于系统体量太大，内部的通信是否会存在拥堵的现象。为了能够缓解或者限制这种<strong>Incast congestion</strong>现象，论文中提出了与TCP中流量控制的相似机制，<strong>滑动窗口</strong>。通过对应的窗口来实现流量的控制。此处如果系统学过计网，应该能够了解这种机制以及在应用层自己来封装一层额外的滑动窗口机制的好处所在。此处不必赘诉。</p>
+<p>总的来说，在<strong>Reducing Latency</strong>这里，给我所带来的最大启发为，在我们遇到一些问题时，我们可以尝试在已经了解到的领域中去查找是否存在类似问题的解决方案，对于一个CSer来说，计算机网络就是一个非常完善且存在大量可以借鉴经验的宝库。</p>
+<h2 id="Reducing-Load"><a href="#Reducing-Load" class="headerlink" title="Reducing Load"></a><strong>Reducing Load</strong></h2><p>下文进入另外一个有趣的方面，论文3.1节在考虑如何减小延迟，其中涉及到一些分布式中常规的一些场景，但是其给出了更加详细的场景以及实际的解决方案。</p>
+<p>对于缓存这种基础设施，其不免会存在几个常见的场景，当缓存数据失效时，当为了恢复缓存失效时。针对这些个问题，需要根据实际的场景来分析，本论文中给出了一些个针对于这些问题的解决方案。</p>
+<p><strong>缓存失效</strong></p>
+<p>在论文中，关于缓存失效，其可能是由于一个web server发起了set请求，但是并发存在对于该key的update请求而导致的竞态，也可能是由于一些替换策略，一些delete操作等。此时就可能由于缓存数据的丢失，而导致cache miss，此时对应的请求就会转向一些代价更加昂贵的路径(eg:数据库，分布式储存等)。此时如果存在大量的请求都走了这种路径，那么对应的端点的压力自然就会很大。此时，如何来缓解这种惊群现象就成了一种重要的优化思路。</p>
+<p>一如在其他分布式系统中对于缓存失效&#x2F;缓存穿透的分析，论文中也提出了一种<strong>Lease</strong>机制。类似与其他一些系统，FB中的租约由MemCache服务器来进行生成与管理。其他方面与其他的实现中也大差不差，都是在一个key失效时，只给后续对于这些key的并发请求中的一个颁发Lease，此时获取Lease的Client将会负责重新构建缓存，而其他的Client，则会在获取Lease失败后休眠一会，减少惊群效应的影响。</p>
+<p>除此之外，论文中对于一些缓存失效场景进行了一些优化。其中是当缓存失效是由<strong>delete</strong>操作引起时的操作。当Client发起一次delete操作后，该key在MemCache实际上不一定会被删除，而是会进入一种特殊的数据结构，其中储存了近期被删除的部分key。此时对于这种临界key的访问仍然正常。但是注意到的是，这其实是一种对于stale data的查找，所以其是强依赖与应用场景的。在论文中，其也说明了这是对于部分数据所进行的优化，同时这种优化对于其服务来说确实给到了一定的性能优势。</p>
+<p>此时不难可以猜想这种优化可能的原因，就比如，当我对于一个FaceBook的条目点赞时，此时会触发set操作来进行更新，此时会使得MemCache中的数据失效(delete操作)。对于这种场景来说，实际上用户即使看到了一些过时的数据，也不会存在太大的疑惑，就比如你看到你朋友圈中一个人点赞或者俩个人点赞其实影响不大。所以实际上这种设计是强依赖于业务场景实现的。</p>
+<blockquote>
+<p>请注意，论文中此处的delete操作，是指前文中对于一个Key进行更新(set&#x2F;…)时会产生的delete请求(个人理解)</p>
+</blockquote>
+<blockquote>
+<p>Our experience has shown that since the cached value tends to be a monotonically increasing snapshot of the database, most applications can use a stale value without any changes.</p>
+</blockquote>
+<p><strong>缓存池</strong></p>
+<p>文中给出了一种其在实际的场景中发现的一种现象。对于MemCache不同类型的数据，其对于一个MemCache服务器的适应性和影响都不竞相同。</p>
+<blockquote>
+<p>Different applications’ workloads can produce negative interference resulting in decreased hit rates.</p>
+</blockquote>
+<p>文中给这种现象提供了一种解决方案，将具有相同性质的数据进行聚合，如下文。</p>
+<blockquote>
+<p>For example, we may provision a small pool for keys that are accessed frequently but for which a cache miss is inexpensive. We may also provision a large pool for infrequently accessed keys for which cache misses are prohibitively expensive.</p>
+</blockquote>
+<p>这种聚合管理的思路在现实中倒也比较常见，不过将这种思路运用到实际的设计中倒是很灵活。而且后续的数据提供的数据测量也不得不让人认可其的实际可行性。</p>
+<p><strong>单点瓶颈</strong></p>
+<p>前文从集群的MemCache的较高层视图来分析了一些场景，接下来将视角聚集到较高粒度的</p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2025/09/19/%E5%88%86%E5%B8%83%E5%BC%8F/0.2-memcache-fb/" title="惊群效应">https://tcww0.github.io/2025/09/19/分布式/0.2-memcache-fb/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 分布式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/09/07/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/8-distributedLock2/" rel="prev" title="分布式锁分析(2)">
+      <i class="fa fa-chevron-left"></i> 分布式锁分析(2)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/10/08/OS/3-LSM/" rel="next" title="TinyCoro及杂谈">
+      TinyCoro及杂谈 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%81%E8%B7%AF%E7%BC%93%E5%AD%98-look-aside-cache-%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">旁路缓存(look-aside cache)的场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reducing-Latency"><span class="nav-number">2.</span> <span class="nav-text">Reducing Latency</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reducing-Load"><span class="nav-number">3.</span> <span class="nav-text">Reducing Load</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">276k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">4:11</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : 'a1cd2f552be70f533a591cb4357681b2',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
