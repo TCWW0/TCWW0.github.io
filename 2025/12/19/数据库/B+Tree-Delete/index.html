@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="B+Tree-Delete​	借15445的契机，来分析其中删除操作中蕴含的复杂场景。 ​	对于B+树来说，其的删除操作是相对于插入操作更麻烦，更具有难度的操作，其涉及到的场景更加复杂，对于整个B+树的破坏更加严重，由此需要进行的补偿操作也更加麻烦。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="B+Tree-Delete">
+<meta property="og:url" content="https://tcww0.github.io/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="B+Tree-Delete​	借15445的契机，来分析其中删除操作中蕴含的复杂场景。 ​	对于B+树来说，其的删除操作是相对于插入操作更麻烦，更具有难度的操作，其涉及到的场景更加复杂，对于整个B+树的破坏更加严重，由此需要进行的补偿操作也更加麻烦。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/image-20251219140145164.png">
+<meta property="og:image" content="https://tcww0.github.io/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/image-20251219142656113.png">
+<meta property="og:image" content="https://tcww0.github.io/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/image-20251219153842115.png">
+<meta property="article:published_time" content="2025-12-19T13:51:15.000Z">
+<meta property="article:modified_time" content="2025-12-20T14:02:21.239Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/image-20251219140145164.png">
+
+<link rel="canonical" href="https://tcww0.github.io/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>B+Tree-Delete | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          B+Tree-Delete
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-12-19 21:51:15" itemprop="dateCreated datePublished" datetime="2025-12-19T21:51:15+08:00">2025-12-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-12-20 22:02:21" itemprop="dateModified" datetime="2025-12-20T22:02:21+08:00">2025-12-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>18k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>16 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="B-Tree-Delete"><a href="#B-Tree-Delete" class="headerlink" title="B+Tree-Delete"></a>B+Tree-Delete</h1><p>​	借15445的契机，来分析其中删除操作中蕴含的复杂场景。</p>
+<p>​	对于B+树来说，其的删除操作是相对于插入操作更麻烦，更具有难度的操作，其涉及到的场景更加复杂，对于整个B+树的破坏更加严重，由此需要进行的补偿操作也更加麻烦。</p>
+<span id="more"></span>
+
+<h2 id="示例伪代码"><a href="#示例伪代码" class="headerlink" title="示例伪代码"></a>示例伪代码</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">procedure <span class="title">delete</span><span class="params">(value K, pointer P)</span></span></span><br><span class="line"><span class="function">找到包含 <span class="params">(K, P)</span> 的叶节点 L</span></span><br><span class="line"><span class="function"><span class="title">delete_entry</span><span class="params">(L, K, P)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">procedure <span class="title">delete_entry</span><span class="params">(node N, value K, pointer P)</span></span></span><br><span class="line"><span class="function">从 N 中删除 <span class="params">(K, P)</span></span></span><br><span class="line"><span class="function"><span class="title">if</span> <span class="params">(N 是根节点 <span class="keyword">and</span> N 只剩下一个子节点)</span> then</span></span><br><span class="line"><span class="function">    使 N 的子节点成为该树的新的根节点并删除 N</span></span><br><span class="line"><span class="function"><span class="keyword">else</span> <span class="title">if</span> <span class="params">(N 有太少的值/指针)</span> then begin</span></span><br><span class="line"><span class="function">    令 N&#x27; 为 <span class="title">parent</span><span class="params">(N)</span> 的前一个或后一个孩子节点</span></span><br><span class="line"><span class="function">    令 K&#x27; 为 <span class="title">parent</span><span class="params">(N)</span> 中指针 N 和 N&#x27; 之间的值</span></span><br><span class="line"><span class="function">    <span class="title">if</span> <span class="params">(N 和 N<span class="string">&#x27; 中的项能放入单个节点中) then begin /* 合并节点 */</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">        if (N 是 N&#x27;</span> 的前一个节点)</span> then <span class="title">swap_variables</span><span class="params">(N, N<span class="string">&#x27;)</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">        if (N 不是叶节点) then</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">            将 K&#x27;</span> 以及 N 中所有的指针和值附加到 N<span class="string">&#x27; 中</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">        else</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">            将 N 中所有 (K_i, P_i) 对附加到 N&#x27;</span> 中；令 N<span class="string">&#x27;.P_n = N.P_n</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">        delete_entry(parent(N), K&#x27;</span>, N)</span>；删除节点 N</span></span><br><span class="line"><span class="function">    end</span></span><br><span class="line"><span class="function">    <span class="keyword">else</span> begin <span class="comment">/* 重新分配：从 N&#x27; 借来一个项 */</span></span></span><br><span class="line"><span class="function">        <span class="title">if</span> <span class="params">(N<span class="string">&#x27; 是 N 的前一个节点) then begin</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">            if (N 是非叶节点) then begin</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">                令 m 满足：N&#x27;</span>.P_m 是 N<span class="string">&#x27; 中的最后一个指针</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">                从 N&#x27;</span> 中去除 (N<span class="string">&#x27;.K_&#123;m-1&#125;, N&#x27;</span>.P_m)</span></span></span><br><span class="line"><span class="params"><span class="function">                插入 (N<span class="string">&#x27;.P_m, K&#x27;</span>)，并通过将其他指针和值右移使之成为 N 中的第一个指针和值</span></span></span><br><span class="line"><span class="params"><span class="function">                用 N<span class="string">&#x27;.K_&#123;m-1&#125; 替换 parent(N) 中的 K&#x27;</span></span></span></span><br><span class="line"><span class="params"><span class="function">            end</span></span></span><br><span class="line"><span class="params"><span class="function">            <span class="keyword">else</span> begin</span></span></span><br><span class="line"><span class="params"><span class="function">                令 m 满足：(N<span class="string">&#x27;.P_m, N&#x27;</span>.K_m) 是 N<span class="string">&#x27; 中的最后一个指针/值对</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">                从 N&#x27;</span> 中去除 (N<span class="string">&#x27;.P_m, N&#x27;</span>.K_m)</span></span></span><br><span class="line"><span class="params"><span class="function">                插入 (N<span class="string">&#x27;.P_m, N&#x27;</span>.K_m)，并通过将其他指针和值右移使之成为 N 中的第一个指针和值</span></span></span><br><span class="line"><span class="params"><span class="function">                用 N<span class="string">&#x27;.K_m 替换 parent(N) 中的 K&#x27;</span></span></span></span><br><span class="line"><span class="params"><span class="function">            end</span></span></span><br><span class="line"><span class="params"><span class="function">        end</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">else</span> begin <span class="comment">/* N&#x27; 是 N 的后一个节点 */</span></span></span></span><br><span class="line"><span class="params"><span class="function">            <span class="keyword">if</span> (N 是非叶节点) then begin</span></span></span><br><span class="line"><span class="params"><span class="function">                令 m 满足：N<span class="string">&#x27;.P_0 是 N&#x27;</span> 中的第一个指针</span></span></span><br><span class="line"><span class="params"><span class="function">                从 N<span class="string">&#x27; 中去除 (N&#x27;</span>.K_1, N<span class="string">&#x27;.P_0)</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">                插入 (N&#x27;</span>.P_0, K<span class="string">&#x27;)，并通过将其他指针和值左移使之成为 N 中的最后一个指针和值</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">                用 N&#x27;</span>.K_1 替换 parent(N) 中的 K&#x27;</span></span></span><br><span class="line"><span class="params"><span class="function">            end</span></span></span><br><span class="line"><span class="params"><span class="function">            <span class="keyword">else</span> begin</span></span></span><br><span class="line"><span class="params"><span class="function">                令 m 满足：(N<span class="string">&#x27;.P_1, N&#x27;</span>.K_1) 是 N<span class="string">&#x27; 中的第一个指针/值对</span></span></span></span><br><span class="line"><span class="string"><span class="params"><span class="function">                从 N&#x27;</span> 中去除 (N<span class="string">&#x27;.P_1, N&#x27;</span>.K_1)</span></span></span><br><span class="line"><span class="params"><span class="function">                插入 (N<span class="string">&#x27;.P_1, N&#x27;</span>.K_1)，并通过将其他指针和值左移使之成为 N 中的最后一个指针和值</span></span></span><br><span class="line"><span class="params"><span class="function">                用 N<span class="string">&#x27;.K_1 替换 parent(N) 中的 K&#x27;</span></span></span></span><br><span class="line"><span class="params"><span class="function">            end</span></span></span><br><span class="line"><span class="params"><span class="function">        end</span></span></span><br><span class="line"><span class="params"><span class="function">    end</span></span></span><br><span class="line"><span class="params"><span class="function">end</span></span></span><br></pre></td></tr></table></figure>
+
+<p>​	上面这段伪代码是后续实现细节上的一些guidelines，可以参考这个来补充一定的实现思路。但是在那之前，我们需要来整体分析下删除操作本身。</p>
+<p>​	</p>
+<h2 id="Delete分析"><a href="#Delete分析" class="headerlink" title="Delete分析"></a>Delete分析</h2><p>​	对于删除操作，期望其的行为实际很简单，就是删除当前B+树中的储存的某个值。在删除的过程中，其可能会破坏B+树本身的一些不变性保证，而这是不允许的，所以，删除操作本身需要对于操作导致的对于B+树的破坏进行修复。</p>
+<p>​	结合前文给出的伪代码，我们可以分析得删除操作的部分基本逻辑如下：</p>
+<ol>
+<li>查找到删除的Key所处在的叶节点，对于该Key进行删除</li>
+<li>检查删除后的节点是否违背了B+树的不变性保证，若没有违背，直接返回即可。若违背，需要修复之后再返回</li>
+<li>对于B+树的修复可能会导致整棵树结构的不断变动，可能需要递归修复，但是总之最后需要让B+树本身符合上层对于其的语义要求</li>
+</ol>
+<p>​	我们可以先进行一些严格的假设，后续再逐渐放宽来分析。同时，我们需要给出几个重要的先决条件来明确我们删除操作所处的环境，特别是其所使用的锁策略。我们使用的锁策略如下：</p>
+<ul>
+<li>使用乐观锁策略来处理删除操作，在初始，我们使用读锁封锁从根节点到目标叶子节点上的所有节点，如果本次删除操作不会导致B+树的结构性破坏，那么此次操作的封锁是成功的，直接删除对应的节点并且返回即可</li>
+<li>当本次的删除操作破坏了B+树的不变性保证，就比如，删除一个叶子节点上的KV对导致叶子节点本身陷入了<code>&lt;一半最大容量</code>这个<strong>下溢</strong>状态时，此时插入操作将回退乐观路径，并以悲观锁策略重新封锁路径上的所有节点，并重新处理这个删除操作，此时一定需要保证在删除的同时维持整棵B+树的不变性保证</li>
+</ul>
+<h2 id="Delete实现"><a href="#Delete实现" class="headerlink" title="Delete实现"></a>Delete实现</h2><p>​	为了实现的清晰以及方便管理，我们将删除操作本身进行了划分，使得其由一个简单的workflow来进行管理，方便后续的debug以及分析等。在本次设计中，将插入操作分割为了如下步骤。</p>
+<p><img src="/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/image-20251219140145164.png" alt="image-20251219140145164"></p>
+<p>​	该流程图清晰的描述了本次设计中一次删除操作所需要跑的流程图，但是其中会存在了很多的坑等待我们处理。接下来进入详细的实现的分析。</p>
+<h3 id="入口实现"><a href="#入口实现" class="headerlink" title="入口实现"></a>入口实现</h3><p>​	对于一次删除操作，为了能够简化我们的实现，我将其中的在不同锁策略下的共同逻辑给其抽离出来。主要是为了实现更高程度的代码复用。我们期望，<code>DeleteFromLeaf</code>能够作为悲观策略或者乐观策略的统一入口，该函数应该支持处理流程图中下溢的修复之前的流程的统一。因此，我们给该函数设计了一种无状态的属性，而通过参数<code>is_optimistic</code>来进行本次调用的上下文约定。这在先前Insert中就已经出现了，这里不再赘诉。在内部的实现中，其复用了先前实现的查找逻辑，实现了随外部策略所变化的查找方式。在查找完成后，其又会根据本次的策略进行不同的处理，若处于乐观策略，此时会开始检查本次操作是否会导致下溢，只有在不导致下溢的前提之下才会进入下一步，否则直接回退。同时，正如前文我们所了解到的，我们的<code>FindLeafPage</code>在实现中，如果是乐观策略，此时对应的叶子节点上的锁为读锁，所以势必要进行一次读锁升级。这里的并发分析在先前的Insert操作中已经分析过多次，不再进行赘诉。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">FULL_INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BPLUSTREE_TYPE::DeleteFromLeaf</span><span class="params">(<span class="type">const</span> KeyType &amp;key, Context &amp;ctx,<span class="type">bool</span> is_optimistic)</span> -&gt; <span class="type">int</span> </span>&#123;</span><br><span class="line">  <span class="keyword">auto</span> success = <span class="built_in">FindLeafPage</span>(key, ctx, is_optimistic);</span><br><span class="line">  <span class="keyword">if</span> (!success) &#123; <span class="keyword">return</span> <span class="number">-1</span>; &#125;   <span class="comment">// 获取页面失败，上层决定行为</span></span><br><span class="line">  <span class="keyword">if</span> (is_optimistic) &#123;</span><br><span class="line">    <span class="keyword">auto</span> leaf_guard = std::<span class="built_in">move</span>(ctx.read_set_.<span class="built_in">back</span>());</span><br><span class="line">    ctx.read_set_.<span class="built_in">pop_back</span>();</span><br><span class="line">    <span class="keyword">auto</span> leaf_page = leaf_guard.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">    <span class="type">int</span> size = leaf_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">    <span class="type">int</span> delete_index = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; size; i++) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="built_in">comparator_</span>(leaf_page-&gt;<span class="built_in">KeyAt</span>(i), key) == <span class="number">0</span>) &#123;</span><br><span class="line">        delete_index = i;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (delete_index == <span class="number">-1</span>) &#123;<span class="keyword">return</span> <span class="number">-2</span>;&#125;      <span class="comment">// key不存在返回-2</span></span><br><span class="line">    <span class="keyword">if</span> (leaf_page-&gt;<span class="built_in">GetSize</span>() - <span class="number">1</span> &lt; leaf_page-&gt;<span class="built_in">GetMinSize</span>()) &#123;<span class="keyword">return</span> <span class="number">-3</span>;&#125;      <span class="comment">// 导致下溢返回-3</span></span><br><span class="line">    <span class="keyword">auto</span> leaf_page_id = leaf_guard.<span class="built_in">GetPageId</span>();</span><br><span class="line">    leaf_guard.<span class="built_in">Drop</span>();</span><br><span class="line">    <span class="keyword">auto</span> leaf_write_guard_opt = bpm_-&gt;<span class="built_in">WritePage</span>(leaf_page_id);</span><br><span class="line">    <span class="keyword">if</span> (!leaf_write_guard_opt.<span class="built_in">has_value</span>()) &#123; <span class="keyword">return</span> <span class="number">-1</span>; &#125;   <span class="comment">// -1当前统一当前缓冲区已满，上层自行考虑行为</span></span><br><span class="line">    <span class="keyword">auto</span>&amp; leaf_write_guard = leaf_write_guard_opt.<span class="built_in">value</span>();</span><br><span class="line">    <span class="keyword">auto</span> leaf_page_mut = leaf_write_guard.<span class="built_in">AsMut</span>&lt;LeafPage&gt;();</span><br><span class="line">    <span class="comment">// Double Check</span></span><br><span class="line">    <span class="type">int</span> size_mut = leaf_page_mut-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">    <span class="type">int</span> delete_index_mut = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; size_mut; i++) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="built_in">comparator_</span>(leaf_page_mut-&gt;<span class="built_in">KeyAt</span>(i), key) == <span class="number">0</span>) &#123;</span><br><span class="line">        delete_index_mut = i;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (delete_index_mut == <span class="number">-1</span>) &#123;<span class="keyword">return</span> <span class="number">-2</span>;&#125;</span><br><span class="line">    <span class="keyword">if</span> (leaf_page_mut-&gt;<span class="built_in">GetSize</span>() - <span class="number">1</span> &lt; leaf_page_mut-&gt;<span class="built_in">GetMinSize</span>()) &#123;<span class="keyword">return</span> <span class="number">-3</span>;&#125;</span><br><span class="line">    <span class="comment">// 删除操作</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = delete_index_mut; i &lt; size_mut - <span class="number">1</span>; i++) &#123;</span><br><span class="line">      leaf_page_mut-&gt;<span class="built_in">SetKeyAt</span>(i, leaf_page_mut-&gt;<span class="built_in">KeyAt</span>(i + <span class="number">1</span>));</span><br><span class="line">      leaf_page_mut-&gt;<span class="built_in">SetValueAt</span>(i, leaf_page_mut-&gt;<span class="built_in">ValueAt</span>(i + <span class="number">1</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    leaf_page_mut-&gt;<span class="built_in">SetSize</span>(size_mut - <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 悲观模式</span></span><br><span class="line">  <span class="comment">// 不能假设任何条件，都需要再次进行检查是否会导致下溢</span></span><br><span class="line">  <span class="keyword">auto</span> leaf_guard = std::<span class="built_in">move</span>(ctx.write_set_.<span class="built_in">back</span>());</span><br><span class="line">  ctx.write_set_.<span class="built_in">pop_back</span>();</span><br><span class="line">  <span class="keyword">auto</span> leaf_page = leaf_guard.<span class="built_in">AsMut</span>&lt;LeafPage&gt;();</span><br><span class="line">  <span class="type">int</span> size = leaf_page-&gt;<span class="built_in">GetSize</span>(); </span><br><span class="line">  <span class="type">int</span> delete_index = <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; size; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">comparator_</span>(leaf_page-&gt;<span class="built_in">KeyAt</span>(i), key) == <span class="number">0</span>) &#123;</span><br><span class="line">      delete_index = i;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (delete_index == <span class="number">-1</span>) &#123;<span class="keyword">return</span> <span class="number">-2</span>;&#125;    <span class="comment">// 这可能是由于锁升级的期间被并发抢占删除了</span></span><br><span class="line">  <span class="comment">// 1. 不会导致下溢的删除操作</span></span><br><span class="line">  <span class="keyword">if</span> (leaf_page-&gt;<span class="built_in">GetSize</span>() - <span class="number">1</span> &gt;= leaf_page-&gt;<span class="built_in">GetMinSize</span>()) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = delete_index; i &lt; size - <span class="number">1</span>; i++) &#123;</span><br><span class="line">      leaf_page-&gt;<span class="built_in">SetKeyAt</span>(i, leaf_page-&gt;<span class="built_in">KeyAt</span>(i + <span class="number">1</span>));</span><br><span class="line">      leaf_page-&gt;<span class="built_in">SetValueAt</span>(i, leaf_page-&gt;<span class="built_in">ValueAt</span>(i + <span class="number">1</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    leaf_page-&gt;<span class="built_in">SetSize</span>(size - <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 2. 会导致下溢的删除操作</span></span><br><span class="line">  <span class="comment">//! TODO</span></span><br><span class="line">  <span class="comment">// 2.1 删除对应的KV对</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = delete_index; i &lt; size - <span class="number">1</span>; i++) &#123;</span><br><span class="line">    leaf_page-&gt;<span class="built_in">SetKeyAt</span>(i, leaf_page-&gt;<span class="built_in">KeyAt</span>(i + <span class="number">1</span>));</span><br><span class="line">    leaf_page-&gt;<span class="built_in">SetValueAt</span>(i, leaf_page-&gt;<span class="built_in">ValueAt</span>(i + <span class="number">1</span>));</span><br><span class="line">  &#125;</span><br><span class="line">  leaf_page-&gt;<span class="built_in">SetSize</span>(size - <span class="number">1</span>);</span><br><span class="line">  <span class="comment">// 2.2 向父节点上报下溢</span></span><br><span class="line">  <span class="keyword">auto</span> leaf_page_id = leaf_guard.<span class="built_in">GetPageId</span>();</span><br><span class="line">  ctx.write_set_.<span class="built_in">push_back</span>(std::<span class="built_in">move</span>(leaf_guard)); <span class="comment">// 重新放回context中，方便后续处理</span></span><br><span class="line">  <span class="built_in">UnderflowAndDelete</span>( leaf_page_id, key, ctx);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	接下来注意力集中到在悲观策略下的处理逻辑。照流程图中所说，在悲观策略下，我们肯定是本次删除操作会导致下溢才会下降到这种处理方式。但是，这种保证在实现中可能导致一定的误导。在外面的设计中，我们不能够假设进入了一个悲观策略的删除行为一定会导致节点的删除，这是为应用场景引入并发这个先决条件所导致的。实际上考虑起来很简单，下面给出一个时序图自行分析。</p>
+<img src="/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/image-20251219142656113.png" alt="并发可能时序" style="zoom: 67%;">
+
+<p>​	代码中为了处理并发下可能的删除时序进行了双重检查。我们先假设在这种双重检查之后，本次删除操作确实需要我们来执行，并且会导致下溢，即代码中的2.2部分。接下来，我们来分析代码中对于下溢场景的处理。</p>
+<p>​	</p>
+<h3 id="首次下溢"><a href="#首次下溢" class="headerlink" title="首次下溢"></a>首次下溢</h3><p>​	在一般教材中，对于B+树的下溢修复一般都讲的很笼统，导致我实际上很难以入手分析。为此，我将下溢的发生场景再次进行了切分细化。以此来尝试使得设计思路更加明确。</p>
+<p>​	在本次设计中，将首次下溢处理作为一个特殊的场景抽离出来。本人的思路是这样的，一个B+树的首次下溢，一定是会发生在叶子节点上的。而后续如果还存在下溢，那么其处理的节点属性一定会是中间节点。我依照这种操作节点的属性来对于下溢处理流程进行了第一步的划分。接下俩来观察到时怎么实现的关于首次下溢的场景的，代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">FULL_INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BPLUSTREE_TYPE::UnderflowAndDelete</span><span class="params">(<span class="type">page_id_t</span> leaf_page_id, <span class="type">const</span> KeyType &amp;index_key, Context &amp;ctx)</span> </span></span><br><span class="line"><span class="function">-&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  <span class="keyword">auto</span> leaf_guard = std::<span class="built_in">move</span>(ctx.write_set_.<span class="built_in">back</span>());</span><br><span class="line">  ctx.write_set_.<span class="built_in">pop_back</span>();</span><br><span class="line">  <span class="keyword">auto</span> leaf_page = leaf_guard.<span class="built_in">AsMut</span>&lt;LeafPage&gt;();</span><br><span class="line">  <span class="comment">// 1. 特判，当前叶子节点为根节点</span></span><br><span class="line">  <span class="keyword">if</span> (leaf_page_id == ctx.root_page_id_)&#123;</span><br><span class="line">    <span class="comment">// 根节点特殊处理：若最后一个元素被删除，需要将 root_page_id 设置为 INVALID_PAGE_ID</span></span><br><span class="line">    <span class="keyword">if</span> (leaf_page-&gt;<span class="built_in">GetSize</span>() == <span class="number">0</span>)&#123;</span><br><span class="line">      <span class="keyword">auto</span> header_guard_opt = bpm_-&gt;<span class="built_in">WritePage</span>(header_page_id_);</span><br><span class="line">      <span class="keyword">if</span> (header_guard_opt.<span class="built_in">has_value</span>()) &#123;</span><br><span class="line">        <span class="keyword">auto</span> &amp;header_guard = header_guard_opt.<span class="built_in">value</span>();</span><br><span class="line">        <span class="keyword">auto</span> header_page = header_guard.<span class="built_in">AsMut</span>&lt;BPlusTreeHeaderPage&gt;();</span><br><span class="line">        header_page-&gt;root_page_id_ = INVALID_PAGE_ID;</span><br><span class="line">        ctx.root_page_id_ = INVALID_PAGE_ID;</span><br><span class="line">        <span class="built_in">LOG_INFO</span>(<span class="string">&quot;UnderflowAndDelete: tree became empty, header root set to INVALID_PAGE_ID&quot;</span>);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">LOG_INFO</span>(<span class="string">&quot;UnderflowAndDelete: failed to write header page to set root to INVALID_PAGE_ID&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 2. 找到父节点,当前write_set的最后一个节点即为叶子节点，倒数第二个节点即为父节点</span></span><br><span class="line">  <span class="keyword">auto</span> parent_guard = std::<span class="built_in">move</span>(ctx.write_set_.<span class="built_in">back</span>());</span><br><span class="line">  ctx.write_set_.<span class="built_in">pop_back</span>();</span><br><span class="line">  <span class="keyword">auto</span> parent_page = parent_guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">  <span class="comment">// 2.1 查找到叶子节点ID当前所在父节点位置</span></span><br><span class="line">  <span class="type">int</span> child_index = <span class="number">-1</span>;</span><br><span class="line">  <span class="type">int</span> size = parent_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">  <span class="comment">// 需要以指针来进行查找，如果以最左Key来进行查找，实际上可能出现假阴性的情况，即当前确实存在该子节点，但是无法通过key查找</span></span><br><span class="line">  <span class="comment">// 这是由于我们后续的删除语义对于一些B+树不变形保证的维护导致的</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; size; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (parent_page-&gt;<span class="built_in">ValueAt</span>(i) == leaf_page_id) &#123;</span><br><span class="line">      child_index = i;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">LOG_DEBUG</span>(<span class="string">&quot;UnderflowAndDelete: leaf %d, parent %d, child_index %d, parent_size %d&quot;</span>, leaf_page_id, parent_guard.<span class="built_in">GetPageId</span>(), child_index, size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (child_index == <span class="number">-1</span>)&#123;</span><br><span class="line">    <span class="comment">// 进入这里正常情况只可能是并发问题</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 2.2 尝试从左兄弟节点借</span></span><br><span class="line">  <span class="type">bool</span> borrowed = <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">if</span> (child_index &gt; <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="type">page_id_t</span> left_bro_id = parent_page-&gt;<span class="built_in">ValueAt</span>(child_index - <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">auto</span> left_bro_guard_opt = bpm_-&gt;<span class="built_in">WritePage</span>(left_bro_id);</span><br><span class="line">    <span class="keyword">if</span> (!left_bro_guard_opt.<span class="built_in">has_value</span>()) &#123; <span class="keyword">return</span> <span class="literal">false</span>; &#125;</span><br><span class="line">    <span class="keyword">auto</span>&amp; left_bro_guard = left_bro_guard_opt.<span class="built_in">value</span>();</span><br><span class="line">    <span class="keyword">auto</span> left_bro_page = left_bro_guard.<span class="built_in">AsMut</span>&lt;LeafPage&gt;();</span><br><span class="line">    <span class="keyword">if</span> (left_bro_page-&gt;<span class="built_in">GetSize</span>() &gt; left_bro_page-&gt;<span class="built_in">GetMinSize</span>())&#123;</span><br><span class="line">      <span class="comment">// 2.2.1. 从左兄弟节点借最后一个元素</span></span><br><span class="line">      <span class="type">int</span> left_bro_size = left_bro_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">      KeyType borrow_key = left_bro_page-&gt;<span class="built_in">KeyAt</span>(left_bro_size - <span class="number">1</span>);</span><br><span class="line">      ValueType borrow_value = left_bro_page-&gt;<span class="built_in">ValueAt</span>(left_bro_size - <span class="number">1</span>);</span><br><span class="line">      left_bro_page-&gt;<span class="built_in">SetSize</span>(left_bro_size - <span class="number">1</span>);</span><br><span class="line">      <span class="comment">// 2.2.2. 将借来的元素插入到当前节点头部</span></span><br><span class="line">      <span class="type">int</span> leaf_size = leaf_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">      <span class="keyword">for</span> (<span class="type">int</span> i = leaf_size; i &gt; <span class="number">0</span>; i--) &#123;</span><br><span class="line">        leaf_page-&gt;<span class="built_in">SetKeyAt</span>(i, leaf_page-&gt;<span class="built_in">KeyAt</span>(i - <span class="number">1</span>));</span><br><span class="line">        leaf_page-&gt;<span class="built_in">SetValueAt</span>(i, leaf_page-&gt;<span class="built_in">ValueAt</span>(i - <span class="number">1</span>));</span><br><span class="line">      &#125;</span><br><span class="line">      leaf_page-&gt;<span class="built_in">SetKeyAt</span>(<span class="number">0</span>, borrow_key);</span><br><span class="line">      leaf_page-&gt;<span class="built_in">SetValueAt</span>(<span class="number">0</span>, borrow_value);</span><br><span class="line">      leaf_page-&gt;<span class="built_in">SetSize</span>(leaf_size + <span class="number">1</span>);</span><br><span class="line">	  <span class="comment">// 2.3.3 修复父节点中的key划分：父节点分隔键应当反映右兄弟的新最小键</span></span><br><span class="line">      KeyType new_right_min = (right_bro_page-&gt;<span class="built_in">GetSize</span>() &gt; <span class="number">0</span>) ? right_bro_page-&gt;<span class="built_in">KeyAt</span>(<span class="number">0</span>) : borrow_key;</span><br><span class="line">      parent_page-&gt;<span class="built_in">SetKeyAt</span>(child_index + <span class="number">1</span>, new_right_min);</span><br><span class="line">      borrowed = <span class="literal">true</span>;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; </span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 2.3 尝试从右兄弟借</span></span><br><span class="line">  <span class="keyword">if</span> (!borrowed &amp;&amp; child_index &lt; size - <span class="number">1</span>)&#123; </span><br><span class="line">    <span class="type">page_id_t</span> right_bro_id = parent_page-&gt;<span class="built_in">ValueAt</span>(child_index + <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">auto</span> right_bro_guard_opt = bpm_-&gt;<span class="built_in">WritePage</span>(right_bro_id);</span><br><span class="line">    <span class="keyword">if</span> (!right_bro_guard_opt.<span class="built_in">has_value</span>()) &#123; <span class="keyword">return</span> <span class="literal">false</span>; &#125;</span><br><span class="line">    <span class="keyword">auto</span>&amp; right_bro_guard = right_bro_guard_opt.<span class="built_in">value</span>();</span><br><span class="line">    <span class="keyword">auto</span> right_bro_page = right_bro_guard.<span class="built_in">AsMut</span>&lt;LeafPage&gt;();</span><br><span class="line">    <span class="keyword">if</span> (right_bro_page-&gt;<span class="built_in">GetSize</span>() &gt; right_bro_page-&gt;<span class="built_in">GetMinSize</span>())&#123;</span><br><span class="line">      <span class="comment">// 2.3.1 从右兄弟节点借第一个元素</span></span><br><span class="line">      KeyType borrow_key = right_bro_page-&gt;<span class="built_in">KeyAt</span>(<span class="number">0</span>);</span><br><span class="line">      ValueType borrow_value = right_bro_page-&gt;<span class="built_in">ValueAt</span>(<span class="number">0</span>);</span><br><span class="line">      <span class="type">int</span> right_bro_size = right_bro_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">      <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; right_bro_size - <span class="number">1</span>; i++) &#123;</span><br><span class="line">        right_bro_page-&gt;<span class="built_in">SetKeyAt</span>(i, right_bro_page-&gt;<span class="built_in">KeyAt</span>(i + <span class="number">1</span>));   <span class="comment">// 注意这里的直接前移的语义保证</span></span><br><span class="line">        right_bro_page-&gt;<span class="built_in">SetValueAt</span>(i, right_bro_page-&gt;<span class="built_in">ValueAt</span>(i + <span class="number">1</span>));</span><br><span class="line">      &#125;</span><br><span class="line">      right_bro_page-&gt;<span class="built_in">SetSize</span>(right_bro_size - <span class="number">1</span>);</span><br><span class="line">      <span class="comment">// 2.3.2 将借来的元素插入到当前节点尾部</span></span><br><span class="line">      <span class="type">int</span> leaf_size = leaf_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">      leaf_page-&gt;<span class="built_in">SetKeyAt</span>(leaf_size, borrow_key);</span><br><span class="line">      leaf_page-&gt;<span class="built_in">SetValueAt</span>(leaf_size, borrow_value);</span><br><span class="line">      leaf_page-&gt;<span class="built_in">SetSize</span>(leaf_size + <span class="number">1</span>);</span><br><span class="line">      <span class="comment">// 2.3.3 修复父节点中的key划分</span></span><br><span class="line">      parent_page-&gt;<span class="built_in">SetKeyAt</span>(child_index + <span class="number">1</span>, borrow_key);</span><br><span class="line">      borrowed = <span class="literal">true</span>;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 无法借，合并节点</span></span><br><span class="line">  <span class="comment">// 2.4 优先尝试合并左节点</span></span><br><span class="line">  <span class="keyword">if</span> (child_index &gt; <span class="number">0</span>)&#123;</span><br><span class="line">      <span class="comment">// 2.4.1 尝试合并到左兄弟</span></span><br><span class="line">      <span class="type">page_id_t</span> left_bro_id = parent_page-&gt;<span class="built_in">ValueAt</span>(child_index - <span class="number">1</span>);</span><br><span class="line">      <span class="keyword">auto</span> left_bro_guard_opt = bpm_-&gt;<span class="built_in">WritePage</span>(left_bro_id);</span><br><span class="line">      <span class="keyword">if</span> (!left_bro_guard_opt.<span class="built_in">has_value</span>()) &#123; <span class="keyword">return</span> <span class="literal">false</span>; &#125;</span><br><span class="line">      <span class="keyword">auto</span>&amp; left_bro_guard = left_bro_guard_opt.<span class="built_in">value</span>();</span><br><span class="line">      <span class="keyword">auto</span> left_bro_page = left_bro_guard.<span class="built_in">AsMut</span>&lt;LeafPage&gt;();</span><br><span class="line">      <span class="comment">// 查看当前是否可以合并</span></span><br><span class="line">      <span class="type">int</span> left_bro_size = left_bro_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">      <span class="type">int</span> leaf_size = leaf_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">      <span class="keyword">if</span> (left_bro_size + leaf_size &lt;= leaf_max_size_)&#123;</span><br><span class="line">        <span class="comment">// 2.4.2 合并到左兄弟节点</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; leaf_size; i++) &#123;</span><br><span class="line">          left_bro_page-&gt;<span class="built_in">SetKeyAt</span>(left_bro_size + i, leaf_page-&gt;<span class="built_in">KeyAt</span>(i));</span><br><span class="line">          left_bro_page-&gt;<span class="built_in">SetValueAt</span>(left_bro_size + i, leaf_page-&gt;<span class="built_in">ValueAt</span>(i));</span><br><span class="line">        &#125;</span><br><span class="line">        left_bro_page-&gt;<span class="built_in">SetSize</span>(left_bro_size + leaf_size);</span><br><span class="line">        left_bro_page-&gt;<span class="built_in">SetNextPageId</span>(leaf_page-&gt;<span class="built_in">GetNextPageId</span>());</span><br><span class="line">        <span class="comment">// LOG_INFO(&quot;UnderflowAndDelete: merged leaf %d into left sibling %d&quot;, leaf_page_id, left_bro_id);</span></span><br><span class="line">        <span class="comment">// 2.4.3 从父节点删除对应的child指针和key,将后续节点前移</span></span><br><span class="line">        <span class="type">int</span> parent_size = parent_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">        <span class="comment">// 此时需要注意，由于将叶子节点合并到了左兄弟节点上，导致该兄弟节点的值域上界发生了扩展，此时需要更新父节点中的元素</span></span><br><span class="line">        <span class="comment">// 将原本指向左兄弟节点的指针的右侧，实际上即叶子节点的索引对应的KeyArray中的Key更新为合并后节点的最后一个Key</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = child_index; i &lt; parent_size - <span class="number">1</span>; i++) &#123;</span><br><span class="line">          parent_page-&gt;<span class="built_in">SetValueAt</span>(i, parent_page-&gt;<span class="built_in">ValueAt</span>(i + <span class="number">1</span>));</span><br><span class="line">          parent_page-&gt;<span class="built_in">SetKeyAt</span>(i, parent_page-&gt;<span class="built_in">KeyAt</span>(i + <span class="number">1</span>));</span><br><span class="line">        &#125;</span><br><span class="line">      parent_page-&gt;<span class="built_in">SetSize</span>(parent_size - <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">if</span> (parent_page-&gt;<span class="built_in">GetSize</span>() &lt; parent_page-&gt;<span class="built_in">GetMinSize</span>())&#123;</span><br><span class="line">          <span class="comment">// ! <span class="doctag">TODO:</span> 递归向上处理，此时就是叶子节点的统一处理逻辑</span></span><br><span class="line">          <span class="keyword">auto</span> parent_page_id = parent_guard.<span class="built_in">GetPageId</span>();</span><br><span class="line">          ctx.write_set_.<span class="built_in">push_back</span>(std::<span class="built_in">move</span>(parent_guard)); <span class="comment">// 重新放回context中，方便后续处理</span></span><br><span class="line">          <span class="built_in">RedistributeOrMergeToParent</span>(parent_page_id, ctx);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (child_index &lt; size - <span class="number">1</span>) &#123;  <span class="comment">// 左侧无兄弟，尝试右兄弟的合并</span></span><br><span class="line">      <span class="type">page_id_t</span> right_bro_id = parent_page-&gt;<span class="built_in">ValueAt</span>(child_index + <span class="number">1</span>);</span><br><span class="line">      <span class="keyword">auto</span> right_bro_guard_opt = bpm_-&gt;<span class="built_in">WritePage</span>(right_bro_id);</span><br><span class="line">      <span class="keyword">if</span> (!right_bro_guard_opt.<span class="built_in">has_value</span>()) &#123; <span class="keyword">return</span> <span class="literal">false</span>; &#125;</span><br><span class="line">      <span class="keyword">auto</span>&amp; right_bro_guard = right_bro_guard_opt.<span class="built_in">value</span>();</span><br><span class="line">      <span class="keyword">auto</span> right_bro_page = right_bro_guard.<span class="built_in">AsMut</span>&lt;LeafPage&gt;();</span><br><span class="line">      <span class="comment">// 查看当前是否可以合并</span></span><br><span class="line">      <span class="type">int</span> right_bro_size = right_bro_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">      <span class="type">int</span> leaf_size = leaf_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">      <span class="keyword">if</span> (right_bro_size + leaf_size &lt;= leaf_max_size_)&#123;</span><br><span class="line">        <span class="comment">// 2.4.2 合并到右兄弟节点</span></span><br><span class="line">        <span class="comment">// 将右兄弟节点的数据append到当前节点尾部</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; right_bro_size; i++) &#123;</span><br><span class="line">          leaf_page-&gt;<span class="built_in">SetKeyAt</span>(leaf_size + i, right_bro_page-&gt;<span class="built_in">KeyAt</span>(i));</span><br><span class="line">          leaf_page-&gt;<span class="built_in">SetValueAt</span>(leaf_size + i, right_bro_page-&gt;<span class="built_in">ValueAt</span>(i));</span><br><span class="line">        &#125;</span><br><span class="line">        leaf_page-&gt;<span class="built_in">SetSize</span>(leaf_size + right_bro_size);</span><br><span class="line">        leaf_page-&gt;<span class="built_in">SetNextPageId</span>(right_bro_page-&gt;<span class="built_in">GetNextPageId</span>());</span><br><span class="line">        <span class="built_in">LOG_INFO</span>(<span class="string">&quot;UnderflowAndDelete: merged right sibling %d into leaf %d&quot;</span>, right_bro_id, leaf_page_id);</span><br><span class="line">        <span class="comment">// 2.4.3 修复由于合并导致的一致性破坏</span></span><br><span class="line">        <span class="comment">// 由于将右兄弟合并到叶子节点上，此时上界被扩展，需要更新父节点中的Key</span></span><br><span class="line">        parent_page-&gt;<span class="built_in">SetKeyAt</span>(child_index + <span class="number">1</span>, leaf_page-&gt;<span class="built_in">KeyAt</span>(leaf_page-&gt;<span class="built_in">GetSize</span>() - <span class="number">1</span>));</span><br><span class="line">        <span class="type">int</span> parent_size = parent_page-&gt;<span class="built_in">GetSize</span>();</span><br><span class="line">        <span class="comment">// 从 child_index+1 开始，整体左移</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = child_index + <span class="number">2</span>; i &lt; parent_size - <span class="number">1</span>; i++) &#123;</span><br><span class="line">          parent_page-&gt;<span class="built_in">SetValueAt</span>(i, parent_page-&gt;<span class="built_in">ValueAt</span>(i + <span class="number">1</span>));</span><br><span class="line">          parent_page-&gt;<span class="built_in">SetKeyAt</span>(i, parent_page-&gt;<span class="built_in">KeyAt</span>(i + <span class="number">1</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        parent_page-&gt;<span class="built_in">SetSize</span>(parent_size - <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">if</span> (parent_page-&gt;<span class="built_in">GetSize</span>() &lt; parent_page-&gt;<span class="built_in">GetMinSize</span>())&#123;</span><br><span class="line">          <span class="comment">// ! TODO</span></span><br><span class="line">          <span class="keyword">auto</span> parent_page_id = parent_guard.<span class="built_in">GetPageId</span>();</span><br><span class="line">          ctx.write_set_.<span class="built_in">push_back</span>(std::<span class="built_in">move</span>(parent_guard)); <span class="comment">// 重新放回context中，方便后续处理</span></span><br><span class="line">          <span class="built_in">RedistributeOrMergeToParent</span>(parent_page_id, ctx);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 这实际上应该是不可能执行到的点</span></span><br><span class="line">  <span class="built_in">BUSTUB_ASSERT</span>(<span class="number">1</span>, <span class="string">&quot;严重的逻辑漏洞，重新修复UnderflowAndDelete逻辑&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	对于首次下溢这种场景的处理逻辑相对简单。我们将其分为多个维度来进行处理，首先，从操作节点的属性入手，此时存在俩种可能</p>
+<ul>
+<li><p><strong>操作的叶子节点是根节点</strong></p>
+<p>对于删除操作，根节点可以说是操作中最为特殊的一个节点了。在B+树中，只允许根节点在特殊情况下的下溢是允许的。实际上，这种特殊情况就是当根节点为一个叶子节点时，此时即使根节点下溢，我们也不必对于其进行修复。其次，其存在一个重要的边界，当本次删除之后根节点如果为空，此时B+树的行为会是什么？这如果从实现上来说，保留该页和删除该页都是允许的，都各自有各自的优势。但是在BusTub的测试用例中，其期望当删除根节点最后一个元素时，整棵树的状态回退为空，所以此时我们使用上述将树清空的逻辑。</p>
+</li>
+<li><p><strong>操作的叶子节点不为根节点</strong></p>
+<p>此时我们将进入一个常规的下溢处理流程。在系列教材中，对于B+树下溢的处理方式有且只有俩种方式：1. 从兄弟节点中借一个节点数据；2.将本节点与兄弟节点之间合并。我们此处也依照这俩种标准方法来实现下溢修复的逻辑。</p>
+</li>
+</ul>
+<p>​	对于下溢修复的逻辑，实际上会存在很多中方式，正如Andy在课上所说的一样：”<strong>这取决于你的实现</strong>“。所以，在继续后续的分析之前，我们需要先约定出外面的修复策略，后续的代码是基于该策略进行实现的：</p>
+<ol>
+<li>优先从左兄弟中窃取其最大的节点进行补偿，如果失败再从右兄弟中窃取最小的节点进行补偿</li>
+<li>如果无法进行节点的窃取，优先考虑于左兄弟节点的合并，再考虑与右兄弟节点的合并</li>
+</ol>
+<p>​	在这种简单的策略下，我们来回顾我们的实现。</p>
+<p><strong>1.  从符合左兄弟中窃取节点</strong></p>
+<p>​	其中的窃取逻辑很简单，即将左兄弟中的节点拷贝出来并更新该节点的容量大小，并且将该窃取出来的KV对插入到下溢的叶子节点中完成修复。但是这是不够的，我们需要观察到，在这种处理下，原本左左兄弟节点的上界被<strong>收缩</strong>了，而叶子节点的下界被<strong>扩展</strong>了。而这种变化牵扯到了对于父节点的一致性保证的破坏。而我们通过<code>parent_page-&gt;SetKeyAt(child_index, borrow_key);</code>该操作进行了弥补。我们需要分析其是怎么进行补偿的。</p>
+<p>​	下图是一个若窃取节点之后没有正确维护父级上的指针上会存在的结果。</p>
+<p><img src="/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/image-20251219153842115.png" alt="image-20251219153842115"></p>
+<p>​	在窃取后的树结构中，我们可以观察到一个结构性的错误，对于父节点来说，其的第一个指针指向的页中的内容所处在的值域应该是**(-inf,4]<strong>，这在修改后的树中是符合条件的。但是，父节点的第二个指针其指向的<code>page3</code>的值域范围应该是</strong>(4,+inf)**。但是此时该值域中却出现了3这个值，而这会导致一种严重的现象，即在[4,+inf)的值域范围内却出现了3这个值，这对于树的破坏是不可接受的。而这种场景的修复方法也比较简单。如前文所说，此时叶子节点的下界实际上被扩展了。而在父节点中，储存叶子节点的指针索引对应的Key储存位置储存的值代表的即该叶子节点的下界，我们只需要更新该数据即可更新叶子节点的下界范围来维护整体的结构稳定。</p>
+<p><strong>2.从右子节点中窃取节点</strong></p>
+<p>​	实际上，从右兄弟节点中窃取节点与从左兄弟节点中窃取数据时对称的。在本次窃取中，窃取到数据的叶子节点的上届被扩展，而被窃取的叶子节点的下界被收缩。正如前文所说明到的，父节点实际上分割的是每个节点对应的值域的下界，所以我们关注到下界变动的节点，即右兄弟节点，我们所需要做的，即是将其对应的下界进行更新，更新为其右兄弟节点的新下界，即新的**Key[0]**值。</p>
+<p><strong>3.无法窃取，合并左节点</strong></p>
+<p>​	当左右兄弟节点都不支持窃取时，此时需要使用节点合并来进行修复，我们按照原则优先合并左节点。合并左节点的操作很简单，就是将当前叶子节点的数据搬运过去。此时父节点需要同步更新。因为这种合并操作实际上修改了原先左节点的上界。但是，我们需要注意到一个合并操作相对于窃取操作的一个特殊性，其对于边界实际上的破坏是特殊的，其是由于值域的合并而导致的改变，而不是由于一边改变而导致的改动。此时的修复操作实际上是合并，而对应的操作即使使用后一个值进行覆盖即可</p>
+<p><strong>4.合并右节点</strong></p>
+<p>​	当右节点不支持合并时，此时进入最后一个可行的修复操作，合并右节点。此时的操作与先前的左节点的合并操作实际上是对称的，此处不再进行赘诉。我们直接进入下一步的分析。</p>
+<h3 id="递归下溢"><a href="#递归下溢" class="headerlink" title="递归下溢"></a>递归下溢</h3><p>​	当经历上述操作之后，此时对于叶子节点的下溢应该已经修复，但是由于在该修复过程中我们可能涉及到对于父节点的结构性修改，此时可能导致父节点的进一步下溢，我们也需要对于这种下溢进行处理。我们将其的修复逻辑抽象为一个处理函数。我们按照对于这种场景下的修复方法进行逐步的分析。</p>
+<p>​	如前文一般，我们仍然需要对于本次操作的节点的属性来进行划分</p>
+<ul>
+<li><p><strong>下溢的节点为根节点</strong></p>
+<p>这是一种相当特殊的情况，如果说前文第一次删除时对于根节点的操作是唯一可能导致树状态变为空的场景，那么这种场景下的处理操作则是唯一可能导致树的高度坍缩的场景。在B+树中存在一个约定：如果某次下溢操作导致根节点只剩下一个叶子节点的指针，那么该节点将被提升为一个新的根节点。为了处理这种情况，我们势必需要来进行这种特判，而且这种特判给了我们一个明确的结束信号，我们能够明确如果将其唯一子节点提升为新的根节点后，整个本次删除的下溢操作一定能够保证结束</p>
+</li>
+<li><p><strong>下溢的节点为中间节点</strong></p>
+<p>这是相对普遍的场景，这种情况下如前文一般，存在一套完整的修复规则来进行对应的处理。但归根到底仍然是之前所提到的俩种修复方法：1.从兄弟节点中借节点；2.合并兄弟节点。我们仍然将我们的修复策略规定如下：</p>
+<ol>
+<li>如果可能，优先合并兄弟节点来进行中间节点的下溢场景修复</li>
+<li>如果无法通过合并节点进行修复，再考虑左右兄弟节点的窃取来实现修复</li>
+</ol>
+<p>这里存在一个有趣的考虑，为什么这里要优先合并而前文中设计为优先窃取？是否可以反过来呢？这方面的思考很简单但是也有点意思，留给读者自行思考。</p>
+</li>
+</ul>
+<hr>
+<p>下面我们来进行修复步骤的详细分析</p>
+<p><strong>1.合并兄弟节点</strong></p>
+<p>​	对于合并操作来说，其相对叶子节点的合并复杂许多，因为其不再只是简单的数据易懂。对于中间节点来说，其的数据本质上是对于其的子节点的边界描述。而对于俩个子节点来说，其对于其本身的边界实际上是未知的。关于一个子节点的边界的信息，其实际上储存在父节点上。同时对于子节点来说，俩个边界内部的各个小边界，其是具有完备信息的，这方面在合并时就不必担心了。所以，此时你应该也能够感觉到合并的棘手点在哪里。即是如何将俩个相对独立的节点消除其中的部分未知边界。而这需要由外部来进行辅助，但是又有谁储存了这部分的信息呢？正是父节点。由父节点来提供俩个子节点的边界信息，利用该边界信息消除俩个节点之间的部分未知，来使得新节点内部的状态重新变得其对于内部可见。这正是本次合并操作会需要父节点协作的点。</p>
+<p>​	同时，我们可观察到父节点之于子节点的地位。对于子节点来说，父节点是一种类似的仲裁机构，其掌握了子节点的“边界所有权”。在合并操作中，原本位于父节点，用于描述来个子节点关系的边界，被移动到合并后的节点中，从而使得新的子节点内部边界完整。此时父节点响应的删除该下移的Key以及指向被合并节点的指针，其值域不发生拜年话，但结构规模减小，可能触发进一步的下溢修复。</p>
+<p><strong>2.窃取兄弟节点数据</strong></p>
+<p>​	若兄弟之间无法合并，此时就必须得考虑使用窃取来处理下溢操作。但是整体操作相对来说也很简单。前文说道，对于中间节点来说，其的本质就是边界的管理，而窃取操作本身实际上影响的就是俩个节点之间的边界划分，这是我们从父节点的视角来看的结果。如果从左兄弟中窃取，此时左兄弟的上边界将被收缩，对应的，右兄弟的下边界将被扩展。这部分涉及到数据的部分移动罢了，操作起来很简单。但是我们需要考虑到这种操作对于B+树整体操作的后果，在这种操作中，俩个中间节点之间的边界划分发生了变动，而正如我们前文所说，B+树中存在了一个管理这些边界的结构，是的，对于管理这俩个节点的父节点来说，这种修改破坏了现有的父节点中的保证，所以我们需要进行修复。而这种修复也很简单。</p>
+<p>​	我们观察到这种操作破坏的点，其即是将对应的左兄弟的上界收缩和右兄弟的下界扩展，而整体的边界实际上仍然没有变动，故我们只需要修改决定这个分割线的Key即可。而对于中间节点来说，BusTub中对于指针对应的Key，该Key决定的是该指针对应的页面的值域的上界。对于B+Tree这种结构，我们实际可以观察到一个如此的边界情况：左孩子最大Key&lt;对应父节点分割Key&lt;&#x3D;右孩子最小Key。而由于窃取了数据，此时的边界被变动了，但是这里实际上并不能够将左孩子被窃取的节点Key直接移动到右节点中，因为这也会破坏整体的约束。当然，实际上也是一个可行的操作，只需要对于这种破坏进行后续的父节点的补偿。但是一种更加优雅的方式则是，将父节点中的分割Key拉下来充当窃取节点的新Key[1]，将被窃取的Key推上父节点来恢复整体的边界保证。这在我看来，实际上是一种相当优雅的边界平移，以一种较少的步骤修复了B+树整体的结构性保证。</p>
+<hr>
+<p>​	</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​	综上，我们完成了对于B+树中删除操作可能导致的节点下溢修复的操作流程分析。其中的操作在实现出来之后，相对来说显得较为清晰，但是如果是首次实现，其中的各种逻辑由于没有现有的教程或者状态机参考会显得不知从哪入手，故在实现之后进行一次详尽的分析总结无疑是一种必要的操作，其能够对于B+树这个数据结构有一个整体上的总结。同时，能够对于其中的一些tradeoff等设计有进一步的吸收以及理解，是一次相当有趣的设计体验。</p>
+<p>​	</p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/" title="B+Tree-Delete">https://tcww0.github.io/2025/12/19/数据库/B+Tree-Delete/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 数据库</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/" rel="prev" title="B+Tree-Insert">
+      <i class="fa fa-chevron-left"></i> B+Tree-Insert
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#B-Tree-Delete"><span class="nav-number">1.</span> <span class="nav-text">B+Tree-Delete</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%E4%BC%AA%E4%BB%A3%E7%A0%81"><span class="nav-number">1.1.</span> <span class="nav-text">示例伪代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Delete%E5%88%86%E6%9E%90"><span class="nav-number">1.2.</span> <span class="nav-text">Delete分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Delete%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.</span> <span class="nav-text">Delete实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A5%E5%8F%A3%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.1.</span> <span class="nav-text">入口实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A6%96%E6%AC%A1%E4%B8%8B%E6%BA%A2"><span class="nav-number">1.3.2.</span> <span class="nav-text">首次下溢</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%92%E5%BD%92%E4%B8%8B%E6%BA%A2"><span class="nav-number">1.3.3.</span> <span class="nav-text">递归下溢</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">81</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">337k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">5:06</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : 'f23b91ca17f2f75981f7700b747c0429',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

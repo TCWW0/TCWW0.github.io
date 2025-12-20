@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="B+树-Insert​	本文借15445的契机，来逐步实现一个B+树，本文主要聚焦于插入逻辑的实现。 ​	B+树是一个相当复杂的数据结构，其中涉及到相当复杂的应用场景。如果想要平地起高楼，这对于现阶段的我来说是无法实现的，所以我考虑一种TDD(测试驱动编程)的方法来进行实现。我们一次来看到在Lab中所需要我们来通过的测试用例，来方向约定住我们所需要实现的内容。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="B+Tree-Insert">
+<meta property="og:url" content="https://tcww0.github.io/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="B+树-Insert​	本文借15445的契机，来逐步实现一个B+树，本文主要聚焦于插入逻辑的实现。 ​	B+树是一个相当复杂的数据结构，其中涉及到相当复杂的应用场景。如果想要平地起高楼，这对于现阶段的我来说是无法实现的，所以我考虑一种TDD(测试驱动编程)的方法来进行实现。我们一次来看到在Lab中所需要我们来通过的测试用例，来方向约定住我们所需要实现的内容。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/image-20251211215252498.png">
+<meta property="og:image" content="https://tcww0.github.io/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/image-20251215124911042.png">
+<meta property="og:image" content="https://tcww0.github.io/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/image-20251215134330834.png">
+<meta property="article:published_time" content="2025-12-14T13:51:15.000Z">
+<meta property="article:modified_time" content="2025-12-19T02:38:17.191Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/image-20251211215252498.png">
+
+<link rel="canonical" href="https://tcww0.github.io/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>B+Tree-Insert | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          B+Tree-Insert
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-12-14 21:51:15" itemprop="dateCreated datePublished" datetime="2025-12-14T21:51:15+08:00">2025-12-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-12-19 10:38:17" itemprop="dateModified" datetime="2025-12-19T10:38:17+08:00">2025-12-19</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>16k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>15 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="B-树-Insert"><a href="#B-树-Insert" class="headerlink" title="B+树-Insert"></a>B+树-Insert</h1><p>​	本文借15445的契机，来逐步实现一个B+树，本文主要聚焦于插入逻辑的实现。</p>
+<p>​	B+树是一个相当复杂的数据结构，其中涉及到相当复杂的应用场景。如果想要平地起高楼，这对于现阶段的我来说是无法实现的，所以我考虑一种TDD(测试驱动编程)的方法来进行实现。我们一次来看到在Lab中所需要我们来通过的测试用例，来方向约定住我们所需要实现的内容。</p>
+<span id="more"></span>
+
+<h2 id="BasicInsertTest"><a href="#BasicInsertTest" class="headerlink" title="BasicInsertTest"></a>BasicInsertTest</h2><p>原始测试代码</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">TEST</span>(BPlusTreeTests, BasicInsertTest) &#123;</span><br><span class="line">  <span class="comment">// create KeyComparator and index schema</span></span><br><span class="line">  <span class="keyword">auto</span> key_schema = <span class="built_in">ParseCreateStatement</span>(<span class="string">&quot;a bigint&quot;</span>);</span><br><span class="line">  <span class="function">GenericComparator&lt;8&gt; <span class="title">comparator</span><span class="params">(key_schema.get())</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">auto</span> disk_manager = std::<span class="built_in">make_unique</span>&lt;DiskManagerUnlimitedMemory&gt;();</span><br><span class="line">  <span class="keyword">auto</span> bpm = std::<span class="built_in">make_unique</span>&lt;BufferPoolManager&gt;(<span class="number">50</span>, disk_manager.<span class="built_in">get</span>());</span><br><span class="line">  <span class="comment">// allocate header_page</span></span><br><span class="line">  <span class="type">page_id_t</span> page_id = bpm-&gt;<span class="built_in">NewPage</span>();</span><br><span class="line">  <span class="comment">// create b+ tree</span></span><br><span class="line">  BPlusTree&lt;GenericKey&lt;<span class="number">8</span>&gt;, RID, GenericComparator&lt;<span class="number">8</span>&gt;&gt; <span class="built_in">tree</span>(<span class="string">&quot;foo_pk&quot;</span>, page_id, bpm.<span class="built_in">get</span>(), comparator, <span class="number">2</span>, <span class="number">3</span>);</span><br><span class="line">  GenericKey&lt;<span class="number">8</span>&gt; index_key;</span><br><span class="line">  RID rid;</span><br><span class="line"></span><br><span class="line">  <span class="type">int64_t</span> key = <span class="number">42</span>;</span><br><span class="line">  <span class="type">int64_t</span> value = key &amp; <span class="number">0xFFFFFFFF</span>;</span><br><span class="line">  rid.<span class="built_in">Set</span>(<span class="built_in">static_cast</span>&lt;<span class="type">int32_t</span>&gt;(key), value);</span><br><span class="line">  index_key.<span class="built_in">SetFromInteger</span>(key);</span><br><span class="line">  tree.<span class="built_in">Insert</span>(index_key, rid);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">auto</span> root_page_id = tree.<span class="built_in">GetRootPageId</span>();</span><br><span class="line">  <span class="keyword">auto</span> root_page_guard = bpm-&gt;<span class="built_in">ReadPage</span>(root_page_id);</span><br><span class="line">  <span class="keyword">auto</span> root_page = root_page_guard.<span class="built_in">As</span>&lt;BPlusTreePage&gt;();</span><br><span class="line">  <span class="built_in">ASSERT_NE</span>(root_page, <span class="literal">nullptr</span>);</span><br><span class="line">  <span class="built_in">ASSERT_TRUE</span>(root_page-&gt;<span class="built_in">IsLeafPage</span>());</span><br><span class="line"></span><br><span class="line">  <span class="keyword">auto</span> root_as_leaf = root_page_guard.As&lt;BPlusTreeLeafPage&lt;GenericKey&lt;<span class="number">8</span>&gt;, RID, GenericComparator&lt;<span class="number">8</span>&gt;&gt;&gt;();</span><br><span class="line">  <span class="built_in">ASSERT_EQ</span>(root_as_leaf-&gt;<span class="built_in">GetSize</span>(), <span class="number">1</span>);</span><br><span class="line">  <span class="built_in">ASSERT_EQ</span>(<span class="built_in">comparator</span>(root_as_leaf-&gt;<span class="built_in">KeyAt</span>(<span class="number">0</span>), index_key), <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	分析出该测试用例中所涉及到的场景，其中实际上只有一个非常简单的场景，给一个空的二叉树进行插入，而且插入的次数不会导致分裂，只会插入到当前树的根节点中。从该测试用例暴露出来的场景中我们可以简单来约定插入方法的一些处理</p>
+<ul>
+<li>当B+树被初始化之后，其应该能够立即支持插入</li>
+<li>当B+树被首次插入之后，其的根节点实际上应该为叶子节点</li>
+</ul>
+<p>​	我们接下来先根据上面的一些约定来进行设计，首先我们需要来观察到当前给出的BPlusTree的构造函数以及一些其他的信息来完善上下文。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">FULL_INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="title">BPLUSTREE_TYPE::BPlusTree</span><span class="params">(std::string name, <span class="type">page_id_t</span> header_page_id, BufferPoolManager *buffer_pool_manager,<span class="type">const</span> KeyComparator &amp;comparator, <span class="type">int</span> leaf_max_size, <span class="type">int</span> internal_max_size)</span></span></span><br><span class="line"><span class="function">    : bpm_(std::make_shared&lt;TracedBufferPoolManager&gt;(buffer_pool_manager)),</span></span><br><span class="line"><span class="function">      index_name_(std::move(name)),</span></span><br><span class="line"><span class="function">      comparator_(std::move(comparator)),</span></span><br><span class="line"><span class="function">      leaf_max_size_(leaf_max_size),</span></span><br><span class="line"><span class="function">      internal_max_size_(internal_max_size),</span></span><br><span class="line"><span class="function">      header_page_id_(header_page_id) &#123;</span></span><br><span class="line">  <span class="keyword">auto</span> guard_opt = bpm_-&gt;<span class="built_in">WritePage</span>(header_page_id_);</span><br><span class="line">  <span class="keyword">auto</span>&amp; guard = guard_opt.<span class="built_in">value</span>();</span><br><span class="line">  <span class="keyword">auto</span> root_page = guard.<span class="built_in">AsMut</span>&lt;BPlusTreeHeaderPage&gt;();</span><br><span class="line">  root_page-&gt;root_page_id_ = INVALID_PAGE_ID;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  std::shared_ptr&lt;TracedBufferPoolManager&gt; bpm_;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  KeyComparator               comparator_;</span><br><span class="line">  std::vector&lt;std::string&gt;    log;  <span class="comment">// NOLINT</span></span><br><span class="line">  <span class="type">int</span>                         leaf_max_size_;             </span><br><span class="line">  <span class="type">int</span>                         internal_max_size_;</span><br><span class="line">  <span class="type">page_id_t</span>                   header_page_id_;</span><br></pre></td></tr></table></figure>
+
+<p>​	结合我们测试用例中的实现，我们可以来建立起一些关于成员变量的抽象</p>
+<ul>
+<li>comparator_：用于当前B+树中的Key值的比较器，在B+树中的Key值是通过类型擦除技术来实现的，在BusTub中通过一个模版类来实现这种Key的比较</li>
+<li>leaf_max_size_：外部传入的该B+树中约定的叶子节点中的KV对的最大数量</li>
+<li>internal_max_size_：外部传入的该B+树约定的中间节点中的Key值的最大数量</li>
+<li>header_page_id_：外部传入的该B+树的Header Page的页面ID，此时该ID对应的页面已经存在，只是内部内容为空</li>
+</ul>
+<p>​	有了上述的约定之后，接下来我们来分析如何来实现，明确当前已有的几个约束</p>
+<ul>
+<li><p>当前B+树中没有任何实际页面(不计算Header Page)</p>
+</li>
+<li><p>Header Page为一种刚初始化的状态</p>
+<p>我们根据上面这写约束来简单描述出场景，如下图(很抽象？)</p>
+<img src="/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/image-20251211215252498.png" alt="image-20251211215252498" style="zoom:50%;"></li>
+</ul>
+<p>​	在当前场景中，插入场景涉及到B+树从0到1的生成状态。其需要分析如何来处理。首先是首次生长涉及到的是谁，是逻辑上的根节点的插入。而由于当前的根节点实际上还没有存在，所以实际上涉及到的操作如下：生长根节点-&gt;在根节点中查找位置插入。</p>
+<p>​	对应的insert逻辑很简单，可以实现如下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">FULL_INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BPLUSTREE_TYPE::Insert</span><span class="params">(<span class="type">const</span> KeyType &amp;key, <span class="type">const</span> ValueType &amp;value)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  Context ctx;</span><br><span class="line">  ctx.header_page_ = bpm_-&gt;<span class="built_in">WritePage</span>(header_page_id_);</span><br><span class="line">  <span class="keyword">if</span> (ctx.header_page_ == std::<span class="literal">nullopt</span>) &#123; <span class="keyword">return</span> <span class="literal">false</span>; &#125;</span><br><span class="line">  <span class="keyword">auto</span> header_page = ctx.header_page_-&gt;<span class="built_in">AsMut</span>&lt;BPlusTreeHeaderPage&gt;();</span><br><span class="line">  <span class="keyword">if</span> (header_page-&gt;root_page_id_ == INVALID_PAGE_ID) &#123;</span><br><span class="line">    <span class="type">page_id_t</span> new_root_page_id = bpm_-&gt;<span class="built_in">NewPage</span>();</span><br><span class="line">    header_page-&gt;root_page_id_ = new_root_page_id;</span><br><span class="line">    <span class="keyword">auto</span> root_guard_opt = bpm_-&gt;<span class="built_in">WritePage</span>(new_root_page_id);</span><br><span class="line">    <span class="keyword">if</span> (!root_guard_opt.<span class="built_in">has_value</span>()) &#123; <span class="keyword">return</span> <span class="literal">false</span>; &#125;</span><br><span class="line">    <span class="keyword">auto</span> root_guard = std::<span class="built_in">move</span>(root_guard_opt.<span class="built_in">value</span>());</span><br><span class="line">    <span class="keyword">auto</span> root_page = root_guard.<span class="built_in">AsMut</span>&lt;LeafPage&gt;();</span><br><span class="line">    root_page-&gt;<span class="built_in">Init</span>(leaf_max_size_);</span><br><span class="line">    <span class="built_in">InsertKVToOneLeaf</span>(*root_page, key, value);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="OptimisticInsertTest"><a href="#OptimisticInsertTest" class="headerlink" title="OptimisticInsertTest"></a>OptimisticInsertTest</h2><p>接下来进入本次设计最难，最麻烦的一节，其奠定了整体B+树操作的基础，这是个人认为的结果测试中最重要，最难啃的骨头。同时也是令人提升最大的一节。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">TEST</span>(BPlusTreeTests, OptimisticInsertTest) &#123;</span><br><span class="line">  <span class="keyword">auto</span> key_schema = <span class="built_in">ParseCreateStatement</span>(<span class="string">&quot;a bigint&quot;</span>);</span><br><span class="line">  <span class="function">GenericComparator&lt;8&gt; <span class="title">comparator</span><span class="params">(key_schema.get())</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">auto</span> disk_manager = std::<span class="built_in">make_unique</span>&lt;DiskManagerUnlimitedMemory&gt;();</span><br><span class="line">  <span class="keyword">auto</span> bpm = std::<span class="built_in">make_unique</span>&lt;BufferPoolManager&gt;(<span class="number">50</span>, disk_manager.<span class="built_in">get</span>());</span><br><span class="line">  <span class="comment">// allocate header_page</span></span><br><span class="line">  <span class="type">page_id_t</span> page_id = bpm-&gt;<span class="built_in">NewPage</span>();</span><br><span class="line">  <span class="comment">// create b+ tree</span></span><br><span class="line">  BPlusTree&lt;GenericKey&lt;<span class="number">8</span>&gt;, RID, GenericComparator&lt;<span class="number">8</span>&gt;&gt; <span class="built_in">tree</span>(<span class="string">&quot;foo_pk&quot;</span>, page_id, bpm.<span class="built_in">get</span>(), comparator, <span class="number">4</span>, <span class="number">3</span>);</span><br><span class="line">  GenericKey&lt;<span class="number">8</span>&gt; index_key;</span><br><span class="line">  RID rid;</span><br><span class="line"></span><br><span class="line">  <span class="type">size_t</span> num_keys = <span class="number">25</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; num_keys; i++) &#123;</span><br><span class="line">    <span class="type">int64_t</span> value = i &amp; <span class="number">0xFFFFFFFF</span>;</span><br><span class="line">    rid.<span class="built_in">Set</span>(<span class="built_in">static_cast</span>&lt;<span class="type">int32_t</span>&gt;(i &gt;&gt; <span class="number">32</span>), value);</span><br><span class="line">    index_key.<span class="built_in">SetFromInteger</span>(<span class="number">2</span> * i);</span><br><span class="line">    tree.<span class="built_in">Insert</span>(index_key, rid);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">size_t</span> to_insert = num_keys + <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">auto</span> leaf = IndexLeaves&lt;GenericKey&lt;<span class="number">8</span>&gt;, RID, GenericComparator&lt;<span class="number">8</span>&gt;&gt;(tree.<span class="built_in">GetRootPageId</span>(), bpm.<span class="built_in">get</span>());</span><br><span class="line">  <span class="keyword">while</span> (leaf.<span class="built_in">Valid</span>()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (((*leaf)-&gt;<span class="built_in">GetSize</span>() + <span class="number">1</span>) &lt; (*leaf)-&gt;<span class="built_in">GetMaxSize</span>()) &#123;</span><br><span class="line">      to_insert = (*leaf)-&gt;<span class="built_in">KeyAt</span>(<span class="number">0</span>).<span class="built_in">GetAsInteger</span>() + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ++leaf;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">EXPECT_NE</span>(to_insert, num_keys + <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">auto</span> base_reads = tree.bpm_-&gt;<span class="built_in">GetReads</span>();</span><br><span class="line">  <span class="keyword">auto</span> base_writes = tree.bpm_-&gt;<span class="built_in">GetWrites</span>();</span><br><span class="line"></span><br><span class="line">  index_key.<span class="built_in">SetFromInteger</span>(to_insert);</span><br><span class="line">  <span class="type">int64_t</span> value = to_insert &amp; <span class="number">0xFFFFFFFF</span>;</span><br><span class="line">  rid.<span class="built_in">Set</span>(<span class="built_in">static_cast</span>&lt;<span class="type">int32_t</span>&gt;(to_insert &gt;&gt; <span class="number">32</span>), value);</span><br><span class="line">  tree.<span class="built_in">Insert</span>(index_key, rid);</span><br><span class="line">  <span class="keyword">auto</span> new_reads = tree.bpm_-&gt;<span class="built_in">GetReads</span>();</span><br><span class="line">  <span class="keyword">auto</span> new_writes = tree.bpm_-&gt;<span class="built_in">GetWrites</span>();</span><br><span class="line"></span><br><span class="line">  <span class="built_in">EXPECT_GT</span>(new_reads - base_reads, <span class="number">0</span>);</span><br><span class="line">  <span class="built_in">EXPECT_EQ</span>(new_writes - base_writes, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	如果要说该测试用例最重要的是什么，那么毋庸置疑，其最重要的是其约定了B+树中的Insert逻辑，更直接点，其约定了插入时所需要使用的锁策略。我们将目光聚焦于<code>EXPECT_GT(new_reads - base_reads, 0); EXPECT_EQ(new_writes - base_writes, 1);</code>。其的上文描述了当前已经存在一个经过多次插入而最终形成的B+树，此时该B+树的层级经过生长已不再是一个Root节点当做一层的场景。当我们向该这类”普通B+树”插入的时候(这里保证一定不会分裂)，我们期望，其产生的新写相只有一次，而其中可以产生多次新读操作。而这正是乐观锁在乐观时会产生的现象。也就是说，其约定了，在B+树的插入逻辑设计中，我们需要使用乐观锁策略来进行实现，若使用悲观锁为锁策略将不可能通过测试用例。</p>
+<p>​	其次是一个易观察出来的点，该测试用例还要求B+树实现完整的分裂逻辑，该分裂逻辑中需要严格维护叶子节点上的链表，至少为单向链表(从左往右)，使得EXPECT_NE(to_insert, num_keys + 1);测试通过。</p>
+<p>​	综上，我们可以简单总结下本测试我们所需要完成的内容，描述起来很简单：使用乐观锁策略实现完整的B+树的插入逻辑，其中包括了正确的分裂逻辑，叶子节点上的链表的维护逻辑。由此我们来开始进入麻烦的插入逻辑解析。</p>
+<h2 id="状态抽象"><a href="#状态抽象" class="headerlink" title="状态抽象"></a>状态抽象</h2><p>​	在后续的设计中，无论是哪个环节，其中抽象都是该环节中占比相当大的一部分。为何要抽象？抽象是为了来约定设计的边界，使得其不至于过于的发散，如果以稍微术语点的话术来说，就是为了让其高内聚。而高内聚的本质是为了什么？是为了让外界使用其的时候知道其会做什么，不会做什么，由此来明白自己应该做什么，自己应该怎么使用它。</p>
+<p>​	在插入的<code>api</code>设计中，我们需要一层层的抽象隔离，我们首先来对于树的状态进行抽象。对于一棵树来说，我认为其的状态只有俩种，即空与非空。当刚创建一棵树时，此时<code>B+</code>树完全没有数据，此时其即为空，只要其插入了任何一个数据，此时<code>B+</code>树就进入了常规的形态。此时即使通过一系列的删除将树内的数据全部删除，树也不会回退为空的状态，此时的状态还是非空，只是没有数据的状态而已。为何要建立这种抽象？其实际涉及到一个简单的编码层面上的考虑，所谓的<code>Empty</code>态实际上代表着此时根节点还未被初始化的状态，如果此时以一种普通的情况来对于根节点进行读写操作，此时是一种UB的操作。所以需要将这种状态进行特判处理，在FSM也能够看到，一但其从Empty态转移出去，此时就永远不可能再转移回来，这方面相当的简单，不再进行赘诉。</p>
+<p><img src="/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/image-20251215124911042.png" alt="B+树简单状态机"></p>
+<p>​	在这种抽象下，对应的Empty态下的处理实际上十分简单，其就是我们先前所实现的通过BasicInsertTest的部分逻辑。其核心就是为了解决在当前可能UB的情况下安全转移到No-Empty的状态。但是，此时与先前的测试存在了部分区别，所以我们需要重新来考虑如何设计。我们需要来设计一个在乐观锁策略下正确且安全的Empty状态处理</p>
+<h3 id="Empty状态处理"><a href="#Empty状态处理" class="headerlink" title="Empty状态处理"></a>Empty状态处理</h3><p>​	此时的设计相较于先前的测试，其最大的区别是其引入了乐观锁的策略，由此，我们需要来重新设计在乐观锁策略下的Empty状态处理。首先我们需要来明确下乐观锁到底意味了什么？</p>
+<p>​	乐观锁是一个相当常见的锁策略，在当前阶段，我们先进行一个最小可行的假设：在到达需要操作的叶子节点之前，之前路径上的所有节点都获取读锁进行封锁，只有在实际上需要操作的叶子节点上才进行写锁的封锁来最大化并行访问程度。</p>
+<p>​	在该策略下，我们怎么来处理Empty状态呢？我们首先需要明确在Empty下我们需要处理什么。在Empty状态下，我们的一次Insert需要以下步骤：访问Header Page获取Root PageID-&gt;创建Root Page-&gt;将数据插入到该Root Page中完成状态转移。乐观策略是怎么影响这其中的设计的呢？我们来进行一次简单的推演。</p>
+<p>​	首先，在乐观策略中，我们首先需要以读锁来封锁Header Page。然后检查当前树是否为空，如果其为空，其将会陷入到Empty状态的处理中，接下来就涉及到一个十分重要的并发安全问题。在该状态的处理中，如果处理成功，那么最后势必会进行RootID的更新，在这种需求下，读锁将无法满足需求，我们势必需要来进行写锁的获取。在当前的设计中，我们使用的读写锁是<code>std::shared_mutex</code>。该读写锁不提供读锁升级的功能，如果想要从读锁切换到写锁，只能通过先释放读锁然后获取写锁来实现。但是这种操作不是原子的，也就是说，俩者之间势必会存在时隙，这种时隙就可能导致并发，我们需要来考虑这种情况下的并发会导致一种什么问题，其是否可以接受，如果不可以接受，我们需要使用什么机制来进行弥补。</p>
+<p>​	我们来观察一种可能的执行顺序</p>
+<img src="/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/image-20251215134330834.png" alt="HeaderPage 可能时序" style="zoom:80%;">
+
+<p>​	在这种时序下，线程T2在线程T1进行锁升级的时隙中抢占了写锁，并修改了内部的状态，使得线程T1陷入了一个奇怪的状态。线程T1本身进行锁升级的触发点就是为了来创建页面来处理该Empty状态，但是该工作在其准备期间已经被完成了。那么在T1成功获取写锁之后，其的行为应该是怎么样的呢？这一点非常重要，相对简单但是涉及到我们并发安全的核心。</p>
+<p>​	T1在此阶段可能存在多种执行策略，就比如如下几种</p>
+<ol>
+<li><p>仍然按照先前所期望的创建新页面并修改HeaderPage中的信息</p>
+</li>
+<li><p>双重检测并回滚操作</p>
+</li>
+</ol>
+<p>​	你应该能够一眼就能知道你应该使用哪种策略，但是，为什么呢？对于第一种策略，我们来分析其会导致一种什么后果。在这种情况下，其的页面创建和写入都是成功的。其的操作对于上层看起来也是成功的。也能够查看到对应的数据。但是，这种保证就正确吗？在这种情况下，线程T2创建的新RootID将会被覆盖，此时系统将丢失对于该实际页面的引用，此时导致一种内存泄漏的问题。更严重的是什么？在这种场景下，由T2插入的数据由于丢失了其RootID的引用而逻辑上丢失了。这对于数据库的语义来说，是绝对不可接受的。所以我们摒弃了第一种策略。接下来我们分析为何第二种策略能够一定程度上缓解这种问题。</p>
+<p>​	在第二种策略中，当一个线程成功从读锁升级到写锁后，我们将会进行一次额外的检测，检测当前的Header Page中的RootID是否仍然是INVALID，如果是，我们就认为在锁升级期间不存在其他线程抢占修改了该临界区。否则，我们将会回滚该操作，使得其回退回获取读锁的情况，此时后续的逻辑将会是以No-Empty状态为前提处理的。在这种设计中，我们使得线程拥有了一定程度上对于其他线程操作的感知，使其能够识别其他线程是否在其时隙间操作临界区。在某种程度上，双重检测解决了我们遇到的读锁升级导致的并发缺陷。</p>
+<p>​	我们继续来分析一种场景，一种稍微极端点的并发场景，在极端的并发中，一个线程的锁升级可能有雨总是被抢占而导致一直阻塞，而当其真正获取兵解除阻塞之后，B+树的根节点此时可能已满，甚至于更加极端一点 ，此时已经分裂了。在这种情况下，是否还能够保证插入安全呢？实际上是可以的，这种情况归根到底对于新获取锁的线程来说，都是一个相同的场景，就是在升级期间B+树已经由空树状态转移为了非空树状态，而当前线程当前基于的状态仍然是空树状态。只要能够正确处理这种过时的考虑，那么就能够处理这种并发场景。但是，这种情况就对了吗？实际上，这种语义在B+树的插入语义中往往是不可接受的，因为这意味着一个插入操作已经等待了相当的久，甚至于在由空树转变到分裂时都没有重新获得处理。这种对于上层来说是不可接受的，因为这种情况下的延迟过高了。而这是由什么导致的呢？这是由读写锁的锁调度策略导致的，由于我们使用的读写锁没有一个公平的调度机制，其不提供任何保证。如果后续想要优化这种情况，我们势必要采用一些更加健壮的读写锁，就比如具有公平调度策略的读写锁，使得一个线程不至于被饥饿的太久。</p>
+<blockquote>
+<p>这种双重检查在我看来是解决了一定的并发问题，但是正如单例中的双重检测很久才暴露出问题一样，这里实际上并不能够给出切实的并发安全保障，还得并发大佬来分析。</p>
+</blockquote>
+<p>​	至此，我们分析了在乐观策略下如果处理空树的方法，接下来，我们来分析在<code>No-Empty</code>状态下乐观插入的实现。</p>
+<h3 id="No-Empty状态处理"><a href="#No-Empty状态处理" class="headerlink" title="No-Empty状态处理"></a>No-Empty状态处理</h3><p>​	该状态下的插入相较于之前的Empty状态处理难了不止一个维度。在该状态下，其中的抽象以及隔离等建模方法显得更为重要，我们来分析我们应该如何来处理。</p>
+<p>​	首先我们明确下本次所需要实现的目标：在乐观锁策略下，实现一个完整的插入流程，使得外部通过调用一次Insert，就能够将数据插入到当前的B+树中。为此，我们需要来考虑几个关键词：乐观、悲观、锁策略、抽象、约定。</p>
+<p>​	对于一个乐观锁策略下的B+树插入流程，其在各种教科书及教程上已经描述的很详细和简单了。即从根节点开始，逐层往下遍历，直到查找到目标节点，在此之前，路径上的所有的节点都是使用读锁进行封锁。在此基础上，我针对于现有的Lab环境来进行一些适配以及改造来实现一套自用的十分粗糙的锁协议：</p>
+<ul>
+<li><p>B+树混合使用乐观策略与悲观策略来组成锁策略</p>
+</li>
+<li><p>在默认情况下，插入使用乐观策略进行操作，使用读锁封锁从根节点到叶子节点的这条路径上的所有节点(注意包括叶子节点)</p>
+</li>
+<li><p>在首次遍历到叶子节点时，判断当前插入操作是否会导致分裂，若会导致分裂，将逐步释放路径上的系列锁，并使用悲观策略进行重新尝试</p>
+</li>
+<li><p>在一次插入回退到悲观策略时，此时会从根节点开始遍历到叶子节点，同时对于路径上的所有的节点都进行写锁的封锁</p>
+</li>
+<li><p>所有的上述操作都是建立在当前的B+树不处于Empty状态下成立，并且对于No-Empty状态下的所有类型的B+树都成立(包括但不限于只有根节点且可插入，只有根节点且需要分裂等情况)</p>
+</li>
+</ul>
+<p>​	上述几点就是在本次Lab中总结出来的使用的锁策略，其共同配合实现了一个相对安全的Insert环境。我们将来分析如何围绕这个自设计的锁协议来实现完整的Insert逻辑。</p>
+<h4 id="时序划分"><a href="#时序划分" class="headerlink" title="时序划分"></a>时序划分</h4><p>​	对于一个Insert操作，为了方便管理，我将其划分为了多个阶段，我规定，一次插入操作，首先会先遍历B+树找到目标插入节点-&gt;将KV对数据插入到该目标节点中-&gt;判断是否需要回溯分裂并处理。</p>
+<p>​	有了上述的划分，我们能够分阶段的来实现对应的目标，并且逐步来建立起抽象。实际上其最大的一个好处就是，如果后续某处的抽象的建立错误，我们能够减少代码重构的成本。首先我们来看到如何来完成插入操作的第一步：<strong>遍历B+树并找到目标插入节点</strong>。</p>
+<p>​	回顾我们前面的锁协议，其中涉及到几个有趣的点，对于B+树的Insert操作，实际上其会存在乐观与悲观俩种情况，而这俩种情况，均会对于查找策略造成较大的影响，但是相对来说影响的区域是有限的，为了来简化实现，我们可以使用一种比较优雅的实现方式。我们对于这个环节来进行抽象，我们将其抽象为一个简单的策略函数，其接受外部指定的策略(如悲观或者乐观)，并提供简洁的保证。如：对于策略为xx的调用，我们保证实现如何找到xx节点等等。在这种需求的驱动下，我设计了如下的函数接口</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @note 该函数期望返回从根节点开始查找，知道查找到需要插入的子页为止</span></span><br><span class="line"><span class="comment">         我们约定，在调用方，其已经处理了根节点为空的特殊场景,该函数给出以下约定</span></span><br><span class="line"><span class="comment">         1. 只进行一次对于存在合法结果的B+树的只读遍历，不会修改树结构</span></span><br><span class="line"><span class="comment">         2. 该函数负责中间路径上的锁策略实现，目前不支持锁的提前释放等操作</span></span><br><span class="line"><span class="comment">         3. 任何插入以及分裂逻辑均不在本函数中实现，函数中保证最后的返回值为期望插入的节点指针</span></span><br><span class="line"><span class="comment">         4. 外部需要保证已经正确处理root为空的场景并且已经将Context.root_page_id_正确设置</span></span><br><span class="line"><span class="comment"> * @param key 需要查找的键值</span></span><br><span class="line"><span class="comment"> * @param ctx 上下文环境</span></span><br><span class="line"><span class="comment"> * @param is_optimistic 是否是乐观锁模式</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">FindLeafPage</span><span class="params">(<span class="type">const</span> KeyType &amp;key, Context &amp;ctx, <span class="type">bool</span> is_optimistic)</span>-&gt;<span class="type">bool</span></span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>​	该函数的设计对于我来说是一种设计思想的磨炼，对于我先前来说，我设计一个接口时是自顶向下的，那种情况下，我是期望先有一个高层需求-&gt;先搭出高层框架代码-&gt;再给出具体的实现。但是，本次设计中，这种思路有了一些微妙的转变，有一个高层的需求-&gt;已有高层接口调用约定但内部实现很原始几乎于没有-&gt;先基于高层需求拆分，设计出系列子级别接口，接口各自存在一定的约定-&gt;回到中层中对于这些子接口进行组合调度来实现高层需求。</p>
+<p>​	在这种新的思路的驱动下，我先将上层的需求(Insert)拆分成了几个底下可一步步实现的子需求(三个阶段功能)，这几个功能各自严格约定上下文调用环境和接口，在完成之后再由中层接口来组合来实现上层的Insert需求。我的思路相对于以前来说更加的清晰，设计起来也更容易集中于一点，而不至于过于的发散。</p>
+</blockquote>
+<p>​	我们来分析下该函数接口的设计动机，首先其想要提供的基本抽象是提供一个Key，由该函数来帮助查找到插入目标(叶子节点)。除此之外，由于外部可能存在悲观策略以及乐观策略影响，所以需要该策略参数来作为内部行为的一些控制开关。还有一个语义上的控制，我们期望这个函数是一个”<strong>委派</strong>“类型的函数。即，当外部调用时，其传入一个期望处理的容器，由该函数来使用，在其处理完成返回之后，该容器应该与结果有一定的因果关系，这也正是这里的<code>Context &amp;ctx</code>的设计动机。接下来是该函数内部的设计细节分析。</p>
+<p>​	该函数设计起来很简单，我们从约定入手，该函数假设当前的B+树一定为非空状态，为何？其是为了来实现整个遍历过程的安全与统一，该约束使得整体B+树拥有了一个较为稳定的结构，使得后续的设计可以给予一个较为稳定的结构来处理，减少了后续的设计复杂度。这给了我们一种设计上的启示：在设计中分析并提取一个场景的结构不变量，基于该不变量来进行处理，能够减少很多边界场景的处理。其中的查找逻辑很简单，就是从根节点开始，找到前往期望的Key的下一跳路径。并递归处理这个过程直到遍历到叶子节点。除此之外，其应该能够正确处理该路径上的锁策略，此时参数is_optimistic发挥作用，其决定本次到底应该如何获取读锁&#x2F;写锁。</p>
+<p>​	剩余的部分是一些实现细节上的问题，此处不再赘诉，但是仍然存在一个有趣的点，需要来说明，虽然说实现上也应该是实现细节上的问题，但是其相当有意思，不吐不快。在BusTub中，为了来处理这里的逻辑，我们势必会存在一个递归逻辑：获取pageguard-&gt;获取原信息判断是否为叶子节点-&gt;若非叶子，继续递归，若为叶子，跳出递归。这种逻辑在悲观策略下一路写锁的实现下将会十分流畅，但是在乐观策略下，此时将会导致一些约定上的问题，为了判断一个页面是否是叶子页面，势必需要先获取Pageguard，而在乐观策略下优先获取的是ReadPageGuard，这种情况下实际上破坏了我们传统的乐观锁策略，此时不再是遍历到叶子前就停止获取读锁转而获取叶子的写锁，而是一路获取读锁直到叶子节点上。我们需要来考虑几个先前已经讨论过的类似问题：这种实现上的局限对于原期望策略存在什么样的偏移，是否可以接受？如果不可以接受，我们需要做什么来对于其进行弥补吗？</p>
+<p>​	该问题实际上还涉及到本FindLeafPage函数所向外部暴露的抽象，先前我们期望的最优情况就是其能够实现在乐观策略下从根节点开始，到到达目标叶子节点前的所有中间节点的读锁封锁+目标叶子节点的写锁封锁。但是在现在这种实现的约束下，一般的逻辑会导致原始的逻辑只能够一路获取根节点到叶子节点上的读锁。而无法一次性的获取到叶子节点的写锁。此时你可能会考虑我直接在这个函数中给出在乐观策略下最后实现一种锁升级不就可以了？确实，这不失为一种弥补的策略。但是，这种设计优雅吗？在我看来，这相当的不优雅，其为了弥补一个设计实际上破坏了一个我们设计的重要约束：该函数应该是一个纯洁的只读函数，不涉及任何复杂的业务逻辑。你可以考虑下为什么会将读锁升级视为破坏这种约束的操作。除此之外，我们考虑一个问题：这种读锁升级，真的有必要吗？这种读锁升级的操作，实际上不止此处能够做，同时上层的调用者也能够做，那么，此时如果将该操作放置到该层次和放置在高层次中，又会有什么不同呢？若按照端到端的想法来做的话，我个人更倾向于将这种读锁升级的操作提升到上层来做，当然，你也可以将其放置在本层次中，只要你认为合理，接下俩分析下我将该读锁升级操作提升到上层的操作。</p>
+<p>​	首先，最重要的一点，就是通过延迟该升级操作，甚至于有时候在某些场景中我可以进行优化。考虑如下场景，在查找到叶子节点时，该叶子节点只可能存在俩种状态：可插入以及不可插入。在可插入的情况下，此时进行才有必要进行读锁升级，因为此时才有可能在后续成功获取写锁后插入。但是，如果当前为不可插入即叶子节点已满的状态，此时的插入操作将会导致分裂。在这种情况下，在我们的锁策略中，我们将会取消使用乐观策略而回退到悲观策略，此时就没有必要再去进行锁升级操作。你可能会思考，这上述说明的操作，不也可以在<code>FindLeafPage</code>中实现吗？事实也确实如此，但是，正如端到端的观点，你将其放入到此处，真的有价值吗？对于我来说，为了保证<code>FindLeafPage</code>本身语义的纯洁，我认为将上述涉及到的行为都放入到<code>FindLeafPage</code>是不合理的。</p>
+<p>​	至此，我们分析了在<code>FindLeafPage</code>的设计中所进行的一系列的权衡以及设计思路。给其提供了几个十分重要的上下文调用约定和接口约定</p>
+<ul>
+<li><p>调用<code>FindLeafPage</code>是B+树应该为<code>No-Empty</code>状态</p>
+</li>
+<li><p><code>FindLeafPage</code>提供查找当前B+树中从根节点开始到目标叶子节点的可行路径，并且按照策略来进行路径上的节点封锁，策略如下</p>
+<ul>
+<li>在乐观策略中，其将会封锁从根节点到目标叶子节点上的所有节点(包括叶子节点)，此时均使用读锁进行封锁</li>
+<li>在悲观策略中，其将会封锁从根节点到目标叶子节点上的所有节点(包括叶子节点)，此时均使用写锁进行封锁</li>
+</ul>
+<p>我们接下来可以根据该接口约定来设计下一步：<strong>将KV对数据插入到该目标节点中</strong>。</p>
+<p>直接给出在我的设计中对应的接口设计</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @note 该函数负责将一个键值对插入到一个叶子节点中 </span></span><br><span class="line"><span class="comment">          1. 该函数假定调用方已经处理了树为空的场景</span></span><br><span class="line"><span class="comment">          2. 该函数负责处理叶子节点的分裂逻辑</span></span><br><span class="line"><span class="comment">          3. 该函数负责更新context中的相关锁信息</span></span><br><span class="line"><span class="comment"> * @param key 需要插入的键值</span></span><br><span class="line"><span class="comment"> * @param value 需要插入的值</span></span><br><span class="line"><span class="comment"> * @param ctx 上下文环境</span></span><br><span class="line"><span class="comment"> * @param is_optimistic 是否是乐观锁模式</span></span><br><span class="line"><span class="comment"> * @return 返回是否插入成功</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">FULL_INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BPLUSTREE_TYPE::InsertIntoLeaf</span><span class="params">(<span class="type">const</span> KeyType &amp;key, <span class="type">const</span> ValueType &amp;value, Context &amp;ctx</span></span></span><br><span class="line"><span class="params"><span class="function">                                    ,<span class="type">bool</span> is_optimistic)</span> </span></span><br><span class="line"><span class="function"> -&gt; <span class="type">bool</span></span></span><br></pre></td></tr></table></figure>
+
+<p>​	该函数所需要提供的抽象很简单，即将参数中的KV对按照期望的策略模式来插入到最终的叶子节点中。在B+树的插入的逻辑中，我们实际上明白一个插入操作实际只可能触发俩种场景：</p>
+<ol>
+<li><p>.当前节点仍有槽位可以直接插入，此时直接插入该节点即可</p>
+</li>
+<li><p>当前节点已满，需要触发B+树的分裂逻辑</p>
+</li>
+</ol>
+</li>
+</ul>
+<p>​	我们从较简单的场景入手，我们首先处理第一种场景。对于InsertIntoLeaf来说，其的逻辑很简单，只有俩个步骤：1.查找插入的位置，2.将所需的KV对插入到该节点中，在第一种情况下，我们先不必考虑分裂的处理，但是，我们需要来分析对应的边界，明确需要怎么来隔离当前的实现。对于InsertIntoLeaf来说，其触发第二种场景就只有一种情况，如其中所说，只有在目标插入节点中已满时，此时才会触发分裂逻辑。该函数的设计可以结合实际的代码来分析，其更直观点</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">FULL_INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BPLUSTREE_TYPE::InsertIntoLeaf</span><span class="params">(<span class="type">const</span> KeyType &amp;key, <span class="type">const</span> ValueType &amp;value, Context &amp;ctx,<span class="type">bool</span> is_optimistic)</span> </span></span><br><span class="line"><span class="function"> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(!<span class="built_in">FindLeafPage</span>(key, ctx, is_optimistic))&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span>(is_optimistic)&#123;</span><br><span class="line">    <span class="comment">// 乐观模式，read_set_的最后一个元素即为叶子节点的读锁</span></span><br><span class="line">    <span class="keyword">auto</span> leaf_guard = std::<span class="built_in">move</span>(ctx.read_set_.<span class="built_in">back</span>());</span><br><span class="line">    ctx.read_set_.<span class="built_in">pop_back</span>();</span><br><span class="line">    <span class="comment">// 快速检查：1.是否存在key，2.是否已满需分裂</span></span><br><span class="line">    <span class="keyword">auto</span> leaf_page = leaf_guard.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">    <span class="keyword">if</span> (leaf_page-&gt;<span class="built_in">HasKey</span>(key, comparator_)|| leaf_page-&gt;<span class="built_in">GetSize</span>() == leaf_max_size_) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">auto</span> leaf_page_id = leaf_guard.<span class="built_in">GetPageId</span>();</span><br><span class="line">    leaf_guard.<span class="built_in">Drop</span>();</span><br><span class="line">    <span class="keyword">auto</span> leaf_write_guard_opt = bpm_-&gt;<span class="built_in">WritePage</span>(leaf_page_id);</span><br><span class="line">    <span class="keyword">if</span> (!leaf_write_guard_opt.<span class="built_in">has_value</span>()) &#123; <span class="keyword">return</span> <span class="literal">false</span>; &#125;</span><br><span class="line">    <span class="keyword">auto</span>&amp; leaf_write_guard = leaf_write_guard_opt.<span class="built_in">value</span>();</span><br><span class="line">    <span class="keyword">auto</span> leaf_page_mut = leaf_write_guard.<span class="built_in">AsMut</span>&lt;LeafPage&gt;();</span><br><span class="line">    <span class="keyword">if</span> (leaf_page_mut-&gt;<span class="built_in">HasKey</span>(key, comparator_)|| leaf_page_mut-&gt;<span class="built_in">GetSize</span>() == leaf_max_size_) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">InsertKVToOneLeaf</span>(*leaf_page_mut, key, value);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 悲观模式，write_set_的最后一个元素即为叶子节点的写锁</span></span><br><span class="line">  <span class="comment">// auto leaf_guard = std::move(ctx.write_set_.back());</span></span><br><span class="line">  <span class="comment">// ctx.write_set_.pop_back();</span></span><br><span class="line">  <span class="comment">// auto leaf_page = leaf_guard.AsMut&lt;LeafPage&gt;();</span></span><br><span class="line">  <span class="comment">// 原地检查，不必移动出来，否则还是得移动回去</span></span><br><span class="line">  <span class="keyword">if</span> (ctx.write_set_.<span class="built_in">back</span>().<span class="built_in">AsMut</span>&lt;LeafPage&gt;()-&gt;<span class="built_in">HasKey</span>(key, comparator_))&#123; <span class="comment">// 直接失败，符合Lab要求语义</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (ctx.write_set_.<span class="built_in">back</span>().<span class="built_in">AsMut</span>&lt;LeafPage&gt;()-&gt;<span class="built_in">GetSize</span>() == leaf_max_size_)&#123;</span><br><span class="line">    <span class="keyword">auto</span>&amp; leaf_guard = ctx.write_set_.<span class="built_in">back</span>();</span><br><span class="line">    <span class="keyword">auto</span> leaf_page = leaf_guard.<span class="built_in">AsMut</span>&lt;LeafPage&gt;();</span><br><span class="line">    <span class="keyword">auto</span> leaf_page_id = leaf_guard.<span class="built_in">GetPageId</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">SplitLeafAndInsert</span>(*leaf_page, leaf_page_id, key, value, ctx);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 插入键值对</span></span><br><span class="line">  <span class="built_in">InsertKVToOneLeaf</span>(*ctx.write_set_.<span class="built_in">back</span>().<span class="built_in">AsMut</span>&lt;LeafPage&gt;(), key, value);</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	首先我们来分析该函数的一些上下文调用环境约定，其仍只要求上文调用时此时已经处理了空树的状态即可。同时，此处我们特别指出一点，参数<code>is_optimistic</code>指定了当前的函数调用环境，若其为True，指定了在本次调用时，内部应以乐观策略来进行相应的处理，若其为false则应使用悲观的假设来处理。</p>
+<p>​	内部实现首先是一次通过先前所实现的<code>FindLeafPage</code>来获取到本次插入所应该处理的整条路径。然后就开始进入俩种不同策略时的处理，在乐观策略中，结合锁策略，我们在该层次所应该做的事，就是处理当前可插入(有空闲槽位)时的插入，当涉及到分裂时(叶子节点已满)，其不应尝试自己解决，而是将操作上报回退，由上层来进行处理。当然，你也考虑在这个层次就给其处理了，只要你觉得你做得到并且你确实能够做到。</p>
+<p>​	在外面的设计中，这种处理很简单，但是也存在几点需要注意的。首先，在我们FindLeafPage的调用中，最后产出的Context中包含了路径上的读锁。但是此时我们所需要的是叶子页面的写锁，所以此时就涉及到了前文我们所说的读锁升级的操作，正如前文一样，我们需要来分析这种升级操作所可能带来的竞态导致的问题并尝试补偿。不过，由于先前已经详细分析过一次读锁升级的操作，而这里实际上也是换汤不换药，所以这里交由读者自行分析，不再赘诉。</p>
+<p>​	除此之外，该函数的设计不再有什么复杂的点，正如代码中所示，基本观察到就了解其的基本含义，这里就不重复了，我们将进入最后的硬骨头：<strong>分裂</strong>。</p>
+<p>TODO:挖个坑，懒得写了，等之后有心情了再回来补充(doge)</p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/" title="B+Tree-Insert">https://tcww0.github.io/2025/12/14/数据库/B+Tree-Insert/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> 数据库</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/12/06/%E6%95%B0%E6%8D%AE%E5%BA%93/15445-type/" rel="prev" title="15445 类型系统">
+      <i class="fa fa-chevron-left"></i> 15445 类型系统
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/" rel="next" title="B+Tree-Delete">
+      B+Tree-Delete <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#B-%E6%A0%91-Insert"><span class="nav-number">1.</span> <span class="nav-text">B+树-Insert</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#BasicInsertTest"><span class="nav-number">1.1.</span> <span class="nav-text">BasicInsertTest</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OptimisticInsertTest"><span class="nav-number">1.2.</span> <span class="nav-text">OptimisticInsertTest</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E6%8A%BD%E8%B1%A1"><span class="nav-number">1.3.</span> <span class="nav-text">状态抽象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Empty%E7%8A%B6%E6%80%81%E5%A4%84%E7%90%86"><span class="nav-number">1.3.1.</span> <span class="nav-text">Empty状态处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#No-Empty%E7%8A%B6%E6%80%81%E5%A4%84%E7%90%86"><span class="nav-number">1.3.2.</span> <span class="nav-text">No-Empty状态处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%B6%E5%BA%8F%E5%88%92%E5%88%86"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">时序划分</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">81</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">337k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">5:06</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : 'fb509383bc842f2ac7efd187d2592f5e',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
