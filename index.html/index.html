@@ -186,7 +186,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/11/01/C++%E5%AD%A6%E4%B9%A0/5-event/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -202,7 +202,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/" class="post-title-link" itemprop="url">B+Tree-Delete</a>
+            <a href="/2025/11/01/C++%E5%AD%A6%E4%B9%A0/5-event/" class="post-title-link" itemprop="url">Event实现分析</a>
         </h2>
 
         <div class="post-meta">
@@ -212,14 +212,14 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2025-12-19 21:51:15" itemprop="dateCreated datePublished" datetime="2025-12-19T21:51:15+08:00">2025-12-19</time>
+              <time title="Created: 2025-11-01 08:51:15" itemprop="dateCreated datePublished" datetime="2025-11-01T08:51:15+08:00">2025-11-01</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-12-20 22:02:21" itemprop="dateModified" datetime="2025-12-20T22:02:21+08:00">2025-12-20</time>
+                <time title="Modified: 2025-11-02 14:23:33" itemprop="dateModified" datetime="2025-11-02T14:23:33+08:00">2025-11-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -227,7 +227,7 @@
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                  <a href="/category/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
                 </span>
             </span>
 
@@ -237,14 +237,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>18k</span>
+              <span>3.2k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>16 mins.</span>
+              <span>3 mins.</span>
             </span>
 
         </div>
@@ -256,302 +256,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="B-Tree-Delete"><a href="#B-Tree-Delete" class="headerlink" title="B+Tree-Delete"></a>B+Tree-Delete</h1><p>​	借15445的契机，来分析其中删除操作中蕴含的复杂场景。</p>
-<p>​	对于B+树来说，其的删除操作是相对于插入操作更麻烦，更具有难度的操作，其涉及到的场景更加复杂，对于整个B+树的破坏更加严重，由此需要进行的补偿操作也更加麻烦。</p>
+          <h1 id="Event实现思路"><a href="#Event实现思路" class="headerlink" title="Event实现思路"></a>Event实现思路</h1><p>本文借TinyCoro的Lab4a的契机，来分析一下一些底层的同步原语的一些实现细节以及其中能够学习的地方</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2025/12/19/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Delete/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/" class="post-title-link" itemprop="url">B+Tree-Insert</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-12-14 21:51:15" itemprop="dateCreated datePublished" datetime="2025-12-14T21:51:15+08:00">2025-12-14</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-12-19 10:38:17" itemprop="dateModified" datetime="2025-12-19T10:38:17+08:00">2025-12-19</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>16k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>15 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="B-树-Insert"><a href="#B-树-Insert" class="headerlink" title="B+树-Insert"></a>B+树-Insert</h1><p>​	本文借15445的契机，来逐步实现一个B+树，本文主要聚焦于插入逻辑的实现。</p>
-<p>​	B+树是一个相当复杂的数据结构，其中涉及到相当复杂的应用场景。如果想要平地起高楼，这对于现阶段的我来说是无法实现的，所以我考虑一种TDD(测试驱动编程)的方法来进行实现。我们一次来看到在Lab中所需要我们来通过的测试用例，来方向约定住我们所需要实现的内容。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/12/14/%E6%95%B0%E6%8D%AE%E5%BA%93/B+Tree-Insert/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/12/06/%E6%95%B0%E6%8D%AE%E5%BA%93/15445-type/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/12/06/%E6%95%B0%E6%8D%AE%E5%BA%93/15445-type/" class="post-title-link" itemprop="url">15445 类型系统</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2025-12-06 10:51:15 / Modified: 20:17:26" itemprop="dateCreated datePublished" datetime="2025-12-06T10:51:15+08:00">2025-12-06</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>10k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>9 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="BusTub类型系统"><a href="#BusTub类型系统" class="headerlink" title="BusTub类型系统"></a>BusTub类型系统</h1><p>本文来分析下15445中的类型系统的实现，这一块的设计很优雅，十分由学习和参考的价值</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/12/06/%E6%95%B0%E6%8D%AE%E5%BA%93/15445-type/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/12/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/12/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM/" class="post-title-link" itemprop="url">15445 Lab2</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-12-02 21:51:15" itemprop="dateCreated datePublished" datetime="2025-12-02T21:51:15+08:00">2025-12-02</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-12-06 11:38:51" itemprop="dateModified" datetime="2025-12-06T11:38:51+08:00">2025-12-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>8.2k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>7 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="BufferPool-Manager"><a href="#BufferPool-Manager" class="headerlink" title="BufferPool Manager"></a>BufferPool Manager</h1><p>针对15445的Lab2来进行分析，尝试总结一下如果来做这种Lab</p>
-<h2 id="抽象与隔离"><a href="#抽象与隔离" class="headerlink" title="抽象与隔离"></a>抽象与隔离</h2><p>对于本次的Lab实现，个人感觉其中最麻烦的地点在于，你所需要实现的东西不再是局限于一个比较清晰的子模块，而是一个需要被嵌入使用的系统组件，你在开始时并不知道你所需要实现的内容，而是需要不断的熟悉各种上下文约定来约束你的场景。但是，怎么来做呢？</p>
-<p>实际上，我在过往的几次Lab中也逐渐发现了这个问题，但是可能是之前还不够成熟，或者说不太在意，所以并没有总结出来，现在对于这个问题进行总结。对于CMU15445的Lab这种实验，其通常提供部分框架代码，让我们来补充缺失的逻辑，其一般会在任务书中给出部分要求，就比如一下的Task1的描述。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/12/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM/#more" rel="contents">
+              <a class="btn" href="/2025/11/01/C++%E5%AD%A6%E4%B9%A0/5-event/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -650,104 +358,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2025/11/01/C++%E5%AD%A6%E4%B9%A0/6-channel/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/11/01/C++%E5%AD%A6%E4%B9%A0/5-event/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/11/01/C++%E5%AD%A6%E4%B9%A0/5-event/" class="post-title-link" itemprop="url">Event实现分析</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-11-01 08:51:15" itemprop="dateCreated datePublished" datetime="2025-11-01T08:51:15+08:00">2025-11-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-11-02 14:23:33" itemprop="dateModified" datetime="2025-11-02T14:23:33+08:00">2025-11-02</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/OS/" itemprop="url" rel="index"><span itemprop="name">OS</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>3.2k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>3 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Event实现思路"><a href="#Event实现思路" class="headerlink" title="Event实现思路"></a>Event实现思路</h1><p>本文借TinyCoro的Lab4a的契机，来分析一下一些底层的同步原语的一些实现细节以及其中能够学习的地方</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/11/01/C++%E5%AD%A6%E4%B9%A0/5-event/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1142,10 +752,382 @@
   
   
 
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/" class="post-title-link" itemprop="url">分布式锁分析(1)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-09-06 08:09:19" itemprop="dateCreated datePublished" datetime="2025-09-06T08:09:19+08:00">2025-09-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-09-09 22:00:52" itemprop="dateModified" datetime="2025-09-09T22:00:52+08:00">2025-09-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E9%A1%B9%E7%9B%AE/" itemprop="url" rel="index"><span itemprop="name">项目</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Distributed-lock"><a href="#Distributed-lock" class="headerlink" title="Distributed lock"></a><strong>Distributed lock</strong></h1><p>本节进行项目中分布式锁的使用的分析</p>
+<p>​	分布式锁是一种跨进程的保护全局共享资源的一种机制，实际上与普通的锁本身没有什么本质上的不同，只是视角不同，普通的锁最多也只是在进程内部，对于线程共享，协程共享等资源的保护，而分布式锁，其是在对于一些复杂分布式场景下的资源的保护。实现起来跟OS课上了解的基本锁实现没有什么区别，难度不大。因此，分布式锁的使用实际上不在于如何设计之上，而是在于为何使用，不使用可以吗，为了达成分布式锁的效果，是否存在别的更加简单的机制能够实现同样的效果呢？</p>
+<p>​	下面从多个问题方面进行分析。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/09/06/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/7-distributedLock/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/08/26/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/1-abstract/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/26/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/1-abstract/" class="post-title-link" itemprop="url">文本摘抄</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-08-26 20:51:15 / Modified: 21:14:12" itemprop="dateCreated datePublished" datetime="2025-08-26T20:51:15+08:00">2025-08-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">服务端开发</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>2.8k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>3 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>本专栏用于部分书中优质内容的摘抄，请注意，只是那部分相对来说对于我个人感触较大的，不是对于全部内容，叠个盾()</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/08/26/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/1-abstract/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/08/15/%E9%98%85%E8%AF%BB/%E6%91%98%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/15/%E9%98%85%E8%AF%BB/%E6%91%98%E8%AE%B0/" class="post-title-link" itemprop="url">Untitled</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-08-15 15:40:03" itemprop="dateCreated datePublished" datetime="2025-08-15T15:40:03+08:00">2025-08-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-08-17 14:49:18" itemprop="dateModified" datetime="2025-08-17T14:49:18+08:00">2025-08-17</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <hr>
+<hr>
+<p>从事服务端开发，领域知识是最基础却又最重要的能力。但是，只有当领域知识形成体系的时候，才可能成为真正的核心竞争力。当遇到问题时，如果连相关的知识储备都没有，那么往往很难解决问题；而如果你有相应的知识储备，则可以将知识迁移到问题场景中，辅以推理寻找解决问题的方法。为了能够让领域知识和逻辑推理能够更好的结合，我们需要系统地学习知识，专注于某些技术方向的同时，有意识的向周边进行扩展。就比如，对于后端开发工程师，除了掌握服务端开发技术栈和相关业务知识，也应该了解一些客户端的知识，了解客户端与服务端之间如何进行交互。</p>
+<h2 id="如何将自己的领域知识系统化"><a href="#如何将自己的领域知识系统化" class="headerlink" title="如何将自己的领域知识系统化"></a><strong>如何将自己的领域知识系统化</strong></h2><p>​	很多时候，领域知识点本身是可以相互联系起来的，但是前提是你对于这些知识点的理解足够透彻。在工作中学习，最常陷入的困境是时间过于碎片化，学了后面的，就网络前面的，不得要领。这个现象其实在一般的学习中也会广泛的存在，就比如在对于一些网课的学习中，如果是粗浅的过，那么最后只会是一种模糊的印象，甚至于刚看完的课程不一会就忘记了。出现这种情况的一个很重要原因在于：领域宏观层面的整体视图没有形成，关键知识点理解深度不够、不透彻。这些关键知识点就是这个领域的骨架、支点。缺了骨架，自然难以体系化，缺了支点，则容易误入歧途。</p>
+<p>​	上面这段理论其实与OSTEP中的一个论点很接近，就是关于一个章节或者说一个书本内容的学习，其中最重要的是形成一个自己的心智模型。什么是心智模型，在目前的我看来，一个心智模型是在你看到一个物品时，你能够联想到的关于这个物品背后所涉及到的一系列你领域知识内的东西。</p>
+<p>​	举个例子，当你看到一个服务器集群在运行时，你不免会去猜想其中所用的共识算法到底是什么，是Paxos还是Raft。再进一步，当你想到一个共识算法时，你会去考虑对应的内部到底是怎么达成共识的，对应的在网络分区(P)未发生的情况下，其对应的一致性(C)，可用性(A)，都是怎么实现的。因此，你会很快的想到Raft中使用Leader Election机制和单主复制等来协调集群，进而来实现一种一致性。当发生P时，其通过心跳来检测活性并通过发起新一轮Leader Election等来实现在节点少部分故障时候的可用性。其会在节点落后进度落后时通过InstallSnapshot来追赶对应的进度，而且通过相互之间的信息量来约束对应的选举结果，但是最终是一种尽力而为的模型等等。</p>
+<p>​	总总这些，是本人在学习分布式的共识算法后形成的一些简单的心智模型，或者说，是剩下的那些比较印象深刻的知识点，整体的Raft算法在学习时实际上是比上文描述的麻烦且复杂许多的，但是对于我来说我是无法全部记住的，只能根据实际的一些场景记录下一些重要的知识点，即所谓的支点。在经历过一段时间过后，剩余的知识点实际上构成了一个基本的蓝图。在初始时候不必追求完美企图全部记住，因为这个是不现实的，只有在实际的实践中，我们才能够不断的将这些个知识点内化，纳入为骨架中的一部分。进而形成自己的一个完整心智模型。</p>
+
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/08/12/C++%E5%AD%A6%E4%B9%A0/%E5%8D%8F%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/12/C++%E5%AD%A6%E4%B9%A0/%E5%8D%8F%E7%A8%8B/" class="post-title-link" itemprop="url">类模版</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-08-12 08:51:15 / Modified: 20:48:12" itemprop="dateCreated datePublished" datetime="2025-08-12T08:51:15+08:00">2025-08-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h1><p>本文分析一下在TinyCoro中对于协程遇到的一些问题</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/08/12/C++%E5%AD%A6%E4%B9%A0/%E5%8D%8F%E7%A8%8B/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/index.html/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/index.html/page/9/">9</a><a class="extend next" rel="next" href="/index.html/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/index.html/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/index.html/page/8/">8</a><a class="extend next" rel="next" href="/index.html/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -1213,7 +1195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">81</span>
+          <span class="site-state-item-count">78</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1258,7 +1240,7 @@
           <h3 class="widget-title">Tag Cloud</h3>
           <div id="myCanvasContainer" class="widget tagcloud">
               <canvas width="250" height="250" id="resCanvas" style="width=100%">
-                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
               </canvas>
           </div>
       </div>
@@ -1303,7 +1285,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2025</span>
+  <span itemprop="copyrightYear">2026</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1313,13 +1295,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">Symbols count total: </span>
-    <span title="Symbols count total">337k</span>
+    <span title="Symbols count total">294k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">Reading time total &asymp;</span>
-    <span title="Reading time total">5:06</span>
+    <span title="Reading time total">4:27</span>
 </div>
 
         
