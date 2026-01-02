@@ -186,6 +186,98 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/" class="post-title-link" itemprop="url">BPM_Opt1</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2026-01-02 18:51:15 / Modified: 21:15:11" itemprop="dateCreated datePublished" datetime="2026-01-02T18:51:15+08:00">2026-01-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>8.6k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>8 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="BPM优化"><a href="#BPM优化" class="headerlink" title="BPM优化"></a>BPM优化</h1><p>本文借15445的爬Rank的契机，来进行对于BPM设计上的优化，进而来分析如何优化并发的设计。这是一次相当有趣的设计体验。其中所需要的经历相当的多，同时也收获很多。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/11/01/C++%E5%AD%A6%E4%B9%A0/5-event/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1017,98 +1109,6 @@
 <p>​	举个例子，当你看到一个服务器集群在运行时，你不免会去猜想其中所用的共识算法到底是什么，是Paxos还是Raft。再进一步，当你想到一个共识算法时，你会去考虑对应的内部到底是怎么达成共识的，对应的在网络分区(P)未发生的情况下，其对应的一致性(C)，可用性(A)，都是怎么实现的。因此，你会很快的想到Raft中使用Leader Election机制和单主复制等来协调集群，进而来实现一种一致性。当发生P时，其通过心跳来检测活性并通过发起新一轮Leader Election等来实现在节点少部分故障时候的可用性。其会在节点落后进度落后时通过InstallSnapshot来追赶对应的进度，而且通过相互之间的信息量来约束对应的选举结果，但是最终是一种尽力而为的模型等等。</p>
 <p>​	总总这些，是本人在学习分布式的共识算法后形成的一些简单的心智模型，或者说，是剩下的那些比较印象深刻的知识点，整体的Raft算法在学习时实际上是比上文描述的麻烦且复杂许多的，但是对于我来说我是无法全部记住的，只能根据实际的一些场景记录下一些重要的知识点，即所谓的支点。在经历过一段时间过后，剩余的知识点实际上构成了一个基本的蓝图。在初始时候不必追求完美企图全部记住，因为这个是不现实的，只有在实际的实践中，我们才能够不断的将这些个知识点内化，纳入为骨架中的一部分。进而形成自己的一个完整心智模型。</p>
 
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/08/12/C++%E5%AD%A6%E4%B9%A0/%E5%8D%8F%E7%A8%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/08/12/C++%E5%AD%A6%E4%B9%A0/%E5%8D%8F%E7%A8%8B/" class="post-title-link" itemprop="url">类模版</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2025-08-12 08:51:15 / Modified: 20:48:12" itemprop="dateCreated datePublished" datetime="2025-08-12T08:51:15+08:00">2025-08-12</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>4.1k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>4 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h1><p>本文分析一下在TinyCoro中对于协程遇到的一些问题</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/08/12/C++%E5%AD%A6%E4%B9%A0/%E5%8D%8F%E7%A8%8B/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
       
     </div>
 

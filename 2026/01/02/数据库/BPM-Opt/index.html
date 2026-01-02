@@ -26,21 +26,21 @@
   <meta name="description" content="BPM优化本文借15445的爬Rank的契机，来进行对于BPM设计上的优化，进而来分析如何优化并发的设计。这是一次相当有趣的设计体验。其中所需要的经历相当的多，同时也收获很多。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="BPM_Opt1">
-<meta property="og:url" content="https://tcww0.github.io/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/index.html">
+<meta property="og:url" content="https://tcww0.github.io/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="BPM优化本文借15445的爬Rank的契机，来进行对于BPM设计上的优化，进而来分析如何优化并发的设计。这是一次相当有趣的设计体验。其中所需要的经历相当的多，同时也收获很多。">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://tcww0.github.io/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/873dc241f05b934b657e0967954a8b36.jpg">
-<meta property="og:image" content="https://tcww0.github.io/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/image-20260102180814336.png">
-<meta property="og:image" content="https://tcww0.github.io/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/a7b0f77ebcc29a4e6730bf29e2e917a7.png">
-<meta property="article:published_time" content="2025-01-02T10:51:15.000Z">
-<meta property="article:modified_time" content="2026-01-02T12:50:05.622Z">
+<meta property="og:image" content="https://tcww0.github.io/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/873dc241f05b934b657e0967954a8b36.jpg">
+<meta property="og:image" content="https://tcww0.github.io/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/image-20260102180814336.png">
+<meta property="og:image" content="https://tcww0.github.io/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/a7b0f77ebcc29a4e6730bf29e2e917a7.png">
+<meta property="article:published_time" content="2026-01-02T10:51:15.000Z">
+<meta property="article:modified_time" content="2026-01-02T13:15:11.538Z">
 <meta property="article:author" content="TCWW">
 <meta property="article:tag" content="数据库">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://tcww0.github.io/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/873dc241f05b934b657e0967954a8b36.jpg">
+<meta name="twitter:image" content="https://tcww0.github.io/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/873dc241f05b934b657e0967954a8b36.jpg">
 
-<link rel="canonical" href="https://tcww0.github.io/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/">
+<link rel="canonical" href="https://tcww0.github.io/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/">
 
 
 <script id="page-configurations">
@@ -196,7 +196,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tcww.jpg">
@@ -220,16 +220,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
+              
 
-              <time title="Created: 2025-01-02 18:51:15" itemprop="dateCreated datePublished" datetime="2025-01-02T18:51:15+08:00">2025-01-02</time>
+              <time title="Created: 2026-01-02 18:51:15 / Modified: 21:15:11" itemprop="dateCreated datePublished" datetime="2026-01-02T18:51:15+08:00">2026-01-02</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2026-01-02 20:50:05" itemprop="dateModified" datetime="2026-01-02T20:50:05+08:00">2026-01-02</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -276,7 +270,7 @@
 <span id="more"></span>
 
 <h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>​	在初始阶段，为了能够Pass掉所有的测试用例，我考虑使用一个粗暴的大粒度锁(BPM级别的锁)来保护一系列状态。最后经过一系列调整确实能够跑通Gradescope上的所有测试点，但是最后的Rank不甚理想(如图1)。</p>
-<p><img src="/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/873dc241f05b934b657e0967954a8b36.jpg" alt="图1"></p>
+<p><img src="/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/873dc241f05b934b657e0967954a8b36.jpg" alt="图1"></p>
 <p>​	为了获取更高的Rank(至少要到前100吧)，我需要来对于现有的设计来进行一次全面的优化。为此，我们需要放弃使用一个全局锁来进行封锁，而改用一些更加高级的策略来进行优化，这就引出了我们本次所需要分析的内容：如何在缩小锁粒度的同时保证程序本身的正确性。</p>
 <h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>​	对于QBS的优化，在我认为第一步实际上不是优化锁的粒度。因为其实很易懂的一点，如果我们优化的部分不是瓶颈，那么在这方面再做如何的优化，对应的提升的效果也不会很好。对于我来说，我的第一次优化相对来说是较容易的，或者说，由于有较为明显的缺陷。就是我在一个全局锁内阻塞的执行了全部的状态改变+顺序阻塞IO处理，而这无论如何是不可接受的。故我专门针对这一点进行了优化。首先的思路是将对应的IO执行移出全局锁的临界区并保证整体逻辑的不改变。</p>
 <p>​	我们应该如何来看待并发？对于我来说，并发是多个执行流的同时运行。我们需要保证这多个执行流之间的互不干扰吗？这是一种保证并发安全的做法，但是这种做法是最初级的做法，通过在各个执行流的起始点来限制串行就能够实现这点，不过正如你所想，这往往是不可接受的。因为，这太慢了。这相当于是将并发的操作处理为了单线程的操作，而且还附带上了一系列的上下文切换损耗以及空转等。相当的不优雅，而为了能够优化这种场景，我们需要换一种视角来看待并发，不能够以一种互斥的角度来看待并发。对于我现在来说，应该以一种可预测，可处理的观点来看待并发。我期望的并发是我能够在一个执行流观测到另外一个执行流的行为，并且当前执行流能够通过观测到的行为来实现协调，进而实现整体的执行流的正确有序推进。严格来说，前面所说的全局锁是这里的一种方法，我们这里不过是稍微往深处走一走来了解。</p>
@@ -292,7 +286,7 @@
 <p>​	总的来说，我们需要处理这俩种可能的IO操作，需要将这俩种IO操作给移出由BPM所构造的临界区。我们接下来分析将这俩种操作移出临界区之后会导致的问题。</p>
 <p>​	对于我来说，如果将这些IO操作每个都分析一遍来进行处理，那是不可接受的。我考虑抽离出其中的共性来分析。在我看来，其中的共性为一点，其都是Frame本身的IO操作以及整个GetFrame本身围绕的元素本身。故我的基本思路为直接从Frame本身来入手。对于Frame本身，我为其显式附加了一个状态变量<code>FrameStatus status_</code>。我想要做的是，在整个GetFrame函数中来建立起一个对于Frame的确定性状态机，通过将各个步骤涵盖住Frame本身。</p>
 <p>​	对于FrameStatus ，我将其划分为三个基本状态<code>FREE，READY，LOADING</code>。这三个状态涵盖了我理解的Frame的状态。其中<code>FREE</code>代表当前的Frame是一个空闲状态，未被任何一方所使用，其中不承载任何数据，可直接被使用，<code>list&lt;frame_id_t&gt; free_frames_</code>中的所有frame都应该处于该状态。<code>LOADING</code>态的Frame是一个中间状态，该状态的Frame不应该长久存在，其应该快速坍缩为READY态。而<code>READY</code>态是一个稳态，该状态下的Frame代表着其的前置准备工作都已经执行完毕，这是BPM外部唯一可以使用的Frame的所处状态。</p>
-<p>​	<img src="/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/image-20260102180814336.png" alt="Frame的简单FSM"></p>
+<p>​	<img src="/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/image-20260102180814336.png" alt="Frame的简单FSM"></p>
 <p>​	为什么要有这个状态建模？因为我想要有一个仲裁的机构，我不想后续的设计过于发散，我期望先建立出一个我认为的标准，后续的操作都往这个标准来靠。只要观测者都能够按照一定的要求来观察和使用这套标准，那我就应该能够保证一种不变式，而这些被观测的状态以及线程等本身的操作，则共同构成了一个逻辑上的协议。</p>
 <p>​	前文中我们其实已经设计了一些简单的不变式：</p>
 <ul>
@@ -340,7 +334,7 @@
 <li>一个脏页被从<code>page_table_</code>移除之后，下一次读取该页一定是最新的结果</li>
 </ul>
 <p>​	实际上回过头来看，所用到的不变式不多，但是正是这几个不变式，构成了我们缩小所粒度的支柱。是一次相当烦人但有趣的体验。下面给出优化后个人在榜上的Rank。</p>
-<p><img src="/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/a7b0f77ebcc29a4e6730bf29e2e917a7.png" alt="Rank_Opt"></p>
+<p><img src="/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/a7b0f77ebcc29a4e6730bf29e2e917a7.png" alt="Rank_Opt"></p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​	总而言之，本次的优化是一个相当有趣的经历。在开始时，实际上我是一个无头苍蝇。甚至于到结束，我都有点混乱，我在一开始的尝试只是为了缩小锁的粒度而去缩小锁的粒度。进而导致了很多的无意义行为以及错误。期间AI本身也给我提了不少建议，但是给我添的乱也不少。但这一切都是因为一点，我看事情的视角错了，我不应该从锁的粒度去看待并发，正如那句话，要”透过现象看本质”。怎么才能够够做到并发，要在变中求不变，找出复杂的执行流浪潮中的锚点，基于这些锚点来逐步扩展自己稳定的领域。最后构建出一个完整的并发执行流。</p>
 <p>​	</p>
 <p>​	</p>
@@ -363,7 +357,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>Post link: </strong>
-    <a href="https://tcww0.github.io/2025/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/" title="BPM_Opt1">https://tcww0.github.io/2025/01/02/数据库/BPM-Opt/</a>
+    <a href="https://tcww0.github.io/2026/01/02/%E6%95%B0%E6%8D%AE%E5%BA%93/BPM-Opt/" title="BPM_Opt1">https://tcww0.github.io/2026/01/02/数据库/BPM-Opt/</a>
   </li>
   <li class="post-copyright-license">
     <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
@@ -384,13 +378,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2025/01/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/21-%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/" rel="prev" title="迭代器模式">
-      <i class="fa fa-chevron-left"></i> 迭代器模式
+    <a href="/2025/11/01/C++%E5%AD%A6%E4%B9%A0/5-event/" rel="prev" title="Event实现分析">
+      <i class="fa fa-chevron-left"></i> Event实现分析
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2025/01/03/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/22-%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F/" rel="next" title="中介者模式">
-      中介者模式 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -687,7 +678,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'comments',
       owner       : 'TCWW0',
       admin       : ['TCWW0'],
-      id          : 'e9b3ea796e1080f25b2a503262367e90',
+      id          : '621bc599d66c9708705ae2ec9f68af23',
         language: 'zh-CN',
       distractionFreeMode: true
     });
