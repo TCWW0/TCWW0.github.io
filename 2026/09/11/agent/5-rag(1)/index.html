@@ -30,16 +30,17 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="RAG本文主要来分享本人在学习RAG的过程。本次学习过程基于一次 agent 的 RAG 模块设计。">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/topic.png">
 <meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/image-20260911082312739.png">
 <meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/bm25_formel">
 <meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/image-20260911123737585.png">
 <meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/image-20260911123935511.png">
 <meta property="article:published_time" content="2026-09-11T00:51:15.000Z">
-<meta property="article:modified_time" content="2026-09-11T05:12:16.066Z">
+<meta property="article:modified_time" content="2026-09-11T05:18:23.558Z">
 <meta property="article:author" content="TCWW">
 <meta property="article:tag" content="Agent">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/image-20260911082312739.png">
+<meta name="twitter:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/topic.png">
 
 <link rel="canonical" href="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/">
 
@@ -223,7 +224,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2026-09-11 08:51:15 / Modified: 13:12:16" itemprop="dateCreated datePublished" datetime="2026-09-11T08:51:15+08:00">2026-09-11</time>
+              <time title="Created: 2026-09-11 08:51:15 / Modified: 13:18:23" itemprop="dateCreated datePublished" datetime="2026-09-11T08:51:15+08:00">2026-09-11</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -268,6 +269,7 @@
 
       
         <h1 id="RAG"><a href="#RAG" class="headerlink" title="RAG"></a>RAG</h1><p>本文主要来分享本人在学习RAG的过程。本次学习过程基于一次 agent 的 RAG 模块设计。</p>
+<p><img src="/2026/09/11/agent/5-rag(1)/topic.png" alt="topic"></p>
 <span id="more"></span>
 
 <h2 id="简单入门"><a href="#简单入门" class="headerlink" title="简单入门"></a>简单入门</h2><p>简单来说，<strong>检索增强生成</strong>（Retrieval-Augmented Generation，RAG）的存在目的以及设计动机很简单。就是基于当前已经存在的语料库（知识库）中检索出一些与本次询问的问题有关的信息，然后将这些信息作为上下文提供给大语言模型来引导生成更准确、更可靠的答案。</p>
