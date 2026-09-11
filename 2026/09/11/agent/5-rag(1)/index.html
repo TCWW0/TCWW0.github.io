@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="RAG本文主要来分享本人在学习RAG的过程。本次学习过程基于一次 agent 的 RAG 模块设计。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAG设计-BM25篇">
+<meta property="og:url" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="RAG本文主要来分享本人在学习RAG的过程。本次学习过程基于一次 agent 的 RAG 模块设计。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/image-20260911082312739.png">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/bm25_formel">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/image-20260911123737585.png">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/image-20260911123935511.png">
+<meta property="article:published_time" content="2026-09-11T00:51:15.000Z">
+<meta property="article:modified_time" content="2026-09-11T05:12:16.066Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/image-20260911082312739.png">
+
+<link rel="canonical" href="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>RAG设计-BM25篇 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RAG设计-BM25篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2026-09-11 08:51:15 / Modified: 13:12:16" itemprop="dateCreated datePublished" datetime="2026-09-11T08:51:15+08:00">2026-09-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/Agent/" itemprop="url" rel="index"><span itemprop="name">Agent</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>14k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>13 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="RAG"><a href="#RAG" class="headerlink" title="RAG"></a>RAG</h1><p>本文主要来分享本人在学习RAG的过程。本次学习过程基于一次 agent 的 RAG 模块设计。</p>
+<span id="more"></span>
+
+<h2 id="简单入门"><a href="#简单入门" class="headerlink" title="简单入门"></a>简单入门</h2><p>简单来说，<strong>检索增强生成</strong>（Retrieval-Augmented Generation，RAG）的存在目的以及设计动机很简单。就是基于当前已经存在的语料库（知识库）中检索出一些与本次询问的问题有关的信息，然后将这些信息作为上下文提供给大语言模型来引导生成更准确、更可靠的答案。</p>
+<p>整体来说可以将RAG切分为三个阶段。<strong>检索（Retrieval）</strong>是指从现有的知识库中查询相关的内容；<strong>增强</strong>是将检索的内容融入提示词中，辅助模型生成；<strong>生成</strong>则由模型来结合检索内容以及现有知识来输出更加准确以及有价值的答案。</p>
+<p>对于一个RAG应用来说。其主要存在两个应用流程，其中一个是数据准备阶段，系统通过数据提取、文本分割、索引化等，将传入的外部只是构建成一个可以检索的数据库。随后在应用阶段，系统会基于用户所提供的查询&#x2F;prompt，来在数据库中检索相关的信息，将其注入Prompt中，并最终驱动大语言模型生成答案</p>
+<h2 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h2><p>在本文中，我们重要来分析<strong>检索</strong>阶段。对于RAG来说，检索是 RAG 的核心步骤，而方法存在很多。经过长久的发展，现在已经存在丰富的技术方案可供选择。在本次设计中，我们主要借鉴 agentty <a target="_blank" rel="noopener" href="https://agentty.org/blog/agentty-0-2-9-retrieval-engine/">[1]</a>中的基础检索方案实现。设计动机是常规的<strong>词法检索算法（如BM25等）</strong>无法理解词之间的语义，就比如在BM25中<strong>部署</strong>和<strong>上限</strong>之间零交集，相应的分数为0，对于这块不足，我们需要使用<strong>embedding模型</strong>来利用其在训练后所获得的语义理解能力。但是，<strong>embedding模型</strong>在关键词匹配等规则性检索的场景无法工作，而此时刚好由词法检索来补齐这块能力。通过综合应用俩者，俩者能够互补。这也是我们在最后为什么使用 <strong>RRF</strong> 的原因。这两路的分数实际上不可通约（BM25 分数无上界 vs cosine∈[-1,1]），只有名次才是通用货币。</p>
+<p><img src="/2026/09/11/agent/5-rag(1)/image-20260911082312739.png" alt="image-20260911082312739"></p>
+<h2 id="BM25"><a href="#BM25" class="headerlink" title="BM25"></a>BM25</h2><h3 id="简单介绍"><a href="#简单介绍" class="headerlink" title="简单介绍"></a>简单介绍</h3><p>在继续之前，我们需要简单来了解一些BM25是什么。BM25算法，如果从效果上看，其是一个能够让你在一个数据集中来检索出有关查询的<strong>相关</strong>数据的算法。如果想要更好的理解它，我们需要简单的了解一下其的发展历史。</p>
+<p>在BM25之前，也存在一些常用的词法检索算法。就比如朴素的检索思路：如果我查询语句中的一次词在一个文档中频繁出现，那么通常意味着这个文档中的内容与我的查询语句成相关关系。基于这个思路，<strong>TF(Term Frequency)<strong>出现了，其描述了一个词在一篇文档中的出现频率，如果值越高，那么通常意味着这个文档更可能是相关的文档。这是一版初期的检索方案。但是，这版方案也存在缺陷：对于每一个词，它的价值可能是不同的。就比如说</strong>“的”<strong>字，其普遍的出现在每个文档中，但是其提供了什么信息量吗？并没有，相反，其会拉高一个文档的</strong>TF打分</strong>。而这一定程度上会抑制其他更有价值的值的打分贡献。为了来解决这个问题，出现了另外一个影响打分的因子：**逆文档频率 IDF(Inverse Document Frequency)**。</p>
+<p><strong>IDF</strong>所描述的是一个词在当前知识库中的出现频率，如果说<strong>TF</strong>描述的是一个词在一个文档中有多重要，那么<strong>IDF</strong>描述的就是一个词在整个文档集合中有多稀有。而对于一个词来说，其如果在整个文档中文档出现频率越少，那么在基于这个词来进行查询时，对应的存在该词的文档的价值自然也就越大。至此，通过引入<strong>IDF</strong>，我们引入了词的价值来辅助判断文档与查询内容的关联性。</p>
+<p>有了<strong>TF-IDF</strong>，此时我们能够有一个可以接受的检索方案了。但是，这个方案仍然存在许多缺陷，或者说，这个方案仍然可以发展，我们仍然可以引入更多的机制来处理当前方案中薄弱的点，就比如说：</p>
+<ul>
+<li>一个文档中频繁出现一个词，甚至于一个文档就是有一个词重复多次堆砌而成的。在这种情况下，<strong>TF</strong>对于分数的贡献将会相当的高。但是实际检索出来的数据却是无价值&#x2F;价值低的</li>
+<li>文档长度对于其所存在的词的价值也有影响。就比如说，一篇10w 文本长度的文档中出现两次 “并发编程与实践”与一篇500文本长度的文档中出现两次 “并发编程与实践”的意义是不一样的。前者可能只是偶然，而后者则可能本身就围绕该词为主题。</li>
+</ul>
+<p>随着这些问题的不断暴露，业界也出现了演进的算法。BM25就是其中一者。就比如说其为了解决第一个问题，其会在用一个词对于一份文档打分的时候，通过一些函数来提高分数的边际效应，我们仍然需要使得一个词出现次数增加能使得相关的文档关联性增加，但是需要控制增长的速度，就比如使用log函数来调整增长曲线。而对于第二个问题，其在对于文档打分时引入了文档长度的打分因素。使得长度本身也成为评价指标的一部分。通过如此，其又处理了两个常见的问题。当然，对应的BM25可能还存在很多需要解决的问题，就比如词语顺序（词距）之间的关系等等。但是这不是我们这次关心的重点，这自然的作为后续的学习内容即可。我们只需要知道，问题是不断发现、不断解决的。算法&#x2F;方案也是不断迭代、不断成熟的。而对于我们这里，常规的BM25算法足够作为学习以及使用的锚点了。</p>
+<h3 id="落地"><a href="#落地" class="headerlink" title="落地"></a>落地</h3><p>经历了前文，我们对于BM25算法应该有一个基础的理解。如果抛开所有的策略，核心其实只有一个：我们持有一个查询词，然后拿着这个查询词来为每个文档打分。分高的通常代表相关性越高，越可能包含相关的内容。</p>
+<h4 id="分词"><a href="#分词" class="headerlink" title="分词"></a>分词</h4><p>当我们进行查询时，输入的通常不是一个单独的词，而是一段自然语言。例如在搜索引擎中，我们可能会搜索”什么是数据库”。</p>
+<p>那么，我们是否可以直接将整个查询语句作为一个整体来进行匹配？理论上当然可以，但这样会带来一个问题：<strong>整个句子作为一个整体进行匹配，要求查询和文档具有较高的文本重合程度，难以处理部分匹配的情况。</strong></p>
+<p>例如，查询”什么是数据库”，而文档内容为”什么是数据库索引“。虽然两者显然具有较高的相关性，但如果将整个查询句子看做一个独立的检索单元，那么文档中的”什么是数据库索引“并不等于”什么是数据库“，因此很难建立有效的匹配关系。</p>
+<p>因此，在搜索之前，通常需要将查询文本划分为更小的检索单元，也就是<strong>term</strong>。例如：什么是数据库→什么 &#x2F; 是 &#x2F; 数据库。这样，查询和文档就不再需要进行整个句子的完全匹配，而可以分别判断其中包含哪些相同的 <strong>term</strong>。</p>
+<p>更重要的是，term 不仅是进行匹配的基本单位，也是信息检索模型进行统计的基本单位。例如 BM25 中需要根据 term 在文档中的出现次数（TF）以及 term 在整个文档集合中的出现范围（DF&#x2F;IDF）计算相关性得分。因此，分词的核心目的并不是简单的“把句子拆小”，而是<strong>将自然语言转换为一组可以被独立匹配、统计以及索引的检索单元</strong>。在此基础上，系统可以进一步来建立倒排索引，根据查询中的 term 快速找到可能相关的文档，再由 BM25 等排序模型计算这些文档与查询的相关性。</p>
+<p>我们接下来来看到一个实际的代码例子：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">tokenize</span><span class="params">(std::string_view s, std::vector&lt;std::string&gt;&amp; out)</span> </span>&#123;</span><br><span class="line">    std::string word;</span><br><span class="line">    std::vector&lt;std::string&gt; run;</span><br><span class="line">    <span class="keyword">auto</span> flush_word = [&amp;]&#123;</span><br><span class="line">        <span class="keyword">if</span> (word.<span class="built_in">size</span>() &gt; <span class="number">1</span>) out.<span class="built_in">push_back</span>(word);</span><br><span class="line">        word.<span class="built_in">clear</span>();</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">auto</span> flush_run = [&amp;]&#123;</span><br><span class="line">        <span class="keyword">if</span> (run.<span class="built_in">size</span>()==<span class="number">1</span>)&#123;</span><br><span class="line">            out.<span class="built_in">push_back</span>(std::<span class="built_in">move</span>(run[<span class="number">0</span>]));</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (std::<span class="type">size_t</span> k=<span class="number">0</span>;k<span class="number">+1</span>&lt;run.<span class="built_in">size</span>();++k)&#123;</span><br><span class="line">                out.<span class="built_in">push_back</span>(run[k]+run[k<span class="number">+1</span>]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        run.<span class="built_in">clear</span>();</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    std::<span class="type">size_t</span> i=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span>(i&lt;s.<span class="built_in">size</span>())&#123;</span><br><span class="line">        <span class="type">const</span> <span class="keyword">auto</span> b = <span class="built_in">static_cast</span>&lt;<span class="type">unsigned</span> <span class="type">char</span>&gt;(s[i]);</span><br><span class="line">        <span class="keyword">if</span> (b&lt;<span class="number">0x80</span> &amp;&amp; std::<span class="built_in">isalnum</span>(b)) &#123;</span><br><span class="line">            <span class="built_in">flush_run</span>();</span><br><span class="line">            word.<span class="built_in">push_back</span>(<span class="built_in">static_cast</span>&lt;<span class="type">char</span>&gt;(std::<span class="built_in">tolower</span>(b)));</span><br><span class="line">            ++i;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span>(b&lt;<span class="number">0x80</span>) &#123;</span><br><span class="line">            <span class="built_in">flush_word</span>();</span><br><span class="line">            <span class="built_in">flush_run</span>();</span><br><span class="line">            ++i;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">flush_word</span>();</span><br><span class="line">            std::<span class="type">size_t</span> len = <span class="built_in">utf8_seq_len</span>(b);</span><br><span class="line">            <span class="comment">// <span class="doctag">TODO:</span> 修改这里的截断逻辑增强容错？</span></span><br><span class="line">            <span class="keyword">if</span> (i+len&gt;s.<span class="built_in">size</span>()) len = s.<span class="built_in">size</span>()-i;</span><br><span class="line">            run.<span class="built_in">emplace_back</span>(s.<span class="built_in">substr</span>(i,len));</span><br><span class="line">            i+=len;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">flush_word</span>();</span><br><span class="line">    <span class="built_in">flush_run</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里不对于内容进行赘诉，自行来理解分析即可。我们只需要了解，对于一个检索算法，其的检索单元一般都为一个 term。通过将一个原始句子拆分为一个个 term，我们能够将句子的语义分散到多个 term 中一次来辅助后续的检索。当然，这个切分阶段不可避免的会造成一些信息的损失以及失真，当然也存在为了处理这些问题而出现的一些新机制，这里不深入讨论，所以分词这块也是一块相当有趣的领域，不同的分词策略会导致同一个句子会被拆分为不同的 term。而这些不同的结果又可能会导致后续打分等阶段的差异。简单来说，如何分词、分词质量如何是影响最后检索质量的重要一环。</p>
+<h4 id="分块"><a href="#分块" class="headerlink" title="分块"></a>分块</h4><p>前文我们介绍了检索算法中的一等公民 <strong>term</strong> 以及产生 <strong>term</strong> 的过程。需要注意的是，分词并不只发生在用户查询语句上。对于作为检索数据来源的语料。我们同样需要进行分词，从而建立后续的倒排索引以及相关统计信息。那么问题来了：用户查询的数据来源是文档，我们是否可以直接将整个文档作为一次检索的对象？</p>
+<p>从算法上来看当然可以，我们完全可以将一个为完整的文档进行分词，然后计算查询语句与整个文档之间的 BM25 得分。但是在实际的 RAG 系统中，这种做法通常并不合理，因为一个文档本身可能非常庞大，而用户真正需要的往往只是其中的一小部分内容。例如，一份包含数百页内容的数据库教程可能同时介绍数据库基础、SQL、事务、索引以及 Buffer Pool 等内容。当用户查询”什么是 Buffer Pool”时，我们真正希望检索出来的并不是整份数据库教程，而是其中介绍 Buffer Pool 的相关内容。</p>
+<p>因此，我们通常会在文档进入检索系统之前，将一个较大的文档划分为多个较小的 <strong>Chunk（文本块）:</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Document </span><br><span class="line">├── Chunk 1 </span><br><span class="line">├── Chunk 2 </span><br><span class="line">├── Chunk 3 </span><br><span class="line">├── ... </span><br><span class="line">└── Chunk N</span><br></pre></td></tr></table></figure>
+
+<p>通过如此的切分，在后续的检索过程中，就可以将 Chunk 作为基本的检索对象，而不是将整份原始文档作为一个整体。分块的核心目的并不是简单地“把数据变小”，而是<strong>确定一个合理的检索粒度，使检索系统能够定位到文档中真正与查询相关的局部内容。</strong>如果完全不进行分块，那么检索系统即使能够正确判断某个文档与查询相关，最终返回的也可能是一个非常庞大的完整文档。对于 RAG 而言，这会带来两个问题：一方面，检索结果过于粗糙，无法精确定位相关内容；另一方面，将整个文档交给后续的 LLM 会占用大量上下文空间，其中可能包含大量与当前问题无关的信息。</p>
+<p>分块同时会使得不同长度的原始文档被转换成相对统一、可控的检索单元。例如一个包含数千行的文档可以被划分为几十个 Chunk，而较短的文档可能只产生一个 Chunk。这样，BM25 面对的就不再是长度差异极大的完整文档，而是一组粒度更加接近的检索对象。</p>
+<p>因此，可以将分块理解为 RAG 数据预处理过程中的一个重要环节。它位于原始文档和检索算法之间，负责将面向人的完整文档转换为适合机器进行检索的基本数据单元。需要注意的是，<strong>分块本身并不是检索算法本身的要求</strong>。例如 BM25 完全可以直接对完整文档进行计算。分块更多是应用层为了改善检索粒度、控制检索结果大小以及适配后续 LLM 上下文而进行的数据组织。</p>
+<p>在这里，我们可以先将前文中介绍的两个概念联系起来：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">原始文档 → 分块（Chunking） → Chunk → 分词（Tokenization） → Term → 建立索引 → BM25 检索</span><br></pre></td></tr></table></figure>
+
+<p>其中，<strong>分块解决的是”什么应该作为一次检索的对象“，分词解决的是”检索对象内部应该以什么作为匹配以及统计等操作的基本单位“</strong>。在此基础上，下一个问题就是：一个 Chunk 到底应该有多大？应该按照固定字符数进行划分，还是应该按照段落、标题等文档结构进行划分？如果一个 Chunk 太小，可能缺少完整上下文；如果太大，又会重新出现检索粒度过粗的问题。这里实际上没有一个标准答案，当然，那种“按照语义划分”的说法无法辩驳，但是这话本来就是我们这里的目的，没有讨论的价值。我们主要是需要根据本身的数据源的情况来定制化相对应的划分策略。就比如说 Chunk Size、Overlap 以及结构化分块等措施来尽可能保留语义。</p>
+<h4 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h4><p>现在，我们已经基本走完了 BM25检索之前的数据预处理过程。首先，我们将原始文档划分为多个 Chunk，从而确定检索的基本对象；随后，再对 Chunk 进行分词，将其中的文本转换为一个个独立匹配以及统计的 Term。那么问题来了：<strong>当知识库已经被转换为大量 Term 之后，我们应该如何利用、组织这些 Term 呢？生成 Term 本身只是手段不是目的，如何做才能在用户真正发起查询时快速找到相关的 Chunk 呢？</strong></p>
+<p>最直接的方式当然是每次查询的时候重新遍历整个知识库。假设知识库中存在 10000 个 Chunk，当用户查询“数据库事务”时，我们可以一次读取每个 Chunk，将其分词，然后判断其中是否出现“数据库”和“事务”，最后计算相关性。但是这种做法存在一个明显的问题：<strong>相同的工作会随着每次查询不断重复</strong>。</p>
+<p>对于知识库来说，其中的内容通常不会随着每一次查询发生变化，而用户的查询却会不断变化。因此，我们可以在知识库建立或更新时，提前对于其中的数据进行统计以及组织，把后续检索需要的信息保存下来。这样，当用户在真正发起查询时，就可以直接利用这些已经计算好的信息，而不需要重新处理整个知识库。这个提前建立的数据结构，就是<strong>索引（Index）</strong>。</p>
+<p>因此，可以将索引建立理解成一次针对知识库的预计算过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">知识库 → Chunk → 分词 → Term → 统计 Term 在各个 Chunk 中的信息 → 建立索引</span><br></pre></td></tr></table></figure>
+
+<p>需要特别注意的是，<strong>索引建立阶段只处理知识库本身，并不处理用户未来会输入的 Query</strong>。例如当前知识库中存在三个 Chunk：</p>
+<ul>
+<li>D1: 数据库通过事务保证数据的一致性 </li>
+<li>D2: 数据库索引可以提高查询效率 </li>
+<li>D3: 事务需要满足 ACID 特性</li>
+</ul>
+<p>经过分词过后，我们可以得到：</p>
+<ul>
+<li>D1 → 数据库 &#x2F; 通过 &#x2F; 事务 &#x2F; 保证 &#x2F; 数据 &#x2F; 一致性 </li>
+<li>D2 → 数据库 &#x2F; 索引 &#x2F; 可以 &#x2F; 提高 &#x2F; 查询 &#x2F; 效率 </li>
+<li>D3 → 事务 &#x2F; 需要 &#x2F; 满足 &#x2F; ACID &#x2F; 特性</li>
+</ul>
+<p>此时系统需要做的事情，就是统计这些 Term 在知识库中的分布情况。首先，对于每个 Chunk，我们需要统计其中每个 Term 出现了多少次，这就是 **TF(Term Frequency)**。例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">D1：</span><br><span class="line">数据库 → 1 </span><br><span class="line">事务 → 1</span><br></pre></td></tr></table></figure>
+
+<p>如果一个 Term 在同一个 Chunk 中重复出现，那么这些出现次数就会被合并统计，这也就是一个<strong>词袋</strong>发挥作用的场景，其中会储存 term → count之类的映射，例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">D2：</span><br><span class="line">数据库 → 3</span><br><span class="line">事务   → 2</span><br><span class="line">一致性 → 1</span><br></pre></td></tr></table></figure>
+
+<p>在 BM25 中，DF 会进一步参与 IDF 的计算。一个 Term 如果几乎出现在整个知识库的所有 Chunk 中，那么它的区分能力就比较弱；如果只出现在少数 Chunk 中，那么它通常具有更高的区分能力。因此，在建立索引的过程中，我们实际上是在提前收集 BM25 后续计算所需要的统计信息，包括：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Term </span><br><span class="line"> ├── TF：在某个 Chunk 中出现了多少次 </span><br><span class="line"> ├── DF：出现在多少个 Chunk 中 </span><br><span class="line"> └── Document Length：Chunk 中包含多少个 Term</span><br></pre></td></tr></table></figure>
+
+<p>除此之外，BM25 还需要知道整个知识库中 Chunk 的平均长度，因此索引建立过程中还需要计算：<strong>Average Document Length</strong>。这些信息最终需要以一种能够根据 Term 快速找到相关 Chunk 的方式保存下来。这里就引出了 BM25 中非常重要的数据结构：<strong>倒排索引（Inverted Index）</strong>。所谓“倒排”，可以简单理解为：我们不是按照“Chunk → 它包含哪些 Term”进行组织，而是反过来按照“Term → 它出现在哪些 Chunk”进行组织。例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">数据库 → D1, D2 </span><br><span class="line">事务 → D1, D3 </span><br><span class="line">索引 → D2</span><br></pre></td></tr></table></figure>
+
+<p>这样，当用户输入：“数据库 事务”时，系统就不再需要遍历所有的 Chunk，而是可以直接通过索引找到：<strong>数据库 → D1, D2，事务   → D1, D3</strong>。从而快速确定哪些 Chunk 是候选结果，再进一步使用 BM25 来计算它们的相关性得分。由此，整个 BM25 索引建立过程就可以理解为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">知识库 → Chunk → 分词 → Term → 统计每个 Chunk 内的 TF → 建立 Term → Chunk 的倒排关系 → 计算 DF → 计算 Chunk Length → 计算 Average Document Length → 保存索引</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是，<strong>这些工作主要发生在知识库建立或更新阶段，而不是用户查询阶段。</strong>当用户真正发起 Query 时，系统不需要重新统计整个知识库的 TF、DF 和文档长度，而是可以直接利用已经建立好的索引，再结合 Query 中的 Term 计算 BM25 得分并进行排序。因此，索引的本质可以理解成：</p>
+<blockquote>
+<p>将知识库中原本分散在各个 Chunk 中的 Term 信息进行预计算和组织，使检索阶段能够快速定位候选 Chunk，并直接利用已经保存的统计信息进行相关性计算。</p>
+</blockquote>
+<p>下面是个人实现中一个索引建立的逻辑，仅供参考：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Bm25Index <span class="title">build_bm25</span><span class="params">(<span class="type">const</span> std::vector&lt;Chunk&gt;&amp; chunks)</span> </span>&#123;</span><br><span class="line">    Bm25Index idx;</span><br><span class="line">    idx.doc_count = chunks.<span class="built_in">size</span>();</span><br><span class="line">    idx.doc_len.<span class="built_in">assign</span>(chunks.<span class="built_in">size</span>(),<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    std::vector&lt;std::string&gt; toks;</span><br><span class="line">    std::<span class="type">uint64_t</span> total_len = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (std::<span class="type">uint32_t</span> d =<span class="number">0</span>;d&lt;chunks.<span class="built_in">size</span>();d++)&#123;</span><br><span class="line">        toks.<span class="built_in">clear</span>();</span><br><span class="line">        <span class="built_in">tokenize</span>(chunks[d].text, toks);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> r = <span class="number">0</span>;r&lt;kHeadingBoost;++r)</span><br><span class="line">            <span class="built_in">tokenize</span>(chunks[d].context, toks);</span><br><span class="line">        idx.doc_len[d] = <span class="built_in">static_cast</span>&lt;std::<span class="type">uint32_t</span>&gt;(toks.<span class="built_in">size</span>());</span><br><span class="line">        total_len += toks.<span class="built_in">size</span>();</span><br><span class="line"></span><br><span class="line">        std::unordered_map&lt;std::<span class="type">uint32_t</span>, std::<span class="type">uint32_t</span>&gt; tf;</span><br><span class="line">        tf.<span class="built_in">reserve</span>(toks.<span class="built_in">size</span>());</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; token: toks) &#123;</span><br><span class="line">            std::<span class="type">uint32_t</span> id;</span><br><span class="line">            <span class="keyword">auto</span> it = idx.term_ids.<span class="built_in">find</span>(token);</span><br><span class="line">            <span class="keyword">if</span>(it == idx.term_ids.<span class="built_in">end</span>())&#123;</span><br><span class="line">                id = <span class="built_in">static_cast</span>&lt;std::<span class="type">uint32_t</span>&gt;(idx.term_ids.<span class="built_in">size</span>());</span><br><span class="line">                idx.term_ids.<span class="built_in">emplace</span>(token,id);</span><br><span class="line">                idx.postings.<span class="built_in">emplace_back</span>();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                id = it-&gt;second;</span><br><span class="line">            &#125;</span><br><span class="line">            ++tf[id];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; [id,count]:tf)</span><br><span class="line">            idx.postings[id].<span class="built_in">push_back</span>(&#123;d,count&#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    idx.avg_doc_len = chunks.<span class="built_in">empty</span>() ? <span class="number">0.0</span></span><br><span class="line">        : <span class="built_in">static_cast</span>&lt;<span class="type">double</span>&gt;(total_len) / <span class="built_in">static_cast</span>&lt;<span class="type">double</span>&gt;(chunks.<span class="built_in">size</span>());</span><br><span class="line">    <span class="keyword">return</span> idx; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h4><p>通过前面一系列的学习，我们已经理解了一个信息检索系统中的索引建立过程。虽然其被称之为索引，但是本质上，我们可以将其看做是一些统计信息的集合，索引建立过程可以理解为对知识库进行的一次离线预计算。在计算过程中将知识库划分成 Chunk，对其中的内容进行分词，并建立了 Term 到 Chunk 的倒排关系，同时保存了后续 BM25 计算所需要的 TF、DF、Chunk 长度以及平均 Chunk 长度等统计信息。</p>
+<p>那么，接下来的问题是：<strong>索引有什么用呢？当用户真正输入一个 Query 时，系统需要做什么呢？</strong></p>
+<p>与索引阶段不同，查询阶段面对的是用户实时输入的内容，而不是整个知识库。它的核心任务可以概括为：<strong>将 Query 转换成 Term，然后利用索引找到包含这些 Term 的 Chunk，根据已经保存的统计信息计算相关性得分，最后按照得分进行排序并返回 Top-K 结果。</strong></p>
+<p>这整个过程可以见到表示为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Query → 分词 → Term → 查询倒排索引 ↓→找到包含这些 Term 的 Chunk → 计算 BM25 相关性得分 → 排序 → Top-K</span><br></pre></td></tr></table></figure>
+
+<p>这里正是我们之前所构建的索引将会实际发挥作用的场景。首先，检索系统需要对于用户的查询语句进行分词，需要注意的是这块的分词逻辑需要与 Chunk 的分词逻辑保持一致。否则可能会导致一定的效果劣化。然后，系统会利用本条查询语句所分出来的 Term 来查询已经建立好的倒排索引。假设系统将查询语句分词之后出现了”数据库“ 和“事务”两个 Term，在通过索引查询之后，其可能得到 <strong>数据库 → D1, D2, D5；事务   → D1, D5, D8</strong>这个查询结果。此时就可以知道，D1 和 D5 同时包含查询中的两个 Term，因此它们很可能与当前查询更加相关。这里需要注意，<strong>倒排索引的作用主要是帮助我们快速找到候选 Chunk，而真正决定 Chunk 排名的工作由 BM25 完成。</strong></p>
+<p>当我们已经通过倒排索引找到候选 Chunk 后，接下来的问题就从“<strong>哪些 Chunk 可能相关</strong>”变成了“<strong>这些 Chunk 到底有多相关</strong>”。这也是 BM25 真正发挥作用的地方。</p>
+<blockquote>
+<p>在这里，我其实之前一直存在一个问题，就是数学有什么用？然后再之后，这个问题变成了：为什么数学可以表示那么多东西？直到最近，我看了一篇 Terence Tao 的播客 <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=OOMx2BHHWtE">[2]</a>。其中有一段话让我印象深刻，下面是大概的翻译：</p>
+<p>我们看到某种现象，它迫切需要一个解释，或者需要进一步的研究。它可能不是一个为了应付眼前问题而急需马上解决的现象，但看起来它应该有。一个有意思的答案，数学差不多完全就是这样。由好奇心驱使的，数学里有些规律，形状里有些规律，这些只是大家在试图做别的事时顺便观察到的。 而我们想要更好的理解它，到某个节点，其他科学家能够把那个规律和自己所研究的东西联系起来。某种数学上的数字规律可能出现在昆虫集群的行为里、或者出现在股市里等等。</p>
+<p>这段话给我深化了一些认知：<strong>现实中先存在问题和现象，而不是先存在公式和算法。人们观察现象，发现其中稳定的规律，再把这些规律抽象成可以描述和计算的数学对象。随着抽象不断深入，经验规律会逐渐形成数学模型、公式和算法；而建立起来的数学体系又可以脱离最初的问题独立发展，并在其他领域中重新解释新的现象。数学与现实因此不是单向的“工具关系”，而是一个不断相互塑造的循环。</strong></p>
+<p><strong>因此，面对一个公式，与其只问“这个公式为什么能解决这个问题”，不如先回到它产生的问题：当时观察到了什么现象？存在什么矛盾？希望保留什么性质、消除什么偏差？公式中的每一个结构又是在回应哪个问题。这样公式就不再是一串需要记忆的符号，而成为对某类现象的一种高度压缩的表达。</strong></p>
+</blockquote>
+<h5 id="相关性计算"><a href="#相关性计算" class="headerlink" title="相关性计算"></a>相关性计算</h5><p>从前面的分析可以看到，我们手中已经有了完成这件事情所需要的大部分信息：一个 Term 在当前 Chunk 中出现了多少次，即 <strong>TF</strong>；这个 Term 在整个知识库中出现了多少次，即 <strong>DF</strong>；当前 Chunk 有多长，以及所有 Chunk 的平均长度。BM25 所做的事情，本质上就是尝试利用这些信息，把“相关”这种原本比较模糊的概念转换成一个可以计算和比较的分数。</p>
+<p>可以先不看公式，而从三个非常直观的显示问题出发：<strong>这个词在当前 Chunk（文档） 中重要吗？这个词在整个知识库中有区分度吗？这个 Chunk 是否因为太长而天然占据优势？</strong></p>
+<p>首先是 <strong>TF（Term Frequency）</strong>。如果 Query 中包含“数据库”，而某个 Chunk 中“数据库”只出现一次，另一个 Chunk 中出现了很多次，我们通常会认为后者与“数据库”这个查询之间的联系更强。因此，Term 在当前 Chunk 中出现得越多，通常意味着这个 Chunk 与我们想要知道的内容之间联系越深，算法本身应该更加偏向输出这类内容。</p>
+<p>但这里又出现了一个新的问题：<strong>一个词出现 10 次，真的应该比出现 1 次的 Chunk 相关 10 倍吗？</strong> 显然通常不是。一个词从 1 次增加到 2 次，可能确实说明相关性增强；但从 100 次增加到 101 次，对相关性的提升通常已经非常有限。这个现象也很容易理解，在一份文档中，如果其想要解释一个概念，其往往不是会重新叙述这个概念的名字，其中的其他内容可能大部分都是针对于概念的延伸，一个出现频率适中的文档可能会比一个频繁出现的文档更加专注于相对应的主题。因此 BM25 没有让 TF 无限线性增长，而是引入了所谓的 <strong>TF Saturation（词频饱和）</strong>：词频增加仍然会提高得分，但增加速度会逐渐变慢。公式中的 (k_1) 就是控制这一变化速度的重要参数。</p>
+<p>第二个问题是 <strong>IDF（Inverse Document Frequency）</strong>。仅仅知道“数据库”在一个 Chunk 中出现很多次还不够，因为如果整个知识库里几乎每个 Chunk 都在讨论数据库，那么这个词其实并不能帮助我们区分具体的 Chunk。这个实际的场景也好理解，就比如说如果当前很多的文档都说明其与 AI 有关，那么用 AI 来筛选文档就很难筛选出一份有价值的文档，此时预期仍然带着这个词去查询，我们就不如换个方向来进行检索，也许查询语句的其他内容能够更好的来辅助筛选。相反，如果 Query 中出现的是一个非常少见的 Term，例如某个具体的函数名、错误码或者专有名词，那么包含它的 Chunk 往往具有更强的区分能力。因此，一个 Term 在整个知识库中出现得越少，它对当前查询的贡献通常就应该越大。</p>
+<p>这里就可以看到 TF 与 IDF 实际上在回答两个不同的问题：<strong>TF 关注当前 Chunk：这个词在这里有多重要？；IDF 关注整个知识库：这个词有多稀有？</strong>因此，一个 Term 对某个 Chunk 的贡献，可以直观理解成“<strong>它在这个 Chunk 中出现得比较多，同时在整个知识库中又比较少见</strong>”。BM25 正是通过把 TF 与 IDF 结合起来，形成当前 Term 对当前 Chunk 的相关性贡献。</p>
+<p>第三个问题是 <strong>Chunk 长度</strong>。假设两个 Chunk 都包含“数据库”这个词，一个只有 100 个 Term，另一个却有 2000 个 Term，那么后者天然拥有更多机会重复出现查询词。如果单纯比较词频，长 Chunk 很容易因为“内容多”而占据优势。因此 BM25 又引入了 <strong>Length Normalization（长度归一化）</strong>。Chunk 越长，在计算词频贡献时就需要进行一定程度的修正；而接近平均长度的 Chunk 则不需要进行过强的调整。公式中的 (b) 就主要控制这一长度归一化的程度。</p>
+<p>这样一来，BM25 的结构实际上就变得非常清楚了：</p>
+<blockquote>
+<p><strong>TF：当前 Chunk 里这个词出现得多不多；</strong></p>
+<p><strong>IDF：这个词在整个知识库里稀不稀有；</strong></p>
+<p><strong>Length Normalization：避免 Chunk 仅仅因为更长就天然占优。</strong></p>
+</blockquote>
+<p>于是，一个 Query Term 对某个 Chunk 的最终贡献，就可以理解成这三个因素共同作用的结果：<strong>当前 Term 对 Chunk 的贡献≈ 词频 TF × 词的区分度 IDF × 长度修正</strong>。BM25 并不是简单把这三个数字直接相乘，而是通过具体的数学形式对 TF 进行饱和，并根据 Chunk 长度进行归一化。不过从理解算法的角度，这种拆分已经足以帮助我们掌握其核心思想。</p>
+<h5 id="多个-Term-如何共同决定一个-Chunk-的排名"><a href="#多个-Term-如何共同决定一个-Chunk-的排名" class="headerlink" title="多个 Term 如何共同决定一个 Chunk 的排名"></a>多个 Term 如何共同决定一个 Chunk 的排名</h5><p>前面我们假设 Query 只有一个 Term，但实际查询通常包含多个 Term。例如：<strong>Query：数据库 事务</strong>。经过分词后得到 <code>数据库</code> 和 <code>事务</code> 两个 Term。对于某个 Chunk，如果同时包含这两个 Term，那么它就会分别获得来自两个 Term 的相关性贡献，最后将这些贡献累加起来。因此，可以把整个计算过程理解为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Query「数据库 事务」 </span><br><span class="line">	→ 「数据库」→ 候选 Chunk → 贡献分数 </span><br><span class="line">	→ 「事务」 → 候选 Chunk → 贡献分数 </span><br><span class="line">								↓ </span><br><span class="line">							累加得到总分 </span><br><span class="line">								↓ </span><br><span class="line">							按总分排序 </span><br><span class="line">								↓ </span><br><span class="line">								Top-K</span><br></pre></td></tr></table></figure>
+
+<p>例如前面得到：<strong>数据库 → D1, D2, D5 事务   → D1, D5, D8</strong>。那么 D1 和 D5 都能够获得“数据库”和“事务”两部分贡献，而 D2 和 D8 只能获得其中一个 Term 的贡献。在其他条件相近的情况下，D1 和 D5 通常就会获得更高的最终得分。这也解释了为什么倒排索引和 BM25 实际上承担的是两个不同的职责：<strong>倒排索引负责缩小搜索范围，告诉我们“哪些 Chunk 值得计算”；BM25 负责计算这些候选 Chunk 与当前 Query 的相关性，告诉我们“谁更值得排在前面”。</strong></p>
+<p>从这个角度看，倒排索引本身并不直接产生“最相关”的答案，它更像是在海量知识库中完成了一次高效的候选集筛选；真正的排序工作发生在候选集进入 BM25 之后。</p>
+<h5 id="公式本身"><a href="#公式本身" class="headerlink" title="公式本身"></a>公式本身</h5><p>到这里，再回头看 BM25 的公式，原本一串比较干燥的数学符号实际上已经可以与前面的现象一一对应：</p>
+<img src="/2026/09/11/agent/5-rag(1)/bm25_formel" alt="LaTeXLive1789100940115" style="zoom:50%;">
+
+<p>这里我们更重要的的是知道每一步到底在解决什么问题。其中，<img src="/2026/09/11/agent/5-rag(1)/image-20260911123737585.png" alt="image-20260911123737585" style="zoom:45%;"> 表示：<strong>Query 中不同 Term 的贡献最终需要汇总起来</strong>；(TF(t,D)) 表示：<strong>当前 Term 在当前 Chunk 中出现了多少次</strong>；(IDF(t)) 表示：<strong>这个 Term 在整个知识库中的区分能力有多强</strong>；而 <img src="/2026/09/11/agent/5-rag(1)/image-20260911123935511.png" alt="image-20260911123935511" style="zoom:33%;">则是在处理：<strong>当前 Chunk 相对于平均 Chunk 到底有多长</strong>。至于 (k_1) 和 (b)，它们并不是在描述某个新的现实对象，而更像是对模型行为的控制参数：(k_1) 主要控制 TF 饱和的程度，(b) 主要控制长度归一化的程度。</p>
+<p>因此，回到前面关于“为什么数学能够表示现实”的讨论，BM25 这个公式其实就是一个很典型的例子。现实中并不存在一个叫做“BM25”的东西。我们首先观察到一些搜索中的现象：词出现得更多通常意味着更相关；稀有词更具有区分度；长文档不能因为天然包含更多词就获得不公平的优势；词频增加带来的价值还会逐渐减弱。然后，我们把这些现象分别抽象成 TF、IDF、文档长度、TF Saturation 等数学概念，再把它们组合成一个可以计算的模型。最终，一个原本无法直接进行精确计算的“相关性”，就被转换成了一个可以比较大小的数值。从更高一层来看，BM25 并不是“拿一个神奇的公式解决搜索问题”，而是：</p>
+<blockquote>
+<p>先观察搜索中的现实现象，再将这些现象抽象成数学量，最后利用数学把这些量组合成一个可计算、可比较的相关性模型。</p>
+</blockquote>
+<p>而查询阶段真正做的事情，就是把用户的 Query 带入这个模型，让知识库中不同 Chunk 的这些现象被统一计算，最终形成一个排序结果。整个 BM25 检索过程，到这里就可以闭环了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">知识库 → Chunk → Term → TF / DF / Chunk Length → 倒排索引 </span><br><span class="line">Query → Term → 倒排索引 → 候选 Chunk → TF + IDF + Length Normalization + TF Saturation → BM25 Score → 排序 → Top-K</span><br></pre></td></tr></table></figure>
+
+<p>至此，前面所讨论的分词、分块、索引和 BM25 其实已经不再是几个孤立的概念，而是一条完整的信息检索链路：<strong>分词决定我们用什么作为匹配单位，分块决定我们以什么作为返回单位，索引负责高效找到候选 Chunk，而 BM25 则负责对候选 Chunk 进行相关性排序。</strong></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文是我围绕 RAG 稀疏检索的一次实践性总结。一开始，我的目标只是理解 BM25 如何完成检索，但随着实际实现逐步展开，我发现，真正值得留下来的并不只是 BM25 本身，而是<strong>从问题出发、逐步建立抽象，再将抽象落地为可运行系统并通过实验验证的过程</strong>。</p>
+<p>回头看整个检索链路，其实并没有一开始就存在一个完整的“BM25 方案”。最初只有一个很具体的问题：<strong>如何从知识库中找到与用户 Query 更相关的内容？</strong> 随着问题逐渐拆解，才出现了后面的一个个概念：文本太粗，就需要分块；整句匹配粒度太高，就需要分词；每次查询都扫描全部内容效率太低，就需要建立倒排索引；词频能够反映一定程度的相关性，于是有了 TF；常见词区分度低，于是引入 IDF；长 Chunk 容易因为内容更多而天然占优，于是需要长度归一化；词频无限增长又不符合实际，于是进一步引入 TF Saturation。最终，这些对不同现象的观察，被组合成了 BM25。</p>
+<p>因此，BM25 对我而言不再只是一个需要记忆的公式，而是一个从现实问题中逐步生长出来的数学模型。<strong>先观察现象，再进行抽象；先建立模型，再用数学描述；最后把模型转化为数据结构和代码，并通过实验检验它是否真的有效。</strong> 公式只是这一过程中的一个中间产物，它将复杂的经验规律压缩成了可以计算和比较的形式。</p>
+<p>这在一定程度上也让我重新理解了数学。数学并不是与现实割裂的抽象符号。很多时候，它只是人们面对现实中的问题、现象与矛盾时，对其中稳定关系进行抽象和压缩的一种方式。一旦这种抽象建立起来，它又能够被迁移到新的问题中，帮助我们理解原本看似不同的现象。因此，数学与工程并不是简单的“工具与被工具”关系，而是在问题、抽象、实现和验证之间不断相互推动。</p>
+<blockquote>
+<p><strong>不要从结论开始，而要从问题开始；不要只记住公式，而要理解公式在解决什么矛盾；不要停留在概念层面，而要把它真正实现出来，再通过测试和实验观察它的行为。</strong></p>
+<p><strong>先有问题与现象，再有抽象与模型；先理解为什么存在，再理解如何实现；最后通过实验验证模型是否真的解释了现实。</strong></p>
+<p><strong>公式不是起点，也不是终点。它是对规律的一次压缩，也是继续追问问题的起点。</strong></p>
+</blockquote>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] <a target="_blank" rel="noopener" href="https://agentty.org/blog/agentty-0-2-9-retrieval-engine/">https://agentty.org/blog/agentty-0-2-9-retrieval-engine/</a><br>[2] <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=OOMx2BHHWtE">https://www.youtube.com/watch?v=OOMx2BHHWtE</a><br>[3] <a target="_blank" rel="noopener" href="https://jalammar.github.io/illustrated-word2vec/">https://jalammar.github.io/illustrated-word2vec/</a></p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/" title="RAG设计-BM25篇">https://tcww0.github.io/2026/09/11/agent/5-rag(1)/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/Agent/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> Agent</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/04/25/agent/4-design/" rel="prev" title="Code Agent设计(1)">
+      <i class="fa fa-chevron-left"></i> Code Agent设计(1)
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RAG"><span class="nav-number">1.</span> <span class="nav-text">RAG</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%85%A5%E9%97%A8"><span class="nav-number">1.1.</span> <span class="nav-text">简单入门</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">系统架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BM25"><span class="nav-number">1.3.</span> <span class="nav-text">BM25</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.3.1.</span> <span class="nav-text">简单介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%90%BD%E5%9C%B0"><span class="nav-number">1.3.2.</span> <span class="nav-text">落地</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E8%AF%8D"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">分词</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%9D%97"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">分块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">查询</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%80%A7%E8%AE%A1%E7%AE%97"><span class="nav-number">1.3.2.4.1.</span> <span class="nav-text">相关性计算</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%9A%E4%B8%AA-Term-%E5%A6%82%E4%BD%95%E5%85%B1%E5%90%8C%E5%86%B3%E5%AE%9A%E4%B8%80%E4%B8%AA-Chunk-%E7%9A%84%E6%8E%92%E5%90%8D"><span class="nav-number">1.3.2.4.2.</span> <span class="nav-text">多个 Term 如何共同决定一个 Chunk 的排名</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%AC%E5%BC%8F%E6%9C%AC%E8%BA%AB"><span class="nav-number">1.3.2.4.3.</span> <span class="nav-text">公式本身</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">1.5.</span> <span class="nav-text">参考文献</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/Agent/" rel="tag">Agent</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">322k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">4:53</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : 'db05f5fb9ecbaebe299d1f2e1d0378ad',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
