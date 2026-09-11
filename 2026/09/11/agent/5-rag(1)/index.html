@@ -36,7 +36,7 @@
 <meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/image-20260911123737585.png">
 <meta property="og:image" content="https://tcww0.github.io/2026/09/11/agent/5-rag(1)/image-20260911123935511.png">
 <meta property="article:published_time" content="2026-09-11T00:51:15.000Z">
-<meta property="article:modified_time" content="2026-09-11T05:18:23.558Z">
+<meta property="article:modified_time" content="2026-09-11T05:33:14.602Z">
 <meta property="article:author" content="TCWW">
 <meta property="article:tag" content="Agent">
 <meta name="twitter:card" content="summary">
@@ -224,7 +224,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2026-09-11 08:51:15 / Modified: 13:18:23" itemprop="dateCreated datePublished" datetime="2026-09-11T08:51:15+08:00">2026-09-11</time>
+              <time title="Created: 2026-09-11 08:51:15 / Modified: 13:33:14" itemprop="dateCreated datePublished" datetime="2026-09-11T08:51:15+08:00">2026-09-11</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -269,14 +269,14 @@
 
       
         <h1 id="RAG"><a href="#RAG" class="headerlink" title="RAG"></a>RAG</h1><p>本文主要来分享本人在学习RAG的过程。本次学习过程基于一次 agent 的 RAG 模块设计。</p>
-<p><img src="/2026/09/11/agent/5-rag(1)/topic.png" alt="topic"></p>
+<p><img src="/2026/09/11/agent/5-rag(1)/topic.png"></p>
 <span id="more"></span>
 
 <h2 id="简单入门"><a href="#简单入门" class="headerlink" title="简单入门"></a>简单入门</h2><p>简单来说，<strong>检索增强生成</strong>（Retrieval-Augmented Generation，RAG）的存在目的以及设计动机很简单。就是基于当前已经存在的语料库（知识库）中检索出一些与本次询问的问题有关的信息，然后将这些信息作为上下文提供给大语言模型来引导生成更准确、更可靠的答案。</p>
 <p>整体来说可以将RAG切分为三个阶段。<strong>检索（Retrieval）</strong>是指从现有的知识库中查询相关的内容；<strong>增强</strong>是将检索的内容融入提示词中，辅助模型生成；<strong>生成</strong>则由模型来结合检索内容以及现有知识来输出更加准确以及有价值的答案。</p>
 <p>对于一个RAG应用来说。其主要存在两个应用流程，其中一个是数据准备阶段，系统通过数据提取、文本分割、索引化等，将传入的外部只是构建成一个可以检索的数据库。随后在应用阶段，系统会基于用户所提供的查询&#x2F;prompt，来在数据库中检索相关的信息，将其注入Prompt中，并最终驱动大语言模型生成答案</p>
 <h2 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h2><p>在本文中，我们重要来分析<strong>检索</strong>阶段。对于RAG来说，检索是 RAG 的核心步骤，而方法存在很多。经过长久的发展，现在已经存在丰富的技术方案可供选择。在本次设计中，我们主要借鉴 agentty <a target="_blank" rel="noopener" href="https://agentty.org/blog/agentty-0-2-9-retrieval-engine/">[1]</a>中的基础检索方案实现。设计动机是常规的<strong>词法检索算法（如BM25等）</strong>无法理解词之间的语义，就比如在BM25中<strong>部署</strong>和<strong>上限</strong>之间零交集，相应的分数为0，对于这块不足，我们需要使用<strong>embedding模型</strong>来利用其在训练后所获得的语义理解能力。但是，<strong>embedding模型</strong>在关键词匹配等规则性检索的场景无法工作，而此时刚好由词法检索来补齐这块能力。通过综合应用俩者，俩者能够互补。这也是我们在最后为什么使用 <strong>RRF</strong> 的原因。这两路的分数实际上不可通约（BM25 分数无上界 vs cosine∈[-1,1]），只有名次才是通用货币。</p>
-<p><img src="/2026/09/11/agent/5-rag(1)/image-20260911082312739.png" alt="image-20260911082312739"></p>
+<p><img src="/2026/09/11/agent/5-rag(1)/image-20260911082312739.png"></p>
 <h2 id="BM25"><a href="#BM25" class="headerlink" title="BM25"></a>BM25</h2><h3 id="简单介绍"><a href="#简单介绍" class="headerlink" title="简单介绍"></a>简单介绍</h3><p>在继续之前，我们需要简单来了解一些BM25是什么。BM25算法，如果从效果上看，其是一个能够让你在一个数据集中来检索出有关查询的<strong>相关</strong>数据的算法。如果想要更好的理解它，我们需要简单的了解一下其的发展历史。</p>
 <p>在BM25之前，也存在一些常用的词法检索算法。就比如朴素的检索思路：如果我查询语句中的一次词在一个文档中频繁出现，那么通常意味着这个文档中的内容与我的查询语句成相关关系。基于这个思路，<strong>TF(Term Frequency)<strong>出现了，其描述了一个词在一篇文档中的出现频率，如果值越高，那么通常意味着这个文档更可能是相关的文档。这是一版初期的检索方案。但是，这版方案也存在缺陷：对于每一个词，它的价值可能是不同的。就比如说</strong>“的”<strong>字，其普遍的出现在每个文档中，但是其提供了什么信息量吗？并没有，相反，其会拉高一个文档的</strong>TF打分</strong>。而这一定程度上会抑制其他更有价值的值的打分贡献。为了来解决这个问题，出现了另外一个影响打分的因子：**逆文档频率 IDF(Inverse Document Frequency)**。</p>
 <p><strong>IDF</strong>所描述的是一个词在当前知识库中的出现频率，如果说<strong>TF</strong>描述的是一个词在一个文档中有多重要，那么<strong>IDF</strong>描述的就是一个词在整个文档集合中有多稀有。而对于一个词来说，其如果在整个文档中文档出现频率越少，那么在基于这个词来进行查询时，对应的存在该词的文档的价值自然也就越大。至此，通过引入<strong>IDF</strong>，我们引入了词的价值来辅助判断文档与查询内容的关联性。</p>
@@ -379,14 +379,14 @@
 </blockquote>
 <p>于是，一个 Query Term 对某个 Chunk 的最终贡献，就可以理解成这三个因素共同作用的结果：<strong>当前 Term 对 Chunk 的贡献≈ 词频 TF × 词的区分度 IDF × 长度修正</strong>。BM25 并不是简单把这三个数字直接相乘，而是通过具体的数学形式对 TF 进行饱和，并根据 Chunk 长度进行归一化。不过从理解算法的角度，这种拆分已经足以帮助我们掌握其核心思想。</p>
 <h5 id="多个-Term-如何共同决定一个-Chunk-的排名"><a href="#多个-Term-如何共同决定一个-Chunk-的排名" class="headerlink" title="多个 Term 如何共同决定一个 Chunk 的排名"></a>多个 Term 如何共同决定一个 Chunk 的排名</h5><p>前面我们假设 Query 只有一个 Term，但实际查询通常包含多个 Term。例如：<strong>Query：数据库 事务</strong>。经过分词后得到 <code>数据库</code> 和 <code>事务</code> 两个 Term。对于某个 Chunk，如果同时包含这两个 Term，那么它就会分别获得来自两个 Term 的相关性贡献，最后将这些贡献累加起来。因此，可以把整个计算过程理解为：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Query「数据库 事务」 </span><br><span class="line">	→ 「数据库」→ 候选 Chunk → 贡献分数 </span><br><span class="line">	→ 「事务」 → 候选 Chunk → 贡献分数 </span><br><span class="line">								↓ </span><br><span class="line">							累加得到总分 </span><br><span class="line">								↓ </span><br><span class="line">							按总分排序 </span><br><span class="line">								↓ </span><br><span class="line">								Top-K</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Query「数据库 事务」 </span><br><span class="line">	→ 「数据库」→ 候选 Chunk → 贡献分数 </span><br><span class="line">	→ 「事务」 → 候选 Chunk → 贡献分数 </span><br><span class="line">							↓ </span><br><span class="line">						累加得到总分 </span><br><span class="line">							↓ </span><br><span class="line">						按总分排序 </span><br><span class="line">							↓ </span><br><span class="line">						Top-K</span><br></pre></td></tr></table></figure>
 
 <p>例如前面得到：<strong>数据库 → D1, D2, D5 事务   → D1, D5, D8</strong>。那么 D1 和 D5 都能够获得“数据库”和“事务”两部分贡献，而 D2 和 D8 只能获得其中一个 Term 的贡献。在其他条件相近的情况下，D1 和 D5 通常就会获得更高的最终得分。这也解释了为什么倒排索引和 BM25 实际上承担的是两个不同的职责：<strong>倒排索引负责缩小搜索范围，告诉我们“哪些 Chunk 值得计算”；BM25 负责计算这些候选 Chunk 与当前 Query 的相关性，告诉我们“谁更值得排在前面”。</strong></p>
 <p>从这个角度看，倒排索引本身并不直接产生“最相关”的答案，它更像是在海量知识库中完成了一次高效的候选集筛选；真正的排序工作发生在候选集进入 BM25 之后。</p>
 <h5 id="公式本身"><a href="#公式本身" class="headerlink" title="公式本身"></a>公式本身</h5><p>到这里，再回头看 BM25 的公式，原本一串比较干燥的数学符号实际上已经可以与前面的现象一一对应：</p>
-<img src="/2026/09/11/agent/5-rag(1)/bm25_formel" alt="LaTeXLive1789100940115" style="zoom:50%;">
+<img src="/2026/09/11/agent/5-rag(1)/bm25_formel" style="zoom:50%;">
 
-<p>这里我们更重要的的是知道每一步到底在解决什么问题。其中，<img src="/2026/09/11/agent/5-rag(1)/image-20260911123737585.png" alt="image-20260911123737585" style="zoom:45%;"> 表示：<strong>Query 中不同 Term 的贡献最终需要汇总起来</strong>；(TF(t,D)) 表示：<strong>当前 Term 在当前 Chunk 中出现了多少次</strong>；(IDF(t)) 表示：<strong>这个 Term 在整个知识库中的区分能力有多强</strong>；而 <img src="/2026/09/11/agent/5-rag(1)/image-20260911123935511.png" alt="image-20260911123935511" style="zoom:33%;">则是在处理：<strong>当前 Chunk 相对于平均 Chunk 到底有多长</strong>。至于 (k_1) 和 (b)，它们并不是在描述某个新的现实对象，而更像是对模型行为的控制参数：(k_1) 主要控制 TF 饱和的程度，(b) 主要控制长度归一化的程度。</p>
+<p>这里我们更重要的的是知道每一步到底在解决什么问题。其中，<img src="/2026/09/11/agent/5-rag(1)/image-20260911123737585.png" style="zoom:40%;"> 表示：<strong>Query 中不同 Term 的贡献最终需要汇总起来</strong>；(TF(t,D)) 表示：<strong>当前 Term 在当前 Chunk 中出现了多少次</strong>；(IDF(t)) 表示：<strong>这个 Term 在整个知识库中的区分能力有多强</strong>；而 <img src="/2026/09/11/agent/5-rag(1)/image-20260911123935511.png" style="zoom:33%;">则是在处理：<strong>当前 Chunk 相对于平均 Chunk 到底有多长</strong>。至于 (k_1) 和 (b)，它们并不是在描述某个新的现实对象，而更像是对模型行为的控制参数：(k_1) 主要控制 TF 饱和的程度，(b) 主要控制长度归一化的程度。</p>
 <p>因此，回到前面关于“为什么数学能够表示现实”的讨论，BM25 这个公式其实就是一个很典型的例子。现实中并不存在一个叫做“BM25”的东西。我们首先观察到一些搜索中的现象：词出现得更多通常意味着更相关；稀有词更具有区分度；长文档不能因为天然包含更多词就获得不公平的优势；词频增加带来的价值还会逐渐减弱。然后，我们把这些现象分别抽象成 TF、IDF、文档长度、TF Saturation 等数学概念，再把它们组合成一个可以计算的模型。最终，一个原本无法直接进行精确计算的“相关性”，就被转换成了一个可以比较大小的数值。从更高一层来看，BM25 并不是“拿一个神奇的公式解决搜索问题”，而是：</p>
 <blockquote>
 <p>先观察搜索中的现实现象，再将这些现象抽象成数学量，最后利用数学把这些量组合成一个可计算、可比较的相关性模型。</p>
