@@ -5801,4 +5801,90 @@
         <tag>课程设计</tag>
       </tags>
   </entry>
+  <entry>
+    <title>RAG设计-Embedding篇</title>
+    <url>/2026/09/12/agent/6-rag(2)/</url>
+    <content><![CDATA[<h1 id="RAG"><a href="#RAG" class="headerlink" title="RAG"></a>RAG</h1><p>本文是 RAG 系列的第二篇，上一篇中，我们关注的主要是 BM25 这条词法检索链路：从分词、分块、倒排索引一路到相关性打分。而在系统架构一节中我们已经提到，词法检索存在一个结构性的盲区：<strong>BM25无法理解词之间的语义</strong>。对于 BM25 来说，「部署」和「上线」之间零交集，相应的匹配分数为 0 ，无论这俩个词在我们看来实际上指代的基本是同种场景。这个盲区不是 BM25 实现的不够好，而是它的工作原理决定的：其统计的是具体符号的出现频次之间进而来推测隐含的关系，这会一定程度上丢失符号背后的含义。</p>
+<p>本文要介绍的内容，就是用来补齐这块盲区的路径：<strong>Embedding 语义检索路</strong>。</p>
+<p><img src="/2026/09/12/agent/6-rag(2)/t.png" alt="5"></p>
+<span id="more"></span>
+
+<h2 id="简单入门"><a href="#简单入门" class="headerlink" title="简单入门"></a>简单入门</h2><p>要理解 embedding，可以先从一个朴素的观察触发：<strong>一个词的含义，很大程度由它周围出现的词决定</strong>。「事务」周围频繁出现「回滚」「隔离级别」「ACID」，而「部署」周围出现的是「流水线」「镜像」「灰度」。如果我们把每个词周围的语言环境统计下来，就会发现含义相近的词，其环境分布也相近。这也就是所谓的<strong>分布式语义（Distributional Semantics）</strong>。</p>
+<p>在此基础上，人们自然会提出一个更进一步的设想：<strong>能否用一个数学对象来表示一个词的含义？</strong>如果含义可以被表示为一个数学对象，那么「俩个词有多接近」这个问题，就可以从模糊的直觉判断，变成一个可以度量、可以计算的数值问题。<strong>词向量</strong>(word embedding,word2vec <a href="https://jalammar.github.io/illustrated-word2vec/">1</a>是这一脉络的经典工作)正是这一设想的落地：把每个词映射成一个固定维度的向量，让「语义相近」尽可能对应「几何相近」。</p>
+<p>而在 RAG 中我们真正需要的，是把一整段文本（一个 Chunk，一句查询）给映射成一个向量。我们通常利用模型来完成这类工作，这类模型通常被称之为<strong>文本嵌入模型（text embedding model）</strong>。它们在海量语料上训练，训练目标可以粗略理解为：<strong>让语义相关的文本对，在当前模型所构造的向量空间内的距离尽可能近；让不相关的文本对尽可能远。</strong>经过这样的训练后，模型内部就压缩了一份「关于语言含义的知识」。对于我们的 RAG 系统来说，这就是 embedding 路的价值所在：BM25 只能看到符号，而 embedding 模型带着它训练时获得的语义理解能力，通过利用这种能力，我们使得系统可以判断「部署」和「上线」说的是一回事。</p>
+<p>于是一次基于 embedding 模型的检索变成了这么一件事：<strong>把查询和所有 Chunk 都送进同一个模型，转换成统一表达空间内的向量，然后再几何上查找与查询语句对应的向量最近的那些。</strong>衡量「最近」的方式我之后再谈，先看整体链路：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Query → embedding 模型 → 查询向量 q</span><br><span class="line">Chunk → embedding 模型 → 文档向量 d1..dN（建库时已算好）</span><br><span class="line">几何相似度(q, di) → 排序 → Top-K</span><br></pre></td></tr></table></figure>
+
+<p>有一个指的停下来注意的细节：在这条链路里，<strong>文档向量的计算发生在建库阶段，而查询向量的计算发生在每次查询时</strong>。这与上一篇中所提到的倒排索引如出一辙——昂贵的计算提前做，查询时只做便宜的部分。但 embedding 路的「贵」和 BM25 的「贵」完全不是一个量级：BM25 建索引只是本地分词和统计，其处于毫秒级；而嵌入一整个语料库，需要真实地过一遍神经网络，动辄几十秒。这个差异会催生文本后面大量的工程设计。</p>
+<h2 id="系统架构：唯一的「外部世界」"><a href="#系统架构：唯一的「外部世界」" class="headerlink" title="系统架构：唯一的「外部世界」"></a>系统架构：唯一的「外部世界」</h2><p>在进入具体的设计之前，我想先说明一个贯穿了整个 embedding 设计的事实：<strong>在 RAG 模块中，BM25 是我们自己写的确定性计算，而 embedding 是整个系统中唯一一个「外部世界」</strong>。</p>
+<p>BM25 的每一个数字都是我们自己算、自己复现、自己负责的。而 embedding 路依赖一个我们既不训练、不部署、也不控制的模型服务（本项目中使用的是本地 Ollama 上的 nomic-embed-text）。而这意味着它会以各种 BM25 永远不会有的方式背叛我们：</p>
+<ul>
+<li>服务会缺席。本次运行用户没配模型、下游服务没启动、网络故障等。此时系统还活着，但语义路已经死亡了。</li>
+<li>服务会变慢。网络抖动、服务过载。一次 embedding 调用从毫秒就可能变成几十秒。</li>
+<li>服务本身可能迭代版本。今天可能 768 维，明天换了模型就可能是 1024 维，旧的向量全部失配。</li>
+<li>服务甚至可能说谎。请求对于64条文本编码，响应里只返回 63 条向量——期间没有任何报错，但如果照单全收，第 64 个 Chunk 之后的所有向量就全部错位。检索结果看起来还在工作，但是顺序上可能已经混乱。</li>
+</ul>
+<p>所以 embedding 设计的核心问题，从一开始就不是「怎么计算余弦相似度」——那只是一行公式。真正的问题是：<strong>如何与一个不受控的组件长期共存</strong>。而将这个问题拆开来，简单来说可以分为三个维度</p>
+<ul>
+<li>圈起来（接缝）——模型依赖不能渗透进系统骨架</li>
+<li>记住它（身份）——embedding 是最贵的预计算，必须缓存，且缓存必须指导何时失效</li>
+<li>接住它（降级）——当服务缺席&#x2F;出错时，系统必须仍然正确，即使其缺失了一些能力</li>
+</ul>
+<p>下面依次展开。</p>
+<h2 id="落地"><a href="#落地" class="headerlink" title="落地"></a>落地</h2><h3 id="接缝：把模型关进函数签名里"><a href="#接缝：把模型关进函数签名里" class="headerlink" title="接缝：把模型关进函数签名里"></a>接缝：把模型关进函数签名里</h3><p>第一个问题是依赖治理。embedding 需要发 HTTP 请求、解析 JSON，这些依赖如果散落在检索代码里，整个 RAG 模块都会被网络细节污染。我们的做法是把 「嵌入」这个动作收缩为一个类型别名：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">enum class</span> <span class="title class_">EmbedRole</span> &#123; Doc, Query &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">EmbedConfig</span> &#123;</span><br><span class="line">    std::string model;            <span class="comment">// 空 = 未配置语义路</span></span><br><span class="line">    std::string host = <span class="string">&quot;localhost&quot;</span>;</span><br><span class="line">    <span class="type">int</span> port = <span class="number">11434</span>;</span><br><span class="line">    <span class="type">int</span> timeout_ms = <span class="number">0</span>;           <span class="comment">// 0 = 默认超时</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 可注入的嵌入后端：给文本，还向量；失败用 expected 显式报告</span></span><br><span class="line"><span class="keyword">using</span> EmbedBackend = std::function&lt;</span><br><span class="line">    std::expected&lt;std::vector&lt;std::vector&lt;<span class="type">float</span>&gt;&gt;, std::string&gt;(</span><br><span class="line">        <span class="type">const</span> EmbedConfig&amp;, <span class="type">const</span> std::vector&lt;std::string&gt;&amp;, EmbedRole)&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>这个签名就是 embedding 在整个系统里的全部存在形式。生成环境传入真实实现，测试传入假件——整个检索算法因此可以完全离线测试，不需要模型服务就可以钉死所有行为。这里又一个值得注意的取舍：EmbedBackend 收的是一批文本而不是一条。因为 embedding 是有网络往返的，逐条嵌入 3700 个 Chunk 就是 3700 次请求；按批送入，网络成本能够被大大摊薄，这里其实就是一种常规的批处理的想法。批处理并不是优化细节，而是接口设计，它必须出现在签名里，才能成为所有调用方的默认行为。</p>
+<h3 id="双角色：查询和文档不说同一种话"><a href="#双角色：查询和文档不说同一种话" class="headerlink" title="双角色：查询和文档不说同一种话"></a>双角色：查询和文档不说同一种话</h3><p>接下来的问题出现在第一次真机联调时：<strong>同一个词、同一个模型，为什么查询向量和文档向量算出来的相似度总是不理想？</strong></p>
+<p>答案藏在现代嵌入模型的训练方式里。以 <code>nomic-embed-text</code> 为代表的指令式（instruct-style）模型，训练时就区分了两种输入：<strong>要被检索的文档</strong>和<strong>发起检索的查询</strong>。模型会为这两者学习略有不同的表示——查询是短的、意图性的，文档是长的、陈述性的。模型的使用说明里因此要求在输入前拼接不同的前缀：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function">std::string <span class="title">embed_input_text</span><span class="params">(std::string_view model, EmbedRole role,</span></span></span><br><span class="line"><span class="params"><span class="function">                             std::string_view text)</span> </span>&#123;</span><br><span class="line">    <span class="function">std::string <span class="title">m</span><span class="params">(model)</span></span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; c : m)</span><br><span class="line">        c = <span class="built_in">static_cast</span>&lt;<span class="type">char</span>&gt;(std::<span class="built_in">tolower</span>(<span class="built_in">static_cast</span>&lt;<span class="type">unsigned</span> <span class="type">char</span>&gt;(c)));</span><br><span class="line"></span><br><span class="line">    std::string_view doc_prefix, query_prefix;</span><br><span class="line">    <span class="keyword">if</span> (m.<span class="built_in">find</span>(<span class="string">&quot;nomic-embed&quot;</span>) != std::string::npos) &#123;</span><br><span class="line">        doc_prefix = <span class="string">&quot;search_document: &quot;</span>;</span><br><span class="line">        query_prefix = <span class="string">&quot;search_query: &quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (m.<span class="built_in">find</span>(<span class="string">&quot;e5&quot;</span>) != std::string::npos) &#123;</span><br><span class="line">        doc_prefix = <span class="string">&quot;passage: &quot;</span>;</span><br><span class="line">        query_prefix = <span class="string">&quot;query: &quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> std::string&#123;text&#125;;     <span class="comment">// 未知方言：裸文本</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">std::string <span class="title">out</span><span class="params">(role == EmbedRole::Doc ? doc_prefix : query_prefix)</span></span>;</span><br><span class="line">    out += text;</span><br><span class="line">    <span class="keyword">return</span> out;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>两个设计决策值得展开。</p>
+<p><strong>第一，角色必须作为参数穿过接缝，而不是藏在调用方。</strong>前缀属于「模型怎么说方言」，不同模型的方言不同（nomic 一套、E5 另一套），所以方言翻译住在 backend 里；而「这次嵌入的是文档还是查询」是调用方的语义，必须显式传进来。<code>EmbedRole</code> 因此出现在了 <code>EmbedBackend</code> 的签名上——它不是实现细节，是契约的一部分。</p>
+<p><strong>第二，一个更隐蔽的问题：方言错误不会报错，只会变差。</strong>前缀拼错了，模型照样返回合法向量，只是语义质量悄悄劣化。没有任何异常会告诉你。这类「不失败的错误」是外部组件最阴险的背叛形式，后面还会遇到它的同伙。</p>
+<h3 id="守卫：错位比失败危险得多"><a href="#守卫：错位比失败危险得多" class="headerlink" title="守卫：错位比失败危险得多"></a>守卫：错位比失败危险得多</h3><p>真实后端拿到响应后要过解析层。这一层如果只写「把 JSON 里的数组取出来」，就等于把系统暴露给了前面说的「静默说谎」。我们的解析层立了三道岗，其中最要紧的是数量守卫：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 数量守卫：解析层最要紧的一道岗。错位比失败危险得多 ——</span></span><br><span class="line"><span class="comment">// 失败会降级（显式、可诊断），错位是 chunk-id↔向量对不上号的静默腐烂。</span></span><br><span class="line"><span class="keyword">if</span> (arr-&gt;<span class="built_in">size</span>() != expected_count)</span><br><span class="line">    <span class="keyword">return</span> std::<span class="built_in">unexpected</span>(<span class="string">&quot;embed 响应数量失守: 期望 &quot;</span> +</span><br><span class="line">                           std::<span class="built_in">to_string</span>(expected_count) + <span class="string">&quot; 条, 实得 &quot;</span> +</span><br><span class="line">                           std::<span class="built_in">to_string</span>(arr-&gt;<span class="built_in">size</span>()) + <span class="string">&quot; 条&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>尤其需要注意一句话：<strong>失败和错位是两种完全不同的问题。</strong>失败是显式的，会被上层降级逻辑接住并处理，用户拿到一个诚实的 BM25-only 结果；错位是静默的，向量数组照常入库，索引照常建立，检索照常返回——只是返回的东西和查询再也没有关系。防御的原则由此确立：<strong>宁可失败，不可错位。宁可降级，不可腐烂。</strong></p>
+<p>同样的原则在批与批之间还要再立一次。建库要嵌入成百上千个 Chunk，分批发送时可能中途换模型（人为失误或配置漂移），导致第一批 768 维、第二批 1024 维。所以每一批的向量在入库前都要和首向量对齐维度——跨批维度守卫。加上它，换模型这个事故就从「静默的索引腐烂」变成「一条明确的报错」。</p>
+<h3 id="身份：嵌入是最贵的预计算"><a href="#身份：嵌入是最贵的预计算" class="headerlink" title="身份：嵌入是最贵的预计算"></a>身份：嵌入是最贵的预计算</h3><p>现在回到前面反复强调的一点：嵌入操作很昂贵。在本人的个人笔记本上对 3700 个 Chunk 的语料全量嵌入要 40 多秒，而指纹未漂移时的重建只需要 1.4 秒——<strong>贵的不是 walk 和解析，贵的全是嵌入</strong>。所以向量必须落盘缓存。但缓存一出现，一个 BM25 索引永远不会有的问题就诞生了：<strong>BM25 缓存失效由内容决定，而向量缓存的失效在此之上还受「外部世界」影响。</strong></p>
+<p>具体来说：Chunk 文本没变，但如果换了嵌入模型，旧向量就全部作废——新查询向量在新模型的空间里，旧文档向量还在旧空间里，两个空间互不相干。甚至更隐蔽的：模型没换，但某天升级了前缀方言的拼法，训练分布变了，旧向量同样失配。</p>
+<p>我们的答案是给嵌入定义一个<strong>身份串</strong>：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// embed 身份串（纯函数）：model + &#x27;\x1f&#x27; + doc 前缀串 + &#x27;\x1f&#x27; + 输入拼法</span></span><br><span class="line"><span class="comment">// 版本。前缀串直接取 embed_input_text(model, Doc, &quot;&quot;) 的输出 —— 方言</span></span><br><span class="line"><span class="comment">// 变了身份就变，无需维护第二份方言表。</span></span><br><span class="line"><span class="function">std::string <span class="title">embed_identity</span><span class="params">(std::string_view model)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (model.<span class="built_in">empty</span>()) <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">    std::string id&#123;model&#125;;</span><br><span class="line">    id.<span class="built_in">push_back</span>(<span class="string">&#x27;\x1f&#x27;</span>);</span><br><span class="line">    id += <span class="built_in">embed_input_text</span>(model, EmbedRole::Doc, <span class="string">&quot;&quot;</span>);</span><br><span class="line">    id.<span class="built_in">push_back</span>(<span class="string">&#x27;\x1f&#x27;</span>);</span><br><span class="line">    id += kEmbedInputRecipe;      <span class="comment">// &quot;context+&#x27;\n&#x27;+text&quot; 拼法版本号</span></span><br><span class="line">    <span class="keyword">return</span> id;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>身份串里最重要的是第二段：它<strong>不维护一份「方言→前缀」的对照表，而是直接调用方言函数本身</strong>，问它「Doc 角色的空前缀是什么」。这样方言的所有变化（加模型、改前缀、删分支）自动反映进身份——<strong>单一事实来源</strong>。任何「第二份对照表」都会在某个周五下午被人改了代码忘了改表，然后在某个不可能的时刻静默失效。</p>
+<p>由此，缓存的失效被拆成了两个半径完全不同的层次：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chunker / 语料变了 → 块的边界都变了 → 缓存整体作废，全量重建</span><br><span class="line">embed 身份变了    → 块文本仍然正确 → 保块、弃向量，只补嵌增量</span><br></pre></td></tr></table></figure>
+
+<p>第二层是整个缓存设计里最划算的一笔：换模型的代价从「重新走一遍 40 秒」降到「块全部复用，只重新嵌入」。而它能成立，靠的正是把「块从哪来」和「向量从哪来」两种失效原因在缓存格式里分离开。还有一条细节：<strong>嵌入失败时不写缓存。</strong>失败可能是瞬时的（网络抖动），把一次抖动的产物固化到磁盘上，等于把一个瞬态故障升级成持久污染。</p>
+<h3 id="降级：缺席要成为声明，而不是惊喜"><a href="#降级：缺席要成为声明，而不是惊喜" class="headerlink" title="降级：缺席要成为声明，而不是惊喜"></a>降级：缺席要成为声明，而不是惊喜</h3><p>最后一件事，也是整个 embedding 设计里我认为最核心的一条原则。当外部世界缺席时——没配模型、网络不通、查询向量嵌入失败、甚至全库向量与查询维度对不上——系统应该怎么办？</p>
+<p>最容易想到的方案是「尽力而为」：语义路失败了就拿 BM25 的结果凑合一下，反正用户拿到了结果。<strong>但「凑合」在这里有一个精确的技术含义：BM25 原始分还是 RRF 融合分？</strong>这两种分数的量纲完全不同——BM25 无上界，RRF 分在 1&#x2F;(k+rank) 量级。如果降级时还输出融合分，下游看到的分数尺度就会随语义路的健康状况漂移：今天 0.03 是高分，明天 0.9 才是高分。</p>
+<p>所以我们的降级遵循一条<strong>恒等语义</strong>：语义路不在场时，返回的结果必须与「从一开始就没配语义路」完全一致——BM25 原始分、BM25 排序、逐位相同。降级不是「差不多」，降级是恒等：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 四条路径殊途同归：dense 空 / 未配模型 → 词法路</span></span><br><span class="line"><span class="keyword">if</span> (dense.vecs.<span class="built_in">empty</span>() || cfg.model.<span class="built_in">empty</span>())</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="built_in">bm25_search</span>(bm25, query, k), SearchMode::Bm25Only&#125;;</span><br><span class="line"><span class="comment">// 查询向量化失败 → 该查询降级</span></span><br><span class="line"><span class="keyword">auto</span> qv = <span class="built_in">backend</span>(cfg, &#123;std::string&#123;query&#125;&#125;, EmbedRole::Query);</span><br><span class="line"><span class="keyword">if</span> (!qv || qv-&gt;<span class="built_in">size</span>() != <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="built_in">bm25_search</span>(bm25, query, k), SearchMode::Bm25Only&#125;;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// 语义名次表为空（如换模型后维度失配，全库零相似）→ 同样恒等降级</span></span><br><span class="line"><span class="keyword">if</span> (dense_scored.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">    <span class="keyword">auto</span> hits = bm25_hits;</span><br><span class="line">    <span class="keyword">if</span> (hits.<span class="built_in">size</span>() &gt; k) hits.<span class="built_in">resize</span>(k);   <span class="comment">// 裁前 k 条 ≡ bm25_search(k)</span></span><br><span class="line">    <span class="keyword">return</span> &#123;std::<span class="built_in">move</span>(hits), SearchMode::Bm25Only&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而恒等语义还需要一个配套：<strong>系统必须把「现在是哪种模式」作为输出的一部分声明出来。</strong>这就是检索结果尾部一行信息 ——<code>mode: hybrid</code> 或 <code>mode: BM25-only (no embed model configured)</code>。它不只是给人看的装饰，更是量纲声明：告诉下游（以及最终告诉 LLM），这批分数是 RRF 融合分还是 BM25 原始分，语义路这次有没有在场。没有这一行，下游对分数的一切解释都建立在猜测上。</p>
+<p>除此之外，系统边界处还存在另一个决策：<strong>未配置模型时，连查询向量都不嵌。</strong>如果 BM25-only 还去发一次注定无意义的嵌入请求再失败降级，那是纯浪费。降级判定必须在任何网络调用之前完成——这件事没有性能优化上的微词可挑，它就是控制流正确性的问题。</p>
+<h2 id="两条路的合流"><a href="#两条路的合流" class="headerlink" title="两条路的合流"></a>两条路的合流</h2><p>至此，embedding 路自身的设计闭环了。它和词法路的融合（RRF 名次融合、为什么分数不可通约而名次才是通用货币）在上一篇的系统架构中已经交代过，这里只把完整链路摆出来收束：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">建库：Chunk → [词法路] tokenize → 倒排索引</span><br><span class="line">            → [语义路] 方言前缀 → 批量嵌入(64/批) → 向量库（身份串缓存）</span><br><span class="line">查询：Query → [词法路] BM25 原始分名次</span><br><span class="line">            → [语义路] 查询向量 → cosine 名次</span><br><span class="line">            → RRF 融合 → Top-K + mode 行（量纲声明）</span><br><span class="line">缺席：任一环节失败 → 恒等降级 BM25-only（原始分，逐位一致）</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>上一篇结束时我说，BM25 让我理解了「先有现象，再有公式」。这一篇的收获不太一样——<strong>embedding 篇教会我的，几乎全是怎么和一个不受控的东西相处。</strong></p>
+<p>回头看，cosine 相似度本身只占了整个设计里很小的一部分篇幅。真正撑起这一篇的是四个问题：依赖怎么圈（接缝）、方言怎么隔离（角色穿接缝）、最贵的预计算怎么缓存和失效（身份串）、以及外部世界缺席时系统怎么自处（恒等降级）。这四个问题没有一个是「算法问题」，全是工程问题。但有趣的地方在于：<strong>恰恰是这些工程决策，决定了算法能力能不能兑现。</strong>模型即使拥有再好的语义理解力，一次维度错位就能让它静默地变成随机检索；语义路设计得再优雅，一次不做恒等的降级就能让下游的分数解释崩坏。</p>
+<p>另一个让我印象很深的点是「不失败的错误」这个类别。前缀拼错、数量少一条、维度换掉——这些背叛全都不带任何异常信号，系统每个部件看起来都在正常工作，只有最终结果悄悄腐烂。对付它们不能靠捕获异常，只能靠主动设防：在关键边界上问「数量对不对得上」「维度齐不齐」「身份变没变」。<strong>异常处理防的是会喊疼的故障，守卫防的是不喊疼的故障——而后者才是和外部世界长期共存时的主要敌人。</strong></p>
+<blockquote>
+<p><strong>算法能力是买来的，系统正确性是自己挣的。</strong></p>
+<p><strong>失败要显式，错位要拦截，缺席要声明。</strong></p>
+<p><strong>降级不是「差不多」，降级是恒等——一个系统在最坏情况下的行为，和它在最好情况下的行为一样，都是设计出来的。</strong></p>
+</blockquote>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] Mikolov, T., Chen, K., Corrado, G., &amp; Dean, J. (2013). <em>Efficient Estimation of Word Representations in Vector Space</em>. arXiv preprint arXiv:1301.3781. DOI: 10.48550&#x2F;arXiv.1301.3781. <a href="https://arxiv.org/abs/1301.3781">https://arxiv.org/abs/1301.3781</a></p>
+<p>[2] Nussbaum, Z., Morris, J. X., Duderstadt, B., &amp; Mulyar, A. (2024). <em>Nomic Embed: Training a Reproducible Long Context Text Embedder</em>. arXiv preprint arXiv:2402.01613. Accepted at TMLR. <a href="https://arxiv.org/abs/2402.01613">https://arxiv.org/abs/2402.01613</a></p>
+]]></content>
+      <categories>
+        <category>Agent</category>
+      </categories>
+      <tags>
+        <tag>Agent</tag>
+      </tags>
+  </entry>
 </search>
