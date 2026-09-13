@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Agent架构设计本文主要来分享本人在学习 Agent 架构设计的过程，本次学习过程基于一个从零开始的终端编码 Agent 的整体架构设计。在之前几篇文章中，我们已经走完了 RAG 检索这条支线；本文回到主干，来聊整个系统是怎么立起来的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent设计--架构篇">
+<meta property="og:url" content="https://tcww0.github.io/2026/09/13/agent/7-architecture/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Agent架构设计本文主要来分享本人在学习 Agent 架构设计的过程，本次学习过程基于一个从零开始的终端编码 Agent 的整体架构设计。在之前几篇文章中，我们已经走完了 RAG 检索这条支线；本文回到主干，来聊整个系统是怎么立起来的。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/13/agent/7-architecture/architecture-1789282659135-2.png">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/13/agent/7-architecture/9894d2f30fbd35ec71a1f278e112e154.png">
+<meta property="article:published_time" content="2026-09-13T00:51:15.000Z">
+<meta property="article:modified_time" content="2026-09-13T09:54:21.147Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2026/09/13/agent/7-architecture/architecture-1789282659135-2.png">
+
+<link rel="canonical" href="https://tcww0.github.io/2026/09/13/agent/7-architecture/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Agent设计--架构篇 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2026/09/13/agent/7-architecture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Agent设计--架构篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2026-09-13 08:51:15 / Modified: 17:54:21" itemprop="dateCreated datePublished" datetime="2026-09-13T08:51:15+08:00">2026-09-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/Agent/" itemprop="url" rel="index"><span itemprop="name">Agent</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>13k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>12 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Agent架构设计"><a href="#Agent架构设计" class="headerlink" title="Agent架构设计"></a>Agent架构设计</h1><p>本文主要来分享本人在学习 Agent 架构设计的过程，本次学习过程基于一个从零开始的终端编码 Agent 的整体架构设计。在之前几篇文章中，我们已经走完了 RAG 检索这条支线；本文回到主干，来聊整个系统是怎么立起来的。</p>
+<p><img src="/2026/09/13/agent/7-architecture/architecture-1789282659135-2.png"></p>
+<span id="more"></span>
+
+<h2 id="简单入门"><a href="#简单入门" class="headerlink" title="简单入门"></a>简单入门</h2><p>在讨论架构之前，我们需要先对齐一个基本问题：<strong>一个 Agent 到底是什么？</strong></p>
+<p>如果去问任何一个写过 LLM 应用的人，得到的答案大概率是：一个循环。模型收到消息，可能回文本，也可能要求调用工具；如果调用了工具，就把工具结果喂回去，再问一次模型；直到模型不再要工具，达到一个多方约定好的停止点，一轮结束。把它写成伪代码，大概就是：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    response = <span class="built_in">llm</span>(messages);</span><br><span class="line">    <span class="keyword">if</span> (response.tool_calls.<span class="built_in">empty</span>()) <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">for</span> (call : response.tool_calls) &#123;</span><br><span class="line">        messages.<span class="built_in">push</span>(<span class="built_in">run_tool</span>(call));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个描述是否是正确的？其确实是一个无可辩驳的答案，这种 ReAct 模型就是几乎所有 Agent的核心循环。但是，如果我们真正开始动手想要把 Agent 实现出来，很快就会发现，这个循环根本装不下一个「能用」的 Agent。因为在这个循环的每一个缝隙里，都塞满了各种循环本身没有帮你解决的东西：</p>
+<ul>
+<li>模型的回复是<strong>流式</strong>到达的。第一个 token 出现时，其他的可能还在网络上，用户期望立刻看到输出（首字延迟低），而不是等几十秒后一次性刷新</li>
+<li>一次工具执行可能很慢（一次 RAG 文档检索建库可能要四十多秒）。在工具执行期间，界面要不要卡死？用户能不能继续输入？</li>
+<li>部分工具会产生真实世界的影响，就比如一个 write 工具可能写文件，一个 net 工具可能发网络请求。但是模型说写就能写吗？谁来允许工具的执行？</li>
+<li>模型一次可能输出多次工具调用。此时要并发跑还是串行跑？出错了怎么办？</li>
+<li>用户可能在模型输出期间输入 Ctrl-C，也可能拒绝工具的执行，网络场景下任何请求都可能失败等等，这些要怎么处理？</li>
+</ul>
+<p>上面种种问题，究其核心可以浓缩为一个<strong>状态</strong>问题：系统现在在哪？在等什么？接下来允许发生什么？在错误的时候应该做什么等等。而裸循环把这些状态全部隐式地编码到了调用栈里面——while 走到哪一行，系统就在哪个状态。这在单线程同步的世界里勉强成立，但一旦引入流式、后台执行和用户审批等场景，此时简单的调用栈就再也无法清晰的描述系统了。</p>
+<p>因此，本文的核心问题其实只有一个：<strong>如何把一个「本质上是循环」的系统，组织成一个可以被推理、被测试、被并发访问的架构？</strong></p>
+<p>我们的答案是：把状态从调用栈中搬出去，成为被显式建模的数据；把所有会碰外部世界的东西，从核心里赶出去。也就是所谓的<strong>纯函数核心 + 副作用外置</strong>。这个方案并非凭空拍板，整体形态主要借鉴了  agentty <a href="1">[1]</a>(<a target="_blank" rel="noopener" href="https://agentty.org/blog/cpp-design-of-a-terminal-agent/">https://agentty.org/blog/cpp-design-of-a-terminal-agent/</a>) 中关于「如何用 C++ 写一个终端 Agent」的讨论。后文的所有设计，几乎都是这一个决定的推论。</p>
+<h2 id="第一个问题：状态和副作用纠缠在一起会发生什么"><a href="#第一个问题：状态和副作用纠缠在一起会发生什么" class="headerlink" title="第一个问题：状态和副作用纠缠在一起会发生什么"></a>第一个问题：状态和副作用纠缠在一起会发生什么</h2><p>要理解为什么需要「纯核心」，最好的方式是先看反例。假设我们不做任何架构设计，直接在裸循环上加需求：流式输出、后台工具、权限审批。最直觉的写法大概会是下面这样：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 反例：一切纠缠在一起的&quot;上帝循环&quot;</span></span><br><span class="line"><span class="keyword">while</span> (running) &#123;</span><br><span class="line">    <span class="keyword">auto</span> response = <span class="built_in">stream_llm</span>(messages, <span class="comment">/*on_delta=*/</span>[](std::string s) &#123;</span><br><span class="line">        <span class="built_in">print</span>(s);                    <span class="comment">// 渲染逻辑内联在传输回调里</span></span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; call : response.tool_calls) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">needs_permission</span>(call)) &#123;</span><br><span class="line">            <span class="keyword">auto</span> ok = <span class="built_in">popup_yes_no</span>(call);   <span class="comment">// UI 阻塞在核心循环里</span></span><br><span class="line">            <span class="keyword">if</span> (!ok) <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">auto</span> result = pool.<span class="built_in">submit</span>(run_tool, call).<span class="built_in">get</span>();  <span class="comment">// 工具阻塞在核心循环里</span></span><br><span class="line">        messages.<span class="built_in">push</span>(result);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码能跑，而且在很多 Agent 的教程示例中也是这个处理逻辑，但它的<strong>可测性是零</strong>：想测试「流式中途用户拒绝工具请求」这条路径，你必须起一个 LLM 服务、真实的渲染一次 UI、实际的运行一次工具。每一条分支都在物理上依赖外部世界。它的<strong>可推理性也是零</strong>：读代码的人无法回答「系统现在处于什么状态」——答案散落在多个 lambda 和回调逻辑中。</p>
+<p>这里其实就可以指出我个人的一个观点了：<strong>副作用的可怕之处不在于它发生，而在于它和决策逻辑混在一起，使得任何一段逻辑都无法脱离环境被单独校验</strong>。状态机决定「该做什么」，环境负责「应该如何做」——一但这俩部分纠缠到一起，测试以及任何其他操作就只能将整体作为一个单元进行测试，再也难以将其拆分为一个个小单元单独处理，这种你中有我，我中有你的设计在任何时候都是需要相当警惕的。</p>
+<p>那么这里自然的引出了一个解决方案：<strong>把「决策」从「执行」里剥离出来，让决策本身成为一个不碰任何外部世界的纯函数</strong>。</p>
+<h2 id="纯核心：update-Model-Msg-→-Step"><a href="#纯核心：update-Model-Msg-→-Step" class="headerlink" title="纯核心：update(Model,Msg) → Step"></a>纯核心：update(Model,Msg) → Step</h2><p>沿着上面的结论，我们把系统重新表述为一个极简的循环：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Msg（发生了什么） → update(Model, Msg) → Step&#123; 新的 Model, 要执行的 Cmd &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Model</strong> 中储存了系统全部的当前状态，比如对话、阶段、权限档案等</li>
+<li><strong>Msg</strong> 是「已经发生的事情」。注意，在我们的设计中，Msg 不是命令，而是事实。用户提交了文本、网络连接中到达了一个 Token、工具返回了结果，这些都是事实</li>
+<li><strong>update</strong> 是纯函数，只接受旧状态和一个当前事实，输出一个新状态和一个「副作用请求」</li>
+<li><strong>Cmd</strong> 是副作用请求执行的内容，update 只负责描述它，不实际执行它</li>
+</ul>
+<p>这就是 Elm 架构（TEA）的形态。在我们的初版实现中，这个接缝只有几十行：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// runtime/agent.hpp</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">NoCommand</span>&#123;&#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">StartStream</span>&#123; Request request; &#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">RunTool</span>&#123; std::string id; std::string name; nlohmann::json args; &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> Cmd = std::variant&lt;NoCommand,StartStream,RunTool&gt;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 语义是 新的内部状态 + 需要执行的外部指令</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Step</span>&#123;</span><br><span class="line">    Model model;</span><br><span class="line">    Cmd cmd;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 根据一个 Msg 生成后继 Model 和需要执行的 Cmd。</span></span><br><span class="line"><span class="comment">// Model 按值传入：调用方可以复制旧快照，也可以通过 std::move()</span></span><br><span class="line"><span class="comment">// 转移状态所有权。update() 不保留对输入 Model 或 Msg 的引用。</span></span><br><span class="line">[[nodiscard]]</span><br><span class="line"><span class="function">Step <span class="title">update</span><span class="params">(Model model,Msg msg)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>这里不对于内容进行赘述，自行来理解分析即可。值得停留的只有一件事：**<code>update</code>的函数签名就是整个架构的承诺**。它不接受任何上下文指针、不访问任何全局单例、不返回任何需要解释的句柄。给它相同的（<code>Model</code>,<code>Msg</code>），就能得到相同的 <code>Step</code>。外部网络是否出错、终端使用的是哪个版本、外部服务是否正常，都与这里的逻辑无关。</p>
+<p>这个承诺的价值可以立刻在测试中体现。在我们的设计中，存在 <code>agent_loop_test.cpp</code>、<code>tool_loop_test.cpp</code>、<code>profile_test.cpp</code>等测试。这些测试<strong>不需要网络、不需要终端、不需要真实的 LLM</strong>。而这正是因为被测对象是一个纯函数，往其中喂构造出来的 Msg 序列、断言产出的 Model 即可获得真实环境中真实输入会得到的结果。当前项目中加起来三百多个测试用例，核心状态机的行为是在毫秒级别跑完的。这在前文中反例架构中是不可想象的，在那种架构下，想要测一条分支，需要完整模拟全部的副作用环境（网络、服务、IO等等）。除此之外，还有一层价值隐藏在实现里。update 中的全部「调度逻辑」长这样：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// runtime/agent.cpp —— update 的完整实现</span></span><br><span class="line"><span class="function">Step <span class="title">update</span><span class="params">(Model model,Msg msg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Cmd cmd = std::<span class="built_in">visit</span>(</span><br><span class="line">        [&amp;model](<span class="type">const</span> <span class="keyword">auto</span>&amp; event) -&gt; Cmd&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">apply</span>(model,event);</span><br><span class="line">        &#125;,</span><br><span class="line">        msg</span><br><span class="line">    );</span><br><span class="line">    <span class="keyword">return</span> Step&#123;</span><br><span class="line">        .model = std::<span class="built_in">move</span>(model),</span><br><span class="line">        .cmd = std::<span class="built_in">move</span>(cmd),</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>系统中实际上使用 <code>std::variant</code> 来描述 <code>Msg</code>。不同种的 <code>Msg</code> 各自对应一个 <code>apply</code> 重载，<code>std::visit</code> 里没有任何 <code>default</code> 分支。<strong>这意味着「漏处理一种事件」在这套代码里不是运行期的日志，而是编译错误</strong>。新增一种 Msg，编译器会把每一个忘记接该类型的地方全部给暴露出来。借用 agentty 中的依据原话：<strong>The compiler is a proof that you handled every event（编译器就是你处理了每个事件的证明）</strong>。动态语言里需要不知何时才可能爆出的 <code>unhandled action type</code>，在这里是一个被编译器强行约束并能够被轻松解决的 <code>build error</code>。</p>
+<p>还有一个容易被忽略的细节：<code>Request</code> 里有一段注释——<strong>系统提示词不是 update 构造的，而是宿主在 effect 侧填充</strong>。因为构建系统提示词需要读文件（记忆、skill 目录等），而 update 必须保持纯洁。这种约束也能一定程度上证明这套架构的纪律性：即使只是「填一个字符串」这种事，只要它碰 IO，就属于宿主的职责。后文会看到这个决定的完整推论。</p>
+<h2 id="状态：让非法状态不可表示"><a href="#状态：让非法状态不可表示" class="headerlink" title="状态：让非法状态不可表示"></a>状态：让非法状态不可表示</h2><p>现在我们应该已经理解以 update 为主的核心的纯洁性了。接下来的问题是：<strong>Model 应该如何来建模一个系统的状态？</strong>最直觉的做法是其中包含一组布尔标志：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 反例：布尔标志的排列组合</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Model</span> &#123;</span><br><span class="line">    <span class="type">bool</span> is_streaming;</span><br><span class="line">    <span class="type">bool</span> is_waiting_permission;</span><br><span class="line">    <span class="type">bool</span> is_executing_tool;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这个写法的问题在于：它允许大量<strong>物理上合法，语义上荒谬</strong>的状态：三个 bool 同时为 true 是什么意思？<code>is_waiting_premission</code> 和 <code>is_executing_tool</code> 同时成立时，这能够说明模型在等待工具审批的同时又在跑工具吗？系统的每一时刻都只可能处于一种局面，这种「互斥」是领域事实，而这种多个独立 flag 难以实现这种强约束，要想实现只能依赖编写人员的自觉，而这是不可接受的。</p>
+<p>C++ 里表达「有且只有一个」的现成工具是 <code>std::varient</code>：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// runtime/model.hpp</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Idle</span>&#123; &#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Streaming</span>&#123; &#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">AwaitingPermission</span>&#123; &#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ExecutingTool</span>&#123; std::string id; &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将多个阶段聚合。这样即能够保证一个状态的原子性以及独占性，也能方便管理</span></span><br><span class="line"><span class="keyword">using</span> Phase = std::variant&lt;Idle,Streaming,AwaitingPermission,ExecutingTool&gt;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Model</span>&#123;</span><br><span class="line">    Phase phase&#123;Idle&#123;&#125;&#125;;</span><br><span class="line">    Thread thread&#123;&#125;;</span><br><span class="line">    Profile profile&#123;Profile::Write&#125;;</span><br><span class="line">    std::optional&lt;PendingPermission&gt; pending_permission&#123;&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这里正体现了一句我很喜欢的话：<strong>make illegal states unrepresentable（让非法状态不可表示）</strong>。这个说法出自 Jane Street 的 Yaron Minsky <a target="_blank" rel="noopener" href="https://blog.janestreet.com/effective-ml-revisited/">4</a>，agentty 的设计也反复引用它。这里的代码实际上明确表达了一个事实：系统要么在等流式输出、要么在执行工具、要么在等审批、要么处于空闲。varient 的语义恰好就是「有且只有一个」，编译器替你排除掉了其余的所有组合。而且注意 <code>ExecutingTool</code> 实际上会携带工具调用的 <code>id</code>，这实际上想要表达是<strong>状态本身会携带自己的证据</strong>。它不是「正在执行工具」这个孤立事实，而是「正在执行本次调用」，这为后续工具执行完毕后产出的 <code>ToolExecOutput</code> 消息回归 owner 线程时的对账提供了依据。</p>
+<p><img src="/2026/09/13/agent/7-architecture/9894d2f30fbd35ec71a1f278e112e154.png"></p>
+<blockquote>
+<p>对于这里，我其实不禁感慨。之前在大一的时候，看 NJU 的 PA 的时候首次接触到状态机的概念，在大二阅读计网黑皮书的时候，再次深化自己对于 FSM 的认知。直到现在，我很多时候才真正将状态机的思维给融合到设计中来。就比如这里，其中的 Phase 本身其实也是一个状态机。其中的每个状态实际上包含了丰富的语义，就比如 <strong>Idle</strong> 代表着当前系统没有需要处理的工作，正处于空闲，对应着没有待审批&#x2F;执行的工具，没有待处理的请求等等。而对应的 <strong>Streaming</strong> 则代表当前系统正在处理一次流式调用等等。<strong>每一个简单的字段，其实际的取值都浓缩了系统其他地方所发生的事件。而我们能够基于这个事件来协调当前的工作。</strong>这正是我个人所认为状态机最核心的一点。</p>
+</blockquote>
+<p>沿着这个设计，还有一个值得说明的涌现现象：<strong>工具调用的串行化是免费的</strong>。<code>update</code> 在一次流转中至多产出一个 <code>RunTool</code>，而 <code>ExecutingTool</code> 作为一个互斥的 Phase，天然构成了一个门闩：工具没执行完，状态机就不在能受理新派发的场面里面。我们没有写任何「工具调度器」、没有配置任何并发上限参数，「一次只跑一个工具」是状态表示方法的直接推论。当然，串行好坏与否是可以讨论的，甚至于，串行本身是否要优化为并发也是可以讨论的，但这里的重点是：<strong>这里的串行执行的行为是设计出来的、显示的，并不是调度细节的偶然产物</strong>。想改成并行，需要首先做修改是 Phase 的表达（比如<code>ExecutingTools&#123; std::vector&lt;...&gt; &#125;</code>），而不是在回调迷宫里加锁。</p>
+<p>对于事件也同理，<code>Msg</code> 也是一个 <code>varient</code>，如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// runtime/msg.hpp</span></span><br><span class="line"><span class="keyword">using</span> Msg = std::variant&lt;Submit,StreamTextDelta,StreamToolCall,StreamFinished,</span><br><span class="line">						StreamError,ToolExecOutput,SetProfile,PermissionApprove,PermissionReject&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是这里的<strong>输入是对称的</strong>：用户的提交（<code>Submit</code>）、网络的事件（<code>StreamTextDelta</code>）、工具的结果（<code>ToolExecOutput</code>）、用户的审批（<code>PermissionApprove</code>）——在状态机眼里全部是同一种东西：一个事实。系统不需要区分「谁说的事」，只需要回答「这个事实发生之后，我在哪个状态、接下来请求什么」。这种统一在后面会反复兑现价值：换掉前端（TUI 换成 headless）、换掉传输（Ollama 换成 Anthropic），状态机一个字都不用动。</p>
+<h2 id="宿主：副作用得有个家"><a href="#宿主：副作用得有个家" class="headerlink" title="宿主：副作用得有个家"></a>宿主：副作用得有个家</h2><p>讲到这里，现在的局面是：系统的核心是纯的。但是一个网络请求副作用（StartStream）要发 HTTP 请求、一次 <code>RunTool</code> 执行要读取文件。核心本身并不复杂执行这些动作，但总得有人真的去做这些事。这个角色在当前系统中我们称之为宿主（<code>AsyncHost</code>）。宿主所需要承担的工作可以列成一份很短的清单：</p>
+<ul>
+<li>维护一个 <strong>inbox</strong>：所有异步来源（网络事件、工具结果、用户输入）都往该结构中投递 Msg</li>
+<li><strong>drain</strong> 驱动：owner 线程需要按 FIFO 的顺序来消费 inbox 中的 Msg 事实，将其逐个喂给 update 并接收产出的 Cmd</li>
+<li>执行 <strong>Cmd</strong> 的副作用：负责替 owner 线程来真正做出产出</li>
+<li>判断静止（quiescent）：基于当前已有信息判断当前回合是否可以停止</li>
+</ul>
+<p>其中最后一点值得展开聊一聊，因为它定义了整个系统的「回合」边界：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Owner-thread only. 阻塞事件循环：drain → 判定静止 → 等唤醒。</span></span><br><span class="line"><span class="comment">// 在没有 in-flight worker 可等时返回，也就是 phase 已经是 Idle（回合结束）</span></span><br><span class="line"><span class="comment">// 或 AwaitingPermission（等的是 owner 自己的审批输入）。</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">run_until_quiescent</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>静止不是「没消息了」，而是「没有在途的工作可等了」</strong>。流式调用中 inbox 空了，不代表静止，此时网络上可能还有在途的 token，此时的状态被称之为 Streaming，宿主应该继续等待。如果工具在后台跑，此时也不能够被称之为静止，毕竟后台线程中还存在在途的结果。在当前设计中，真正的静止点只有两个：<code>Idle</code>（回合自动结束）和 <code>AwaitingPermission</code>（等待用户审批一次工具请求）。这个定义让「一个回合」成为了一个有明确起止的单元——线程可以基于当前是否停止的状态来明确当前自己可以来执行什么操作。</p>
+<h3 id="为什么需要-wake-fd"><a href="#为什么需要-wake-fd" class="headerlink" title="为什么需要 wake_fd"></a>为什么需要 wake_fd</h3><p>在当前设计中，<code>run_until_quiescent</code> 是阻塞式的，这带来一个尖锐的问题：<strong>流式输出进行中（宿主阻塞着等待 token），UI 如何才能够继续读取键盘？</strong>用户想按 Ctrl-C、想继续打字，而 owner 线程正卡在「等在途工作」中。</p>
+<p>当前项目的解法是把「后台有新事件」变成一个<strong>可 poll 的文件描述符</strong>：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 后台唤醒的可 poll 读端。前端把它和 stdin、SIGWINCH 放进同一个 poll，</span></span><br><span class="line"><span class="comment">// 从而在流式输出进行中也能读键盘 —— 这是 run_until_quiescent 做不到的事，</span></span><br><span class="line"><span class="comment">// 那个函数在 phase 是 Streaming 时不返回。</span></span><br><span class="line">[[nodiscard]]</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">wake_fd</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">noexcept</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>在 owner 线程上的 UI 循环中，我们把三个来源：<code>stdin</code>（键盘）、<code>wake_fd</code>（后台事件）、SIGWINCH（窗口变化）给放进了<strong>同一个 <code>poll</code><strong>，谁就绪处理谁。于是「渲染」和「驱动状态机」在 owner 线程上合流，却互不阻塞。这个设计还有一个降级出口：唤醒机制不可用时退化为惰性哨兵 + 超时轮询（<code>wake_fd</code> 返回 -1），系统仍然正确，只是动画糙一点。</strong>正确性不依赖最优雅的机制</strong>——这在 RAG 的降级设计中也多次出现，几乎是这个项目的一个母题。</p>
+<h3 id="两种执行环境：共享池与隔离通道"><a href="#两种执行环境：共享池与隔离通道" class="headerlink" title="两种执行环境：共享池与隔离通道"></a>两种执行环境：共享池与隔离通道</h3><p>在当前设计中，宿主手里有两种后台执行资源，分工不同：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">provider 流 ──→ 共享池（WorkPool）      高频、短小、I/O 密集</span><br><span class="line">工具执行   ──→ 隔离通道（detach）       低频、可能很重、可能卡死</span><br></pre></td></tr></table></figure>
+
+<p>为什么分开？考虑一个具体场景：<code>search_docs</code> 工具首次调用要建库，四十多秒。如果工具和 provider 流共用一组 worker，一个重工具就能把池占满，正在流式输出的其他回合全部饿死。<strong>流是系统的呼吸，工具是系统的动作；动作可以慢，呼吸不能停。</strong> 所以流走共享池（轻、多、要公平），工具走隔离通道（重、可以随便卡，卡死了也只是那一个工具超时）。</p>
+<p>源码里还有一条与线程模型相关的注释，很能体现这类系统的工程细节：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// shared_ptr 而非成员对象：隔离通道的线程是 detach 的，可能活得比 host 久。</span></span><br><span class="line"><span class="comment">// 共享所有权让它们不会对已析构的 WakeSignal / Inbox 动手。</span></span><br></pre></td></tr></table></figure>
+
+<p>后台线程比宿主活得久——这不是刁钻的边界情况，而是 detach 线程的日常。共享所有权（<code>shared_ptr</code>）延长生命周期让「谁先死」不再是一个需要祈祷的问题。</p>
+<h2 id="权限：谁替用户说「可以」"><a href="#权限：谁替用户说「可以」" class="headerlink" title="权限：谁替用户说「可以」"></a>权限：谁替用户说「可以」</h2><p>到目前为止，系统已经能流式输出、能跑工具了。但还有一个问题是裸循环完全没有回答的：<strong>模型要求写一个文件，凭什么写？</strong></p>
+<p>Agent 的权限问题和传统软件不同。传统软件的权限是「用户操作 → 系统执行」，操作本身就是用户意图。而 Agent 是「用户给了一个目标 → 模型自行决定一系列动作」——<strong>动作的意图是模型推断的，不是用户声明的</strong>。模型可能推断错。所以权限系统必须插在「模型的决定」和「动作的执行」之间，而这个缝隙恰好就是我们架构里现成的东西：<strong>update 决定 RunTool，宿主执行 RunTool——权限判定就长在这条缝上。</strong></p>
+<p>这套声明式方案同样来自 agentty 的设计（某种程度上 agentty 参考的是 claude code 的设计？）：<strong>工具不决定自己的信任级别，只申报能力标签</strong>，判定由一条独立于任何工具的纯函数完成。设计是三个纯数据的乘积：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// tool/effects.hpp —— 工具声明自己会碰什么</span></span><br><span class="line"><span class="keyword">enum class</span> <span class="title class_">Effect</span> : std::<span class="type">uint8_t</span> &#123;</span><br><span class="line">    ReadFs  = <span class="number">1u</span>&lt;&lt;<span class="number">0</span>,</span><br><span class="line">    WriteFs = <span class="number">1u</span>&lt;&lt;<span class="number">1</span>,</span><br><span class="line">    Net     = <span class="number">1u</span>&lt;&lt;<span class="number">2</span>,</span><br><span class="line">    Exec    = <span class="number">1u</span>&lt;&lt;<span class="number">3</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// tool/policy.hpp —— 纯函数：声明 × 用户意图 → 判定</span></span><br><span class="line">[[nodiscard]]</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> Decision <span class="title">permission</span><span class="params">(EffectSet effects,Profile profile)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (profile == Profile::Write)&#123;</span><br><span class="line">        <span class="keyword">return</span> Decision::Allow;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(effects.<span class="built_in">has</span>(Effect::WriteFs)||effects.<span class="built_in">has</span>(Effect::Net))&#123;</span><br><span class="line">        <span class="keyword">return</span> Decision::Prompt;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(effects.<span class="built_in">has</span>(Effect::Exec))&#123;</span><br><span class="line">        <span class="keyword">return</span> Decision::Prompt;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (profile == Profile::Minimal &amp;&amp; effects.<span class="built_in">has</span>(Effect::ReadFs))&#123;</span><br><span class="line">        <span class="keyword">return</span> Decision::Prompt;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> Decision::Allow;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>每个工具在注册时<strong>自带</strong> <code>EffectSet</code>（读文件？写文件?网络？执行?）——这依赖于工具作者的诚实申报</li>
+<li><code>Profile</code>（minimal &#x2F; ask &#x2F; write）是<strong>用户的事前意图</strong>，一个环境变量就能切</li>
+<li><code>permission()</code> 是两者的纯函数映射，输出只有两种：<code>Allow</code> 或 <code>Prompt</code></li>
+</ul>
+<p>这个设计的全部力量在于<strong>每个因子都可以独立演化</strong>：新增一个工具，申报它的 effects 即可，权限逻辑零改动；用户把 profile 从 write 切到 ask，所有工具的行为整体收紧，工具零改动。对比一下命令式的权限（在每个工具的实现里写 <code>if (need_ask) ...</code>），声明式把「工具是什么性质」和「当前政策是什么」彻底解耦了。</p>
+<p>值得说明的是，教材在这条路上走得更远：它把 4 位 EffectSet（16 种组合）× 3 个 Profile 的<strong>全部 48 个判定单元格</strong>做成了 <code>constexpr</code> 权限矩阵，并用 <code>static_assert</code> 对照一份独立重述的 spec，在编译期证明全表正确——用原文的话说，最危险的部分 cannot ship wrong。我们的六个工具、一条 if 链就能读完全部判定，还没到需要矩阵证明的规模；但这个对照指出了这条路的方向：<strong>当判定逻辑继续膨胀时，下一步不是更多 if，而是把表格本身变成编译期对象。</strong></p>
+<p>值得注意判定发生的位置：它在 <code>update()</code> 内部——状态机收到 <code>StreamFinished</code>、手里攥着工具调用时，当场查注册表做判定。<strong>放行，就产出 <code>RunTool</code>；要审，就把 phase 切到 <code>AwaitingPermission</code> 并填上 <code>pending_permission</code>。</strong> 这个位置的选择不是随手的：权限判定是决策，决策属于状态机；而「弹窗问用户」是副作用，属于宿主和前端。判定和交互又一次被那条核心边界切开了。</p>
+<p>于是一个回合里的权限流就变成了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">模型请求工具 → update：permission(effects, profile)</span><br><span class="line">    ├─ Allow  → RunTool → 隔离通道执行 → ToolExecOutput → 下一轮流</span><br><span class="line">    └─ Prompt → phase = AwaitingPermission（静止点）</span><br><span class="line">                → 前端展示待审批调用（maya 两段投影）</span><br><span class="line">                → PermissionApprove / PermissionReject（Msg）</span><br><span class="line">                → 状态机继续</span><br></pre></td></tr></table></figure>
+
+<p><code>PermissionReject</code> 甚至可以带一段 feedback 文本——拒绝不是简单地说「不行」，而是把拒绝的理由作为事实交回模型，让下一轮流知道「为什么不行、该换个什么方向」。权限从一道闸门，变成了对话的一部分。</p>
+<h2 id="接缝：让「换掉」成为局部决定"><a href="#接缝：让「换掉」成为局部决定" class="headerlink" title="接缝：让「换掉」成为局部决定"></a>接缝：让「换掉」成为局部决定</h2><p>架构图上还剩最后一块拼图：<strong>依赖的方向和接缝的纯度。</strong></p>
+<p>整个系统九个模块，依赖严格朝下、无环：repl（装配）→ ui &#x2F; runtime → tool &#x2F; prompt → provider &#x2F; rag → http → domain。但比「分层」更重要的是每个接缝上<strong>暴露什么</strong>。这里有两个例子，都值得在别的项目里复用。</p>
+<p>第一个是 provider 的接缝。系统支持三家传输（ollama &#x2F; anthropic &#x2F; openai），但状态机看到的只有一个类型：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// provider/provider.hpp</span></span><br><span class="line"><span class="keyword">using</span> EventSink = std::function&lt;<span class="built_in">void</span>(Msg)&gt;;</span><br><span class="line"><span class="keyword">using</span> StreamEffect = std::function&lt;<span class="built_in">void</span>(Request,EventSink)&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>一个 <code>StreamEffect</code> 是「给我一个请求和一个事件出口，我把事实流出去」。SSE 解析、各家 API 的方言、重试策略，全部藏在实现侧。<strong>状态机不关心你用哪家模型，正如它不关心终端是什么型号。</strong></p>
+<p>第二个是 RAG 的接缝。<code>rag.hpp</code> 是整个项目里设计语义注释最密集的一个头文件，它开头的接口纯净原则值得原文引用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 接口纯净原则（#41 拍板）：本头文件只用 std —— http/nlohmann 是 rag 的</span><br><span class="line">// 实现依赖，PRIVATE 链接、一个 include 都不泄漏到这里。rag 的消费者</span><br><span class="line">// （测试、bench、#43 接线处）看到的接缝永远是纯类型。</span><br></pre></td></tr></table></figure>
+
+<p><strong>「消费者看到的接缝永远是纯类型」</strong>——这意味着测试可以注入假 backend（一个普通函数），bench 可以不碰网络就复现度量口径，而 <code>search_docs</code> 工具的接线处拿到的类型和单元测试拿到的完全一样。HTTP 是 rag 的实现细节，不是它的脸面。</p>
+<p>至于所有的具体选择——用哪家 provider、哪个模型、什么 profile——全部汇聚在一个文件里：<code>main.cpp</code>，所谓<strong>组合根（composition root）</strong>。装配只发生一次，发生在最顶上；下面每一层都只依赖抽象接缝。这也是为什么 headless 模式（<code>headless_runner</code>）和行式回退可以和 TUI 共享同一套 runtime：它们只是不同的前端，插在同一个 <code>dispatch / run_until_quiescent / model</code> 接口上。</p>
+<h2 id="一个回合的生命周期"><a href="#一个回合的生命周期" class="headerlink" title="一个回合的生命周期"></a>一个回合的生命周期</h2><p>至此所有部件都齐了。把一个完整回合串起来走一遍：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">用户输入</span><br><span class="line">  → Submit（Msg）                    事实进 inbox</span><br><span class="line">  → update → StartStream（Cmd）      状态机请求起流</span><br><span class="line">  → 宿主在共享池起 StreamEffect      provider 发 HTTP + SSE</span><br><span class="line">  → StreamTextDelta × N（Msg）       token 逐个回流</span><br><span class="line">      ↳ wake_fd 唤醒 UI → 增量重绘   （owner 线程不阻塞）</span><br><span class="line">  → StreamToolCall（Msg）            模型要工具</span><br><span class="line">  → StreamFinished（Msg）→ update 查 registry：</span><br><span class="line">      ├─ permission = Allow</span><br><span class="line">      │    → RunTool（Cmd）→ 隔离通道执行</span><br><span class="line">      │    → ToolExecOutput（Msg）→ 回到 StartStream（带结果）</span><br><span class="line">      └─ permission = Prompt</span><br><span class="line">           → phase = AwaitingPermission（静止点，球在用户脚下）</span><br><span class="line">           → PermissionApprove / Reject（Msg）→ 沿上/下分支继续</span><br><span class="line">  → 某轮流无工具调用 → Idle           回合结束</span><br></pre></td></tr></table></figure>
+
+<p>这条链上值得最后强调一次的还是那个结构：<strong>所有横向的箭头（HTTP、文件、终端）都发生在宿主和边缘；状态机只经历纵向的 Msg → Model 变换。</strong> 架构图上它是一条链，测试里它是 <code>std::vector&lt;Msg&gt;</code> 的序列断言，生产里它是真的网络——三者共用同一个核心，这就是「纯核心 + 副作用外置」买到的东西。</p>
+<h2 id="RAG-挂进来的位置"><a href="#RAG-挂进来的位置" class="headerlink" title="RAG 挂进来的位置"></a>RAG 挂进来的位置</h2><p>最后用一小节交代前几篇文章的 RAG 在这张图里的位置，作为系列的合流。</p>
+<p>RAG 在架构里不是一层，而是 <strong>tool 模块的一个工具后端</strong>：模型调 <code>search_docs</code>，工具实现内部做懒建库（FNV-1a 目录树指纹漂移门控——指纹没变连库都不重建）、混合检索、渲染。对状态机而言，它和 <code>calculator</code> 没有任何区别，都是一个可能耗时很久的 <code>RunTool</code>。<strong>子系统不需要知道自己活在哪个架构里，它只需要把自己的接缝做干净</strong>——这也是前文 rag.hpp 接缝纯净原则的另一个动机：它是可以被整体搬走的。</p>
+<p>至于检索内部的两路互补、RRF 融合、增量缓存的两层失效半径，前文已详述，此处不再重复。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文是我围绕 Agent 架构设计的一次实践性总结。一开始，我的目标只是把一个教程式的 Agent 循环跑起来，但随着流式、后台工具、权限审批这些真实需求一个个压上来，我发现裸循环的每一处「顺便」都在把系统往不可测试的方向拖。真正值得留下来的，不是某几个具体的类图，而是那个一路被逼出来的核心决定：<strong>把决策做成纯函数，把副作用赶到边缘。</strong></p>
+<p>回头看，整个架构其实没有一步是「先设计后实现」的。最初只有一个很具体的问题：<strong>一个循环，凭什么变成一个系统？</strong> 状态藏在调用栈里没法推理，就有了显式的 Model；布尔标志允许荒谬组合，就有了 variant 的 Phase；核心纯了没人执行副作用，就有了宿主；宿主阻塞了 UI 没法响应，就有了 wake_fd；工具会卡死共享池，就有了隔离通道；模型的动作不是用户的意图，就有了声明式权限；每换一家供应商就改核心，就有了纯接缝和组合根。最终，这些对不同压力的回应，组合成了一个可以逐层检验的系统。</p>
+<blockquote>
+<p><strong>Agent 不应该只是「一个会调工具的 while 循环」，更应该是「一台被事实驱动、被副作用环绕的状态机」。循环只是它的一个投影。</strong></p>
+<p><strong>先让决策纯下来，再谈并发与集成；先让状态不可伪造，再谈流转与恢复；先让接缝只暴露值类型，再谈替换与扩展。</strong></p>
+<p><strong>架构不是画出来的图，而是被真实压力一步步逼出来的形状。图只是事后对这条路径的压缩。</strong></p>
+</blockquote>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] <a target="_blank" rel="noopener" href="https://agentty.org/blog/cpp-design-of-a-terminal-agent/">https://agentty.org/blog/cpp-design-of-a-terminal-agent/</a><br> [2] <a target="_blank" rel="noopener" href="https://guide.elm-lang.org/architecture/">https://guide.elm-lang.org/architecture/</a><br> [3] <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=OOMx2BHHWtE">https://www.youtube.com/watch?v=OOMx2BHHWtE</a><br> [4] <a target="_blank" rel="noopener" href="https://blog.janestreet.com/effective-ml-revisited/">https://blog.janestreet.com/effective-ml-revisited/</a></p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2026/09/13/agent/7-architecture/" title="Agent设计--架构篇">https://tcww0.github.io/2026/09/13/agent/7-architecture/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/Agent/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> Agent</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/09/12/agent/6-rag(2)/" rel="prev" title="RAG设计-Embedding篇">
+      <i class="fa fa-chevron-left"></i> RAG设计-Embedding篇
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Agent%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.</span> <span class="nav-text">Agent架构设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%85%A5%E9%97%A8"><span class="nav-number">1.1.</span> <span class="nav-text">简单入门</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E4%B8%AA%E9%97%AE%E9%A2%98%EF%BC%9A%E7%8A%B6%E6%80%81%E5%92%8C%E5%89%AF%E4%BD%9C%E7%94%A8%E7%BA%A0%E7%BC%A0%E5%9C%A8%E4%B8%80%E8%B5%B7%E4%BC%9A%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88"><span class="nav-number">1.2.</span> <span class="nav-text">第一个问题：状态和副作用纠缠在一起会发生什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%AF%E6%A0%B8%E5%BF%83%EF%BC%9Aupdate-Model-Msg-%E2%86%92-Step"><span class="nav-number">1.3.</span> <span class="nav-text">纯核心：update(Model,Msg) → Step</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%EF%BC%9A%E8%AE%A9%E9%9D%9E%E6%B3%95%E7%8A%B6%E6%80%81%E4%B8%8D%E5%8F%AF%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.4.</span> <span class="nav-text">状态：让非法状态不可表示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%BF%E4%B8%BB%EF%BC%9A%E5%89%AF%E4%BD%9C%E7%94%A8%E5%BE%97%E6%9C%89%E4%B8%AA%E5%AE%B6"><span class="nav-number">1.5.</span> <span class="nav-text">宿主：副作用得有个家</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-wake-fd"><span class="nav-number">1.5.1.</span> <span class="nav-text">为什么需要 wake_fd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83%EF%BC%9A%E5%85%B1%E4%BA%AB%E6%B1%A0%E4%B8%8E%E9%9A%94%E7%A6%BB%E9%80%9A%E9%81%93"><span class="nav-number">1.5.2.</span> <span class="nav-text">两种执行环境：共享池与隔离通道</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%83%E9%99%90%EF%BC%9A%E8%B0%81%E6%9B%BF%E7%94%A8%E6%88%B7%E8%AF%B4%E3%80%8C%E5%8F%AF%E4%BB%A5%E3%80%8D"><span class="nav-number">1.6.</span> <span class="nav-text">权限：谁替用户说「可以」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E7%BC%9D%EF%BC%9A%E8%AE%A9%E3%80%8C%E6%8D%A2%E6%8E%89%E3%80%8D%E6%88%90%E4%B8%BA%E5%B1%80%E9%83%A8%E5%86%B3%E5%AE%9A"><span class="nav-number">1.7.</span> <span class="nav-text">接缝：让「换掉」成为局部决定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E5%9B%9E%E5%90%88%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">1.8.</span> <span class="nav-text">一个回合的生命周期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAG-%E6%8C%82%E8%BF%9B%E6%9D%A5%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="nav-number">1.9.</span> <span class="nav-text">RAG 挂进来的位置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.10.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">1.11.</span> <span class="nav-text">参考文献</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">86</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/Agent/" rel="tag">Agent</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">344k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">5:12</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : '50c2f8cbe1052555ac36a71127916132',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
