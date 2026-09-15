@@ -186,6 +186,144 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/07/29/%E5%88%86%E5%B8%83%E5%BC%8F/0.1-%E6%83%8A%E7%BE%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/07/29/%E5%88%86%E5%B8%83%E5%BC%8F/0.1-%E6%83%8A%E7%BE%A4/" class="post-title-link" itemprop="url">惊群效应</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-07-29 12:51:15" itemprop="dateCreated datePublished" datetime="2025-07-29T12:51:15+08:00">2025-07-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-08-09 15:40:28" itemprop="dateModified" datetime="2025-08-09T15:40:28+08:00">2025-08-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/%E5%88%86%E5%B8%83%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">分布式</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>759</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <hr>
+<h1 id="惊群效应（Thundering-Herds）"><a href="#惊群效应（Thundering-Herds）" class="headerlink" title="惊群效应（Thundering Herds）"></a>惊群效应（Thundering Herds）</h1><p>本文总结分布式系统中常见的“惊群效应”问题及应对方案，内容会随着实践不断补充。</p>
+<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>惊群效应是指在分布式系统中，当某一共享资源在短时间内同时变为可用或失效时，大量客户端或线程几乎同时发起请求，导致后端瞬时负载激增，甚至引发雪崩效应。</p>
+<hr>
+<h2 id="常见触发场景"><a href="#常见触发场景" class="headerlink" title="常见触发场景"></a>常见触发场景</h2><ul>
+<li><p><strong>缓存击穿</strong><br>热点 Key 过期或被淘汰，大量请求同时 miss，直击数据库，造成后端压力骤增。</p>
+</li>
+<li><p><strong>锁竞争唤醒</strong><br>多个线程等待同一分布式锁或条件变量，持锁方释放后全部被唤醒，瞬时产生大量竞争请求。</p>
+</li>
+<li><p><strong>服务节点瞬时上线</strong><br>新节点启动后被路由层立即分配大量请求，但冷缓存&#x2F;初始化开销未完成，容易导致快速过载。</p>
+</li>
+</ul>
+<hr>
+<h2 id="常见缓解策略"><a href="#常见缓解策略" class="headerlink" title="常见缓解策略"></a>常见缓解策略</h2><ul>
+<li><p><strong>限流</strong><br>控制单位时间请求数，防止后端瞬时过载。</p>
+</li>
+<li><p><strong>请求合并</strong><br>多个相同请求合并为一次后端访问，减少重复开销。</p>
+</li>
+<li><p><strong>提前刷新</strong><br>在热点数据失效前主动更新，避免大规模 miss。</p>
+</li>
+<li><p><strong>随机过期</strong><br>为不同 key 增加随机 TTL，避免同一时刻集中失效。</p>
+</li>
+</ul>
+<hr>
+<h2 id="Lease-机制"><a href="#Lease-机制" class="headerlink" title="Lease 机制"></a>Lease 机制</h2><p><strong>原理</strong><br>Lease 是一种缓存击穿防护策略，在 Memcached 等系统中常见：  </p>
+<ul>
+<li>当某个 key miss 时，缓存只向第一个请求方发放 lease token，授权其访问后端并回填数据；  </li>
+<li>其他请求方在 lease 有效期内返回“稍后重试”或等待回填完成；  </li>
+<li>在同一 lease 周期内，只有一个请求会触发后端访问。</li>
+</ul>
+<p><strong>优点</strong>  </p>
+<ul>
+<li>将瞬时高并发压力限制在缓存层，保护后端服务。  </li>
+<li>可结合 TTL 随机化、热点数据提前刷新等策略，进一步降低风险。</li>
+</ul>
+<p><strong>局限</strong>  </p>
+<ul>
+<li>无法避免初次 miss 时的并发涌入。  </li>
+<li>Lease 发放策略与 TTL 需结合业务特点调优。</li>
+</ul>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>惊群效应的本质是<strong>瞬时高并发访问单一昂贵资源</strong>。应对的核心思路是：</p>
+<ul>
+<li>减少瞬时访问量（限流、随机过期）</li>
+<li>减少重复访问（请求合并、Lease）</li>
+<li>提前避免失效（提前刷新）</li>
+</ul>
+<p>在实际系统中，往往需要多种策略结合使用，才能在高并发场景下有效降低惊群带来的风险。</p>
+
+      
+    </div>
+
+    
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/07/24/%E5%88%86%E5%B8%83%E5%BC%8F/lab2B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1060,105 +1198,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2025/04/15/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/2-redis%E5%BA%94%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/tcww.jpg">
-      <meta itemprop="name" content="TCWW">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/04/15/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/2-redis%E5%BA%94%E7%94%A8/" class="post-title-link" itemprop="url">redis了解</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2025-04-15 08:09:19" itemprop="dateCreated datePublished" datetime="2025-04-15T08:09:19+08:00">2025-04-15</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2025-07-06 22:24:07" itemprop="dateModified" datetime="2025-07-06T22:24:07+08:00">2025-07-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/category/%E9%A1%B9%E7%9B%AE/" itemprop="url" rel="index"><span itemprop="name">项目</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="Symbols count in article">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>1k</span>
-            </span>
-            <span class="post-meta-item" title="Reading time">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>1 mins.</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <hr>
-<h1 id="Redis-自动结构调优机制与用户接口视图"><a href="#Redis-自动结构调优机制与用户接口视图" class="headerlink" title="Redis 自动结构调优机制与用户接口视图"></a>Redis 自动结构调优机制与用户接口视图</h1><h2 id="一、整体概述"><a href="#一、整体概述" class="headerlink" title="一、整体概述"></a>一、整体概述</h2><p>Redis 在内部为不同数据结构提供了一套 <strong>自动结构优化机制</strong>，其目的是在保证性能和内存效率的前提下，自动选择合适的底层结构。这种机制对用户是 <strong>完全透明的</strong>，开发者在使用时无需关注底层细节，只需专注于对外暴露的接口。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2025/04/15/%E5%85%A8%E6%A0%88%E8%81%8A%E5%A4%A9%E9%A1%B9%E7%9B%AE/2-redis%E5%BA%94%E7%94%A8/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1230,7 +1269,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">86</span>
+          <span class="site-state-item-count">87</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1275,7 +1314,7 @@
           <h3 class="widget-title">Tag Cloud</h3>
           <div id="myCanvasContainer" class="widget tagcloud">
               <canvas width="250" height="250" id="resCanvas" style="width=100%">
-                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/Agent/" rel="tag">Agent</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/Agent/" rel="tag">Agent</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
               </canvas>
           </div>
       </div>
@@ -1330,13 +1369,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">Symbols count total: </span>
-    <span title="Symbols count total">344k</span>
+    <span title="Symbols count total">361k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">Reading time total &asymp;</span>
-    <span title="Reading time total">5:12</span>
+    <span title="Reading time total">5:28</span>
 </div>
 
         

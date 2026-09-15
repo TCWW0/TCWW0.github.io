@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"tcww0.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="TUI 设计本文是 Agent 设计的一个小支线，主要来记录以及分享本人在 CLI Agent 的 TUI 设计的学习过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent设计--TUI篇">
+<meta property="og:url" content="https://tcww0.github.io/2026/09/15/agent/8-TUI/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="TUI 设计本文是 Agent 设计的一个小支线，主要来记录以及分享本人在 CLI Agent 的 TUI 设计的学习过程。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/15/agent/8-TUI/topic.png">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/15/agent/8-TUI/image-20260915194134978.png">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/15/agent/8-TUI/image-20260915194934917.png">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/15/agent/8-TUI/image-20260915201252976.png">
+<meta property="og:image" content="https://tcww0.github.io/2026/09/15/agent/8-TUI/image-20260915201348963.png">
+<meta property="article:published_time" content="2026-09-15T00:51:15.000Z">
+<meta property="article:modified_time" content="2026-09-15T14:08:25.383Z">
+<meta property="article:author" content="TCWW">
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcww0.github.io/2026/09/15/agent/8-TUI/topic.png">
+
+<link rel="canonical" href="https://tcww0.github.io/2026/09/15/agent/8-TUI/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Agent设计--TUI篇 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/TCWW0" class="github-corner" aria-label="View source on GitHub">
+      <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tag/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/category/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tcww0.github.io/2026/09/15/agent/8-TUI/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tcww.jpg">
+      <meta itemprop="name" content="TCWW">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Agent设计--TUI篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2026-09-15 08:51:15 / Modified: 22:08:25" itemprop="dateCreated datePublished" datetime="2026-09-15T08:51:15+08:00">2026-09-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/Agent/" itemprop="url" rel="index"><span itemprop="name">Agent</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>17k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>16 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="TUI-设计"><a href="#TUI-设计" class="headerlink" title="TUI 设计"></a>TUI 设计</h1><p>本文是 Agent 设计的一个小支线，主要来记录以及分享本人在 CLI Agent 的 TUI 设计的学习过程。</p>
+<p><img src="/2026/09/15/agent/8-TUI/topic.png" alt="topic"></p>
+<span id="more"></span>
+
+<h2 id="简单入门"><a href="#简单入门" class="headerlink" title="简单入门"></a>简单入门</h2><p>在继续之前，我们需要对于 TUI 页面有一定的认知。什么是 TUI？**TUI(Terminal User Interface)**即终端用户页面。简单来说，其是一种运行在终端中的用户页面。与我们平时所接触的 GUI 不同，TUI 并不是通过窗口、按钮、鼠标等图形组件来构建界面，而是利用终端本身提供的字符、颜色、光标以及控制序列来组织和呈现内容。</p>
+<p>就比如说，我们平时在终端中看到的代码编辑器（vim、nano等）、文件管理器、进度条、对话框、乃至于现代的 Agent(Claude Code、Codex等)，都可以属于 TUI。从表面上看，TUI 似乎只是“在终端中打印一些文字”。但如果程序需要支持输入、光标移动、动态刷新、颜色、布局、滚动以及实时更新等内容，那么其实际上已经不再是简单的输入输出程序了，而是在构建一个完整的用户界面系统。</p>
+<p>因此，理解 TUI 最重要的第一步，并不是去学习某个具体的 TUI 库，而是先建立起一个心智模型：<strong>TUI 本质上也是一种 UI。它同样需要处理输入、维护状态、组织布局，并根据当前状态渲染生成最终的屏幕内容</strong>。接下来，我们就从这个角度出发，看看一个 TUI 程序从用户输入到最终屏幕刷新，究竟经历了哪些步骤。</p>
+<h3 id="渲染流程"><a href="#渲染流程" class="headerlink" title="渲染流程"></a>渲染流程</h3><p>我们可以简单来了解一下当我们键入一个字符之后，其对应的是如何来在一个终端中显示的，一个可能的流程图如下</p>
+<p><img src="/2026/09/15/agent/8-TUI/image-20260915194134978.png" alt="1"></p>
+<p>其中的显示设备可以简单认为是我们当前的终端，Progress 可以视为是我们当前所运行的 TUI 程序。而其中的箭头描述的是输入、输出的字节数据在多个进程与终端之间的流转。接下来，我们先从最简单的情况开始：一个进程究竟是如何操控终端，让终端显示出字符的？先来看一个非常简单的例子：</p>
+<p><img src="/2026/09/15/agent/8-TUI/image-20260915194934917.png"></p>
+<p>当前的效果很明显，当执行完对应的<code>printf &#39;AAA&#39; &amp;&amp; printf &#39;BBB\n&#39;</code>之后，对应的终端中随之输出了 <code>AAABBB</code>。为什么会这样？程序是如何做到的呢？首先我们知道，标准的 <code>printf</code> 行为是将指定的内容写入到标准输出。因此，一个自然的问题就出现了：<strong>为什么向标准输出中写入数据，最终就能够让终端显示出对应的字符？</strong></p>
+<p>这也正是这一部分需要讨论的主线。我们先建立一个最基础的模型：对于一个正在运行的进程来说，标准输出实际上对应的是一个文件描述符fd。在我们当前这种交互式终端场景下，这个 fd 最终指向终端这个设备。因此，当程序执行 <code>printf → 向 stdout 写入 → 文件描述符 → 终端</code>。程序本身并没有直接“调用终端显示AAA”。它实际上只是向自己的标准输出写入了一串字节：<code>41 41 41</code>。终端侧在接收到这些字节之后，再按照终端协议对于它们进行解释。对于这里的 <code>A</code> 来说，他们属于普通字符，因此终端就会将 <code>AAA</code> 显示在屏幕上。</p>
+<p>所以，最基础的理解可以暂且建立为：<strong>进程负责产生字节，终端负责解释这些字节并产生视觉效果</strong>。这也是我们后续理解 TUI 的一个非常重要的起点。因为从这个角度来看，TUI 程序本质上也是在控制自己输出给终端的字节，只不过他们控制输出的已经不再只是普通字符，还可能包括颜色、光标移动、清屏等终端控制序列。</p>
+<p>接下来看到另外一个例子：</p>
+<p><img src="/2026/09/15/agent/8-TUI/image-20260915201252976.png">  →  <img src="/2026/09/15/agent/8-TUI/image-20260915201348963.png"></p>
+<p>其中第二张图是执行<code>printf &#39;\x1b[2;5HX\n&#39;</code>之后的结果。可以看到，原本已经显示在终端上的 <code>AAABBB</code>，其中一个字符被 <code>X</code> 替换了。但这里实际上发生的事情并不是 <code>printf</code> 修改了原来的 <code>A</code>。<code>printf</code> 做的事情依然非常简单：向标准输出对应的 fd 中写入了一串字节。真正发生变化的是终端对于这些字节的解释。这一次写入的内容可以拆成俩部分： <code>\x1b[2;5H</code>以及<code>X</code>。其中<code>X</code>是我们熟悉的普通字符，而前面的 <code>\x1b[2;5H</code>则不是一个需要直接显示在屏幕上的字符。它告诉终端：<strong>将光标一定到第 2 行、第 5 列</strong>。当终端完成这个操作之后，后面的 <code>X</code> 就会被写入到新的光标为止，因此我们最终看到的效果就是原来的字符被 <code>X</code> 覆盖。（注：在测试上述俩行时可以先清空屏幕）</p>
+<p>这就引出了终端通信中一个非常重要的概念：<strong>控制字符（Control Character）</strong>。所谓控制字符，可以简单理解为：<strong>不直接用于表示普通内容，而是用于控制终端或通信过程行为的字符</strong>。例如，换行符 <code>\n</code> 并不是让终端显示 <code>\n</code>，而是改变光标的位置；而我们刚才看到的 <code>\x1b</code>（ESC）则可以作为一组控制序列的其实部分，让终端进一步解释后面的内容。因此，从终端的角度来看，写入 fd 的数据其实并不只有一种：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">写入终端的数据</span><br><span class="line">    ├── 普通字符 </span><br><span class="line">    │ 		└── 产生可见内容 </span><br><span class="line">    │ </span><br><span class="line">    └── 控制字符 / 控制序列 </span><br><span class="line">        └── 改变终端状态 </span><br><span class="line">        ├── 光标位置 </span><br><span class="line">        ├── 字体颜色 </span><br><span class="line">        ├── 清屏 </span><br><span class="line">        └── ...</span><br></pre></td></tr></table></figure>
+
+<p>这也是 TUI 能够存在的基础。因为 TUI 程序并不需要直接操作屏幕上的每一个像素。它只需要向终端输出正确的字符以及控制序列，就可以告诉终端：<strong>在哪里显示什么内容，以及应该以什么状态显示</strong>。在这个角度来看，前面那个看起来很简单的 <code>printf</code>，实际上已经具备了一个最小 TUI 所需要的核心能力：<strong>通过向终端输出字节，改变终端的设备和最终显示效果</strong>。</p>
+<h2 id="终端记住了什么"><a href="#终端记住了什么" class="headerlink" title="终端记住了什么"></a>终端记住了什么</h2><p>上一节我们主要分析了程序端往 fd 中输入字节之后为什么能够产生终端上的 UI 效果，当这是单向的，只描述了图中的一条单向路径。要真正写出一个 TUI，我们还需要回答许多问题，现在，我们将注意力集中到一个反向的问题：<strong>在终端侧，究竟记住了什么内容？</strong></p>
+<p>答案其实远远比想象中简单。终端记住的东西只有俩样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">终端的状态</span><br><span class="line">    ├── 一张字符网格：每个格子保存「内容 + 属性」</span><br><span class="line">    │       							└── 属性：前景色、背景色、粗体、下划线……</span><br><span class="line">    └── 一个光标：当前「下一个字符要写进哪个格子」</span><br></pre></td></tr></table></figure>
+
+<p>如果说，终端是一快有记忆的显示设备，那么其的记忆就是当前的渲染网格。程序往终端的 fd 中写入一个普通字符，就等价与「将字符填进光标所在的格子，然后把光标右移一个」；程序写入 <code>\x1b[2;5H</code> 这段字节数据，等价与「把光标挪到第 2 行第 5 列」。除此之外，程序对于终端所做的操作，本质上都可以归为这俩类操作的一个组合。由此，我们能够对于前文覆盖的例子有一个更深刻的理解：<code>X</code> 之所以能够盖住 <code>A</code>，不是终端<strong>删掉</strong>了某个字符，而是因为程序先将光标移动到了对应坐标下的格子，然后往其中写入了一个新的字符。<strong>格子只有覆盖，没有删除</strong>。</p>
+<h2 id="问题：屏幕读不回来"><a href="#问题：屏幕读不回来" class="headerlink" title="问题：屏幕读不回来"></a>问题：屏幕读不回来</h2><p>整个模型到这里还很顺利，程序通过特殊字符以及常规字符来控制当前终端应该显示什么内容。但接下来有一个事实，是整个 TUI 设计复杂度的重要来源：<strong>程序可以把字节写进终端，但却没办法从终端中来将当前显示的数据读取回来</strong>。写操作很简单，往对应的 fd 中来写入数据即可，但是读呢？在大多数终端上，并不存在一个「请把当前屏幕第 3 行告诉我」的通用协议。终端不会回答这个问题。</p>
+<p>这个不对称将带来一个相当尖锐的问题。假设我们现在要实现一个最简单的需求：<strong>把屏幕上第 5 个字符从 <code>A</code> 改成 <code>B</code>。程序应该怎么来编写这条指令？它必须知道屏幕上第 5 个字符确实是期望的 <code>A</code>。但是程序无法获取到当前终端所显示的内容，其应该如何获取呢？</strong></p>
+<p>结论其实只有一个：<strong>程序本身必须自己维护一份屏幕的账本</strong>。程序本身得记住「我上一次将终端绘制成什么样了」，然后基于这份账本以及当前的期望来判断接下来应该如何来生成操作的字节序列。于是整个渲染问题从一个 IO 问题，变成了一个<strong>状态同步问题</strong>：终端侧有一份状态（网格），程序侧也有一份状态，俩者之间必须保持一致，而唯一的同步手段只有程序单向的写字节。这就是 TUI 的接缝（Seam）。</p>
+<h2 id="落地"><a href="#落地" class="headerlink" title="落地"></a>落地</h2><p>经历了前文，问题的形状已经定了下来：<strong>屏幕读不回来，所以程序必须自己记账</strong>。接下来的问题是：这本账在代码里究竟长什么样？围绕这本账，一个完整的 TUI 层又是如何被一层层逼出来的？先交代一下背景，本次实现借鉴 agentty 的 TUI 设计 ，布局层使用同源的 maya 库。但本文并不打算讲任何库的 API——API 是查文档就会的东西，值得写下来的是那些「不做就会错」的边界。</p>
+<h3 id="一帧的四步"><a href="#一帧的四步" class="headerlink" title="一帧的四步"></a>一帧的四步</h3><p>有了账本这个概念，重绘这件事就可以被描述得非常精确了。设：</p>
+<ul>
+<li><strong>B（Buffer &#x2F; Back）</strong>：这一轮我希望屏幕上显示成什么样，也就是期望的屏幕</li>
+<li><strong>F（Front）</strong>：我认为屏幕上现在是什么样，也就是账本</li>
+</ul>
+<p>于是一次重绘就是四步：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">① 算出 B              程序根据当前状态，算出「期望的屏幕」</span><br><span class="line">② 取出手里的 F        把账本拿出来</span><br><span class="line">③ 比对 B 与 F          只把「不一样的地方」翻译成字节写出去</span><br><span class="line">④ 成功之后 F ← B       账本更新为 B，与终端达成一致</span><br></pre></td></tr></table></figure>
+
+<p>价值全在第 ③ 步。如果每一轮都把整屏内容重写一遍（全量重绘），那 ② 与 ④ 就都不需要了，账本也不必存在——但代价是每帧都要写出几千个字节，而在流式输出这种一秒重绘几十次的场景下，写字节本身就会成为瓶颈。反过来，只要维护了 F，就只需要发送<strong>差量</strong>：一个字符变了，就只写那一个字符，外加一次光标移动。</p>
+<p>这也是为什么前文要强调「格子只有覆盖，没有删除」——<strong>正因为写入是覆盖式的，差量重绘才是可行的</strong>。如果写入是追加式的（像打印日志那样），那无论如何都得清屏重来。</p>
+<h4 id="但写入可能只成功一半"><a href="#但写入可能只成功一半" class="headerlink" title="但写入可能只成功一半"></a>但写入可能只成功一半</h4><p>第 ③ 步与第 ④ 步之间，夹着一个可能失败的 <code>write</code>。这是四步里唯一会失败的环节，值得停下来单独看。</p>
+<p>先说自愈的资本。写入是覆盖式的：把同样的内容再写一遍，效果和写一遍相同；把空白再擦一遍，也还是空白。所以「下一轮基于旧 F 重算出来的差量里，有一部分是重复劳动」——这不是问题，恰恰是失败之后能够自愈的前提：<strong>重复无害，缺失要补</strong>。</p>
+<p>真正不能碰的，是第 ④ 步的时机。<strong>只有写入完整成功，才允许 F ← B</strong>。假如账本提前前进了，而这次 write 只送出去一半字节：丢失的那部分再也不会被生成——账本以为它们已经在屏幕上了，后续的差量永远不会再包含它们，屏幕和账本从此永久分家。而只要不提交，下一轮就会基于旧的 F 重新比对，重复的部分无害，丢失的部分补上。<strong>宁可重复，不可丢失。</strong></p>
+<p>更麻烦的情况，是失败落在一条控制序列的中间。终端的解析器被留在半状态上，后续输出的字节会被当成这条序列的延续吃掉。这也是失败之后必须整段重来、不能从断点续发的原因：续发的前提是终端听得懂，而停在半状态上的终端什么都听不懂。所以渲染函数的返回值不是「画了什么」，而是「成没成功」：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/ui/terminal.cpp —— TerminalDriver::render()</span></span><br><span class="line"><span class="type">const</span> std::string&amp; bytes =</span><br><span class="line">    framebuffer_-&gt;<span class="built_in">render</span>(<span class="built_in">to_maya_element</span>(frame, theme), theme);</span><br><span class="line"><span class="keyword">if</span> (!<span class="built_in">write_all</span>(output_fd_, bytes)) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;          <span class="comment">// 写入不完整：不 commit，下一轮基于旧账本重来</span></span><br><span class="line">&#125;</span><br><span class="line">framebuffer_-&gt;<span class="built_in">commit</span>();     <span class="comment">// 只有真的落到终端上，账本才前进</span></span><br><span class="line"><span class="keyword">return</span> <span class="literal">true</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码里 <code>render()</code> 与 <code>commit()</code> 的分离是关键。B 和 F 这俩份缓冲在实现里就是 maya FrameBuffer 的 front&#x2F;back：<code>render()</code> 负责 ①②③——比对、产出差量字节，但<strong>不换缓冲</strong>；<code>commit()</code> 负责 ④——把账本推进到 B。它们是俩个动作，不是一个动作，因为中间夹着那个可能失败的 <code>write</code>。合并成一个「刷新」函数看起来更顺手，但那样就没有地方安放「失败了该怎么办」这个分支了。旁边 <code>write_all</code> 的注释写着同一件事：返回是否全部写出，调用方据此决定是否 commit 已渲染状态，<strong>谎报成功会让后续差分建立在假前提上</strong>。它自己还守着一条纪律：EINTR 当重试而不是失败——被信号打断不算失败，写完才算数。</p>
+<h3 id="帧：一份没有坐标的中间表示"><a href="#帧：一份没有坐标的中间表示" class="headerlink" title="帧：一份没有坐标的中间表示"></a>帧：一份没有坐标的中间表示</h3><p>四步里的 B，需要一个具体的数据结构来承载。这个结构在实现里叫 <code>Frame</code>，它的定义值得完整看一遍：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// include/my_agent/ui/view.hpp</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">StyledLine</span> &#123;</span><br><span class="line">    std::string text;          <span class="comment">// 这一行的正文</span></span><br><span class="line">    std::string rail;          <span class="comment">// 左侧的竖线装饰（如「│」），与正文分开存</span></span><br><span class="line">    StyleColor rail_foreground&#123;StyleColor::Default&#125;;</span><br><span class="line">    StyleColor foreground&#123;StyleColor::Default&#125;;</span><br><span class="line">    StyleColor background&#123;StyleColor::Default&#125;;</span><br><span class="line">    <span class="type">bool</span> bold&#123;<span class="literal">false</span>&#125;;</span><br><span class="line">    <span class="type">bool</span> dim&#123;<span class="literal">false</span>&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Frame</span> &#123;</span><br><span class="line">    std::vector&lt;StyledLine&gt; lines;               <span class="comment">// 屏幕上的若干行</span></span><br><span class="line">    std::vector&lt;MarkdownLayer&gt; markdown_layers;  <span class="comment">// 流式 Markdown 的增量边界（见后文）</span></span><br><span class="line">    std::optional&lt;CursorPosition&gt; cursor;        <span class="comment">// 光标（可选）</span></span><br><span class="line">    std::optional&lt;StatusBar&gt; status_bar;         <span class="comment">// 状态栏（可选）</span></span><br><span class="line">    std::optional&lt;std::<span class="type">size_t</span>&gt; status_bar_line;  <span class="comment">// 状态栏要贴在哪一行</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>最值得注意的是这个结构里<strong>没有的东西</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Frame 里没有的</span><br><span class="line">    ├── 没有转义序列      不含 \x1b，不含颜色码</span><br><span class="line">    ├── 没有绝对坐标      行没有 y，字符没有 x</span><br><span class="line">    ├── 没有屏幕尺寸      不知道终端是 80 列还是 200 列</span><br><span class="line">    ├── 没有折行          超宽的行原样保留完整文本</span><br><span class="line">    └── 没有「上一帧」    它是一份完整的目标，不是一份补丁</span><br></pre></td></tr></table></figure>
+
+<p><strong>位置在这里是用「顺序」表达的</strong>：第几行，等于它在 <code>lines</code> 里的下标；第几个字符，等于它在 <code>text</code> 里的下标。程序不需要知道「第 3 行画在屏幕的 y&#x3D;3」，它只需要知道「这一行排在第三」。谁把它放到 y&#x3D;3？后面的布局层。</p>
+<p>这是一个很重要的解耦，因为屏幕的实际尺寸是<strong>运行期才知道的</strong>，而且随时会变（用户拖窗口）。如果 Frame 里写死了坐标，那每次窗口变化，所有已经算好的内容都作废。而现在，Frame 是一份「与坐标系无关的意图」：窗口大小变了，只需要重新做一次布局，不需要重新想一遍内容。</p>
+<p>「没有折行」值得单独说一句。超宽的行在 Frame 里原样保留完整文本，折行、宽度、裁剪全部下放给布局层。理由很直接：<strong>宽度判据只能有一份</strong>。一个字符占几格（CJK 俩格、组合字符零格……）是一张随时会过期的表，如果投影层自己折行，它就得自己维护这张表；而表一旦和终端的实际行为对不上，折出来的行就和屏幕画出来的行对不上——这正是后面幽灵行事故的老家。让宽度问题整体住在离终端最近的那一层，是比「在哪折行」重要得多的决策。</p>
+<p>唯一的例外是<strong>光标</strong>。它确实带着明确的 row 和 column，为什么能破例？因为<strong>光标不是内容</strong>。内容回答「屏幕上有什么」，光标回答「你的下一个字符会落在哪」——它描述的是设备的输入焦点，全屏只有一个，而且天然就是坐标语义，硬用顺序去表达反而别扭。</p>
+<p>同样的道理，<code>status_bar</code> 与 <code>status_bar_line</code> 也是分离的：前者是「状态栏长什么样」，后者是「它排在第几行」——注意这依然是个<strong>顺序语义</strong>的下标，而不是屏幕上的物理行号。在流式输出这种内容会不断增高的场景里，状态栏必须钉在窗口底部而不是跟着内容往下滚；但「钉在底部」具体由谁实现，后面马上会看到。</p>
+<h3 id="view：把状态投影成帧的纯函数"><a href="#view：把状态投影成帧的纯函数" class="headerlink" title="view：把状态投影成帧的纯函数"></a>view：把状态投影成帧的纯函数</h3><p>有了 Frame 这个目标结构，接下来的问题是：<strong>谁负责把它算出来？</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Model 的投影。纯函数：不碰终端、不碰时钟、不碰文件，因此可以脱离 tty 单测。</span></span><br><span class="line">[[nodiscard]]</span><br><span class="line"><span class="function">Frame <span class="title">view</span><span class="params">(<span class="type">const</span> Model&amp; model, <span class="type">const</span> UiState&amp; ui, Size size)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数是整个 TUI 里我个人最满意的一处设计，因为它把架构篇里那条「纯函数核心」的纪律，一路贯彻到了 UI 层：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">view() 的纪律</span><br><span class="line">    ├── 输入：Model（系统状态）+ UiState（输入框状态）+ Size（窗口大小）</span><br><span class="line">    ├── 输出：Frame</span><br><span class="line">    ├── 不碰终端、不发网络、不读文件</span><br><span class="line">    ├── 不读时钟、不读全局变量</span><br><span class="line">    └── 相同的输入 → 相同的 Frame</span><br></pre></td></tr></table></figure>
+
+<p>输入为什么是三份，值得多说一句。<strong>Model</strong> 是系统状态（对话历史、工具调用、当前 phase），<strong>UiState</strong> 是输入框里打到一半的内容。打到一半的东西单独拎出来、不并进 Model，是因为它只属于前端：状态机不关心用户打了一半什么，它只在提交的那一刻看到一条完整的 Submit——<strong>对领域来说，打到一半的内容不存在</strong>。</p>
+<p>这份纪律有一个可以从文件结构上直接验证的硬证据：<strong>view.hpp 的 include 列表里，一个 maya 的头文件都没有</strong>：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// include/my_agent/ui/view.hpp 的全部 include</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;my_agent/runtime/model.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;my_agent/ui/markdown_scanner.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;my_agent/ui/status_bar.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstddef&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;optional&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>这一点可能反直觉：明明要「渲染」，怎么会和渲染库无关？因为「算出要显示什么」和「怎么把它显示到终端上」是俩件事。前者是纯粹的数据变换，后者才涉及布局与转义序列。分开之后，view() 的测试也就不需要终端、不需要 maya——喂进一个构造出来的 Model，断言产出的 Frame 即可，和架构篇里 update() 的测试是同一个套路：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// tests/view_test.cpp —— 不需要终端，不需要 maya</span></span><br><span class="line"><span class="built_in">TEST</span>(ViewTest, ShowsWorkInFlightWhileStreaming)</span><br><span class="line">&#123;</span><br><span class="line">    my_agent::Model model = <span class="built_in">model_with</span>(&#123;</span><br><span class="line">        &#123;.role = my_agent::Role::User, .text = <span class="string">&quot;hello&quot;</span>&#125;,</span><br><span class="line">        &#123;.role = my_agent::Role::Assistant, .text = <span class="string">&quot;&quot;</span>&#125;,</span><br><span class="line">    &#125;);</span><br><span class="line">    model.phase = my_agent::Streaming&#123;&#125;;</span><br><span class="line">    <span class="type">const</span> my_agent::ui::Frame streaming = my_agent::ui::<span class="built_in">view</span>(</span><br><span class="line">        model, my_agent::ui::UiState&#123;&#125;, my_agent::ui::Size&#123;.columns = <span class="number">40</span>, .rows = <span class="number">10</span>&#125;</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    model.phase = my_agent::Idle&#123;&#125;;</span><br><span class="line">    <span class="type">const</span> my_agent::ui::Frame idle = my_agent::ui::<span class="built_in">view</span>(</span><br><span class="line">        model, my_agent::ui::UiState&#123;&#125;, my_agent::ui::Size&#123;.columns = <span class="number">40</span>, .rows = <span class="number">10</span>&#125;</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 提示只在 Streaming 时出现：两帧必须不同，否则这个提示没有信息量。</span></span><br><span class="line">    <span class="built_in">ASSERT_LT</span>(idle.lines.<span class="built_in">size</span>(), streaming.lines.<span class="built_in">size</span>());</span><br><span class="line">    <span class="built_in">EXPECT_FALSE</span>(streaming.lines.<span class="built_in">back</span>().text.<span class="built_in">empty</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个测试的存在本身就是一段设计说明。它的注释里写着来历：行式 REPL 的实测缺陷正是「敲完回车之后 19 秒里屏幕一片死寂」——用户无法分辨模型是在思考还是进程已经卡死，注释甚至写着「这是整个 TUI 存在的理由」。流式输出的第一个 token 可能几秒后才到，而这几秒里用户必须看到「它在干活」；但此时模型还没有吐出任何文本，Frame 里没有任何内容可以承载这个信号。所以「在干活」这件事只能来自 <strong>phase 这个状态本身</strong>，由 view() 把它投影成状态栏上的「▌ thinking」。<strong>界面不能依赖已经到达的数据，它必须能表达「尚未到达」。</strong></p>
+<p>对称的另一面是<strong>已经失败</strong>。流中途断了，Model 里记着 error，view() 就把它投影成一行跟着对话走的红字——注释里同样写着理由：失败必须看得见，否则「回车之后什么都没发生」和卡死无从区分。尚未到达、已经失败，这俩个「内容之外的事实」，都得由状态投影出来。</p>
+<p>这也是 view() 值得被称为「投影」而不是「渲染」的原因：它不发明任何信息，只是把 Model 里已经存在的事实，换一种形状呈现出来。这里有一处需要注意的细节：view 其实还有第二个重载，多收一个 <code>MarkdownState&amp;</code>：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[[nodiscard]]</span><br><span class="line"><span class="function">Frame <span class="title">view</span><span class="params">(<span class="type">const</span> Model&amp; model, <span class="type">const</span> UiState&amp; ui, Size size,</span></span></span><br><span class="line"><span class="params"><span class="function">           MarkdownState&amp; markdown_state)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>流式场景下一秒要投影几十次，每次都把全部历史消息的 Markdown 从头解析一遍是浪费，于是把「每条消息解析到了哪个边界」记成一份备忘，显式地传进来、传出去。这份备忘本身又是一本账：<strong>committed_prefix</strong>（已提交、只解析一次的段落）加 <strong>active_tail</strong>（在途、每帧重算的尾巴），和渲染的 front&#x2F;back 是同一个思想，只是记账的粒度从「格子」变成了「字符偏移」。它没有破坏纪律——状态从参数的正门进来，而不是藏在全局变量里；而一旦消息的前缀对不上（比如回合被重写、变短），备忘整本作废、从头重算，宁可重算，不可错位。顺带地，每条消息的提交边界会被写进 <code>frame.markdown_layers</code>：渲染层并不消费它，它是给测试看的——增量解析的行为必须能被断言，这件事测试一节会再遇到。</p>
+<h3 id="maya：从帧到元素"><a href="#maya：从帧到元素" class="headerlink" title="maya：从帧到元素"></a>maya：从帧到元素</h3><p>Frame 是一份与坐标系无关的意图，但终端需要的是有坐标的格子。中间这一步由布局库完成，项目里用的是 maya。它是整个 UI 层唯一引入 maya 的地方——翻译层 maya_projection（.hpp&#x2F;.cpp 一对），以及持有 FrameBuffer 的 terminal.cpp。查一遍 include 就能验证：view、ui_loop、input、status_bar 里一个 maya 都没有。整条链路是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Frame               （无坐标、无转义，纯数据）</span><br><span class="line">    ↓  to_maya_element()     唯一的翻译层</span><br><span class="line">maya::Element       （有布局语义的树）</span><br><span class="line">    ↓  FrameBuffer::render()  maya 内部：布局 → 定位 → 与 front 比对 → 差量字节</span><br><span class="line">bytes</span><br><span class="line">    ↓  write_all()</span><br><span class="line">终端</span><br></pre></td></tr></table></figure>
+
+<p>翻译本身的规则很朴素，一行 <code>StyledLine</code> 变成什么：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/ui/maya_projection.cpp</span></span><br><span class="line"><span class="function">maya::Element <span class="title">to_maya_line</span><span class="params">(<span class="type">const</span> StyledLine&amp; line, <span class="type">const</span> maya::Theme&amp; theme)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">const</span> maya::Element body =</span><br><span class="line">        (maya::dsl::<span class="built_in">text</span>(line.text, <span class="built_in">to_maya_style</span>(line, theme))</span><br><span class="line">         | maya::dsl::<span class="built_in">shrink</span>(<span class="number">0.0F</span>)).<span class="built_in">build</span>();</span><br><span class="line">    <span class="keyword">if</span> (line.rail.<span class="built_in">empty</span>()) &#123; <span class="keyword">return</span> body; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">const</span> maya::Element rail =</span><br><span class="line">        (maya::dsl::<span class="built_in">text</span>(line.rail,</span><br><span class="line">             <span class="built_in">to_maya_style</span>(StyledLine&#123;.foreground = line.rail_foreground&#125;, theme))</span><br><span class="line">         | maya::dsl::<span class="built_in">shrink</span>(<span class="number">0.0F</span>)).<span class="built_in">build</span>();</span><br><span class="line">    <span class="keyword">return</span> (maya::dsl::<span class="built_in">h</span>(std::<span class="built_in">move</span>(rail), std::<span class="built_in">move</span>(body))</span><br><span class="line">            | maya::dsl::<span class="built_in">shrink</span>(<span class="number">0.0F</span>)).<span class="built_in">build</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里有两点值得注意。</p>
+<p><strong>第一，text 和 rail 在 Frame 里是同一行上的俩个字段，到了这里才变成左右俩列。</strong>也就是说，「左侧有一条竖线」这个视觉效果，实际上是由 <code>dsl::h(rail, body)</code> 这个横向排列产生的。把它们分开存而不是预先拼成 <code>&quot;│ 内容&quot;</code>，是因为颜色不同——竖线有自己独立的前景色（用户消息与助手消息的竖线颜色不同），拼成一个字符串就没法分别上色了。</p>
+<p><strong>第二，所有元素都带着 <code>shrink(0.0F)</code>。</strong>它是「空间不足时不参与压缩」的声明，也是把宽度问题整体交给布局层的另一半承诺：Frame 不折行，Element 不硬撑，超宽的内容由布局层的裁剪规则处理，而不是把行撑爆、把别的行顶走。</p>
+<p>真正的点睛之笔在最外层的容器上：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/ui/maya_projection.cpp —— to_maya_element()</span></span><br><span class="line"><span class="keyword">return</span> maya::dsl::<span class="built_in">vstack</span>()</span><br><span class="line">    .<span class="built_in">direction</span>(maya::ColumnReverse)      <span class="comment">// 「从下往上」堆叠</span></span><br><span class="line">    .<span class="built_in">overflow</span>(maya::Overflow::Hidden)    <span class="comment">// 超出边界的裁掉</span></span><br><span class="line">    (std::<span class="built_in">move</span>(rows));</span><br></pre></td></tr></table></figure>
+
+<p><code>ColumnReverse</code> 的语义是「从下往上」。配合一个反向遍历 rows 的循环，得到的效果是：<strong>最后几行被贴在窗口底部，超出的内容从顶部裁掉</strong>。这正是聊天类界面想要的——新内容从底部生长，旧内容向上溢出。而且这个「底部对齐」不需要程序去计算「现在窗口有多少行、内容有几行、差多少」，它由布局语义直接承载。前文里 <code>status_bar_line</code> 只说了「排在第几行」，谁把它钉在窗口底部，就是这里。</p>
+<p>顺带一提，<code>Overflow::Hidden</code> 是必需的：<code>ColumnReverse</code> 只改变了堆叠方向，并不会阻止内容溢出到窗口外，少了它，长对话会把整个屏幕推乱。</p>
+<p>状态栏走的是另一条小路。它不是一整行文本，而是一组<strong>自带丢弃顺序的段</strong>：「▌ thinking」永远在场，tok&#x2F;s 最先丢，然后是耗时、模型名、上下文用量……窗口变窄时状态栏的收缩不是一串 if-else 的惊喜，而是每一段声明好自己的优先级（keep），布局层按声明逐段卸货。<strong>收缩要成为声明，而不是惊喜。</strong></p>
+<h3 id="会话：进得去，还要出得来"><a href="#会话：进得去，还要出得来" class="headerlink" title="会话：进得去，还要出得来"></a>会话：进得去，还要出得来</h3><p>渲染接缝管的是「每一帧怎么同步」，但程序与终端的共存还有另一条边界，它在时间维度上：<strong>进场时改掉的东西，退场时必须还回去</strong>。顺带一提，进场之前还有一道门：输入输出俩端都必须是 tty，<code>cat file | my_agent</code> 这种场景下改不了输入的 termios，整个 TUI 直接回退到行式 REPL——「能不能跑」是循环自己的前置条件。</p>
+<p>进场做三件事，全部靠写字节完成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">enter:  \x1b[?1049h   切到备用屏（顺带存好光标位置）</span><br><span class="line">        \x1b[?7l      关掉自动换行（DECAWM）</span><br><span class="line">        \x1b[?25l     隐藏光标</span><br><span class="line">        + termios     raw mode：关回显、关行缓冲、关信号加工</span><br></pre></td></tr></table></figure>
+
+<p>切<strong>备用屏</strong>而不是在正常输出流上直接画（inline），是一个典型的取舍。inline 要精确记账滚出屏幕的物理行数，<strong>那是正确性问题</strong>；备用屏的代价（退出后历史消失）<strong>只是体验问题</strong>。正确性问题没有辩护的余地，体验问题还可以拿「重要内容都在别处」来辩护。</p>
+<p>关 <strong>DECAWM</strong>（自动换行）则是纵深防御。已知的幽灵行成因都修掉之后，这一条防的是未来：宽度表跟不上 Unicode 新分配时，漏网字符会被欠算、把行推过右边距——DECAWM 关着，光标钉在末列原地覆写而不是触发滚屏，幽灵行退化成「末格被覆盖」这种局部瑕疵，而不是整屏错位。</p>
+<p><strong>raw mode</strong> 是逐键处理的前提：关掉回显与行缓冲，按键才会以字节的形式即时到达；关掉 ISIG，Ctrl-C 才会作为普通字节到达、由前端决定含义（中断请求而不是杀进程）——否则进程直接被信号带走，备用屏和 termios 都来不及还原。还有一条不显眼但很关键：关掉 OPOST 之后，终端不再自动把 <code>\n</code> 翻译成 <code>\r\n</code>，<strong>这正是行定位必须显式 CUP 的原因</strong>。渲染流程一节里发出的每个字节，终端从此都按字面解释，定位的责任全部回到了程序自己身上（这些序列的字典，是 xterm 的 ctlseqs 文档 <a href="2">2</a>(<a target="_blank" rel="noopener" href="https://invisible-island.net/xterm/ctlseqs/ctlseqs.html)%EF%BC%89%E3%80%82">https://invisible-island.net/xterm/ctlseqs/ctlseqs.html)）。</a></p>
+<p>退场是进场的精确逆转，而且<strong>顺序相反</strong>：先显光标、再开 DECAWM、最后切回主屏。反过来的话，主屏可能留着隐藏的光标或关着的 autowrap——用户的 shell 从此看不见自己在打什么、长命令不再换行。还原的先后也有讲究：先屏幕、后 termios，因为 termios 还原之后 OPOST 又开了，后面的转义序列会被终端加工甚至截断。</p>
+<p>但<strong>崩溃不会走析构</strong>。raw mode 没还原，意味着用户的 shell 从此不回显，只能敲 <code>reset</code> 才救得回来——所以这条路径不能依赖 RAII，得挂信号处理器。而信号处理器是操作系统约束最严的地方：不能加锁（可能已经持有）、不能分配（可能正崩在 malloc 里）、不能访问对象（this 可能已损坏），只能靠几个平坦的全局量。还原完再重发一次信号（SA_RESETHAND 已经把处理器复位成默认动作），进程才真正终止，留下正确的退出状态和 core，而不是让崩溃被静默吞掉。</p>
+<h3 id="一帧的旅程"><a href="#一帧的旅程" class="headerlink" title="一帧的旅程"></a>一帧的旅程</h3><p>至此，所有部件都齐了。把一个完整回合里的<strong>一次重绘</strong>串起来走一遍：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">按键 / 后台事件</span><br><span class="line">    ↓  read(键盘 fd) / read(唤醒 fd)</span><br><span class="line">	字节</span><br><span class="line">    ↓  InputDecoder::feed()</span><br><span class="line">	Key                ← 有状态：一个 UTF-8 字符可能跨俩次 read 到达</span><br><span class="line">    ↓  apply_key()</span><br><span class="line">	Msg                ← Submit / 审批 / …（没生成 Msg 的键只改 UiState）</span><br><span class="line">    ↓  dispatch() → 状态机 update(Model, Msg)</span><br><span class="line">	Model              ← 新状态与新命令</span><br><span class="line">    ↓  view(Model, UiState, Size)</span><br><span class="line">	Frame              ← 无坐标、无转义；位置由顺序表达</span><br><span class="line">    ↓  to_maya_element()</span><br><span class="line">	maya::Element      ← 唯一一次翻译成布局语言</span><br><span class="line">    ↓  FrameBuffer::render()</span><br><span class="line">	bytes              ← 与账本 front 比对后的差量</span><br><span class="line">    ↓  write_all(输出 fd)</span><br><span class="line">	终端               ← 网格被覆盖</span><br><span class="line">    ↓  写入完整成功？</span><br><span class="line">	账本 front ← back  ← 成功才前进；失败则跳过，下一轮自愈</span><br></pre></td></tr></table></figure>
+
+<p>这条链上，每一站都是一次纯变换，碰外部世界的只有头尾俩次 read&#x2F;write。这正是架构篇里那句话在 UI 层的复现：<strong>所有横向的箭头（终端、网络、文件）都发生在边缘；核心只经历纵向的数据变换。</strong></p>
+<p>链路上有一处藏着状态：InputDecoder。字节变按键不是无状态的——一个中文字符占 3 个字节，而 read 只保证返回「已就绪的字节」，一个 UTF-8 序列完全可能跨俩次 read 到达，残缺的序列必须留在 decoder 里等下一次 feed 缝合，否则会把半个汉字当成非法字节吐出去。apply_key 里也有几条小守卫：空行不发 Submit（模型会收到一条空的用户消息，白跑一次往返，有些 provider 还会直接报错）；审批期间按键的含义整个改变，y&#x2F;n 必须对着 pending_permission 里那个具体的 id 批——<strong>用错 id 会批准另一个工具</strong>。</p>
+<p>而承载这一切的，是循环本身。只看「等事件 → 重绘」这一段，它的形状是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">循环一轮</span><br><span class="line">    ↓</span><br><span class="line">drain_inbox()                    ← 先消费已到达的后台消息</span><br><span class="line">    ↓</span><br><span class="line">should_paint() ? 重绘 : 跳过      ← 帧率合并：20fps 窗口内压掉，记住补画时机</span><br><span class="line">    ↓</span><br><span class="line">poll(键盘, 后台唤醒, 窗口变化)    ← 三个来源放进同一个 poll</span><br><span class="line">    ↓  谁就绪处理谁，回到顶部</span><br></pre></td></tr></table></figure>
+
+<p>顺序是 drain → 重绘 → poll。drain 必须在 poll 之前，还是那个电平的问题：消息已经进了 inbox、但唤醒计数已经被上一轮取走，poll 就会白等一个超时周期——先消费，再决定等多久。循环开始前还会先强制画一帧，否则屏幕在用户敲下第一个键之前是空的。</p>
+<p>这里有几个关于循环的细节，每一个都是实测换来的。</p>
+<p><strong>第一，为什么是三个 fd 塞进同一个 poll。</strong>键盘、后台事件、窗口大小变化，三种完全不同性质的输入。宿主其实提供了一个更省事的 <code>run_until_quiescent()</code>——drain、判定静止、等唤醒一条龙——但它在流式进行中不返回：那时键盘没人管，「流式输出进行中，用户按了 Ctrl-C」这种场景就会卡死。放进同一个 poll，线程才能同时等所有事。顺带一提，键盘 fd 必须用驱动给出的那一个，不能假定是 STDIN_FILENO——假定了，驱动持有的 fd 就被彻底忽略，按键永远读不到。这条在 pty 上实测过：屏幕只画出提示符，敲进去的字节没有人取。</p>
+<p><strong>第二，唤醒是电平的，不取走就一直在亮。</strong>eventfd 的计数不清零，POLLIN 就一直就绪，poll 每次立刻返回，循环退化成忙转——实测不清时空转直接烧满 CPU，而且 poll 的超时从此失效，帧率补画那条路径被永久短路。所以唤醒就绪后的第一个动作是清掉它。窗口变化同理：只取走管道里的字节，重绘交给下一轮——view() 每帧都重新读 terminal.size()，被跳过的那帧由补画机制补上，和别的事件走同一条路。</p>
+<p><strong>第三，为什么需要 RepaintClock。</strong>上游一秒能吐几十个 token，每一个都触发重绘的话，绝大部分时间会花在 write 上，而人眼分辨不出 20fps 以上的差别。所以做一次合并：窗口内的重绘请求<strong>不丢弃，而是记下来</strong>，由 <code>time_until_next_paint()</code> 报出下一次补画的时机，作为 poll 的超时值。合并是延迟，不是丢弃。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 无事可做时返回 -1，poll 会无限等待 —— 这是空闲时占 0% CPU 与占满一核的分界</span></span><br><span class="line">[[nodiscard]]</span><br><span class="line">std::<span class="function">chrono::milliseconds <span class="title">time_until_next_paint</span><span class="params">(Clock::time_point now)</span> <span class="type">const</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>那句「返回 -1 表示无限等」是这个设计里最容易被忽略、但最要紧的一行。假如这里返回 0（立刻超时），poll 会立刻返回，循环空转，CPU 直接跑满一核——而且每轮重绘的都是同一份内容，屏幕看起来毫无异样。<strong>一个空转的 TUI 和一个空闲的 TUI 在视觉上完全没有区别</strong>，这种 bug 只能靠对 CPU 占用的怀疑才能发现。</p>
+<p>时钟自己也守着 view() 同款的纪律：<strong>时间由调用方注入，而不是自己读时钟</strong>。判定因此是纯的、可确定性测试的——注释里的原话是，靠 sleep 制造时间流逝的测试，在负载下会随机失败。最后还有一条兜底：唤醒机制本身可能降级（eventfd 与自管道都失败时，wake_fd 返回 -1），此时没有 fd 可等，只能强制一个 50ms 的有限超时、靠轮询 drain 推进——比永久挂死好，比忙轮询省。</p>
+<blockquote>
+<p>如果你不能将正在做的事情描述为一个流程，那表示你不知道自己正在做什么。</p>
+<p>​																		——爱德华兹·戴明</p>
+<p>在 TUI 设计中，其实我痛切的回想起了我之前在《程序员修炼之道：通向务实的最高境界》这本书中的<strong>变换式编程</strong>一节。TUI 中的字节变化，结构变换等内容，从一个键盘输入最终转换为一个 UI 上的渲染，这实际上印证了文中的一句话：<strong>所有程序其实都是对数据的一种变换——将输入转换成输出。</strong>在我先前做另外一些程序的时候，我只是将做简单的 CRUD，有没有做数据的变换呢？有，但是其的变换只是简单的层级。</p>
+<p>而在 TUI 这里，我们需要来接收用户的输入，将对应输入的字节给解析为操作序列，就比如说将当前的字节流解析为<code>struct Key &#123;Kind kind&#123;Kind::Text&#125;;std::string text;&#125;</code>这样的系列事件，此时是将对应的字节流转换为结构体。然后，其还会消费这里的 Key，将其中的信息消费到 Model中或者别的什么地方，这还是转换。然后在渲染层面，我们也存在需要将 Model 中的信息建模转换为 StyleLine 的过程，还存在将 StyleLine 转换为 Maya 中的 Element 的过程。种种这些过程单单拿出一个出来花费一定时间都能够理解，也都能够编写出来。但是对于我来说，我是做不到如此复杂的一个系统的。这里的系统优雅的将原始的字节进行一层层的解析以及转换，最终形成了在终端中可以看到的优雅 UI。即使每个环节最后看来只是简单的数据转换，但就是这么一个个简单的环节组合到一起，就榨干了我的 CPU。但是这次榨干，也直接深刻的给我注入了一个看待程序的新思路。</p>
+<p><strong>编程讲的是代码，而程序谈的是数据。</strong>如文中所说，在编写程序中，我们需要做的其实是几点：</p>
+<ul>
+<li><p>寻找变换：一个最简单的方法是，从需求开始，确定当前项目的输入以及输出，然后我们就可以沿着这个方向来进行对应的拆分以及理解，就比如这里，我们的期望就是将键盘输入产生的字节转换为信息输出到终端中，由此衍生了如此多的内容</p>
+</li>
+<li><p>一直做向下变换，继续变化：这其实就恰好印证了我们先前的<strong>重绘</strong>逻辑，这就是其的深刻描述</p>
+</li>
+<li><p>把他们放到一起：对于程序来说，即使整个变换过程是一大串连续的变换流程，甚至于涉及到了外部库内部的进一步嵌套变换，但是对于使用这来说，其始终都是一次简单的调用。其只需要提供基础的 Model 以及其他的简单信息，就可以来使得终端中显示出期望的效果</p>
+</li>
+</ul>
+<p>还有很多启示，但这里不再展开。但总的来说，这是一次酣畅淋漓的学习。其确实重塑了我的一些心智模型，使得我在看待一些事物的角度上发生了根本性的改变</p>
+</blockquote>
+<h3 id="测试：一侧不碰终端，一侧自己当终端"><a href="#测试：一侧不碰终端，一侧自己当终端" class="headerlink" title="测试：一侧不碰终端，一侧自己当终端"></a>测试：一侧不碰终端，一侧自己当终端</h3><p>view() 的测试前面已经见过了：不需要终端，喂 Model、断言 Frame。但接缝还有另一侧：<strong>渲染出来的字节，怎么测？</strong></p>
+<p>朴素的做法是抓字节流、断言里面出现了某些子串。这条路走不通，而且原因很根本：<strong>pty 本身不解释转义序列——它只是一对 fd</strong>。字节流里的 <code>\x1b[2;5H</code> 到底把光标放到了哪、屏幕上最终长什么样，光看字节是回答不了的。要回答「屏幕上有没有幽灵行」，必须把字节流喂进一个<strong>会记账的模型</strong>里。</p>
+<p>于是测试目录里长出了一个 VirtualTerminal：一个最小实现的终端，刻意只实现本项目真正会发出的那几个序列（CUP、EL、ED、SGR、DECAWM、备用屏切换、同步输出、光标显隐），把字节喂进去，然后直接读它的网格——<code>screen()</code> 返回当前屏幕内容，一行一个字符串。这一下，接缝的俩侧就都成了假件：程序侧的账本是 FrameBuffer，测试侧的网格是 VirtualTerminal。前文说「程序没办法把屏幕读回来」——<strong>测试框架可以，因为它自己就是终端</strong>。「屏幕上到底有什么」从一个哲学问题，变成了一个返回值。</p>
+<p>VirtualTerminal 上最要紧的一个读数是 <code>scrolls_in_alt_screen()</code>：备用屏里发生过的滚动次数。<strong>这是幽灵行的直接判据</strong>——备用屏是定高的，帧字节全部用绝对定位（CUP）画，一旦发生滚动，此后每一次 CUP 都落在错位的物理行上：屏幕表现为整块内容上移、顶部那行被顶掉，也就是「重复打印 &#x2F; 幽灵行」看起来的样子。</p>
+<p>以下是俩条量具的纪律，值得注意。</p>
+<p><strong>第一，宽度用官方 Unicode 数据做 oracle，不用生产渲染路径的宽度判据。</strong>理由：用被测的宽度函数驱动虚拟终端，欠算会在模型和实现里同时发生、互相抵消，溢出因此永远量不出来。<strong>测试不能拿被测物当裁判。</strong></p>
+<p><strong>第二，没实现的序列记进 <code>unhandled()</code>，断言它是空的，而不是静默忽略。</strong>静默忽略会让探针在实现变化之后悄悄失去鉴别力。RAG 篇里说过「不失败的错误」最阴险，测试领域有它的同伙：<strong>通过的断言不再鉴别</strong>——绿灯照样亮着，只是它已经什么都不证明了。</p>
+<p>这套量具不是设计先行想出来的，是被真实事故逼出来的。幽灵行是用户报告的现象，肉眼在 20 行以上的滚动输出里不可靠；最初的探针还踩过「断言匹配的文本已经在缓冲区里」这种循环论证的坑——所以后来的探针用哨兵串（一个不可能预先存在的随机串，钉在输入的尾部）证明抓到的确实是<strong>这一次输入</strong>产生的那一帧。三层结构各司其职：真 pty 提供真实的 raw mode 与真实的 write，VirtualTerminal 负责解释字节，oracle 负责宽度真相。<strong>单元测试全绿不等于功能可用</strong>，这条教训在这里落成了工具。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文归根到底只是我围绕 TUI 渲染接缝的一次实践性总结。一开始，我的目标只是搞清楚「为什么往 fd 里写字节，屏幕上就出现字符」，但随着真正去实现一个会流式输出、会实时刷新的界面，我发现真正值得留下来的并不是某个库的 API，而是那条每个环节单拎出来都不复杂，但是整体组合起来却实现了庞大且优雅的系统效果的<strong>变换式编程</strong>思维。</p>
+<p>回头看，整个设计没有一步是「先设计后实现」的。最初只有一个很具体的困难：<strong>屏幕读不回来，程序怎么知道该改哪个格子？</strong> 读不回来，就必须自己记账，于是有了 front&#x2F;back 俩份缓冲；账本要前进，就得知道写入成没成功，于是 render 和 commit 被拆开，write_all 不许谎报；尺寸是运行期才知道的，于是 Frame 干脆不带坐标，位置只用顺序表达，折行与宽度整体下放；渲染逻辑要能脱离终端测试，于是 view() 被要求一尘不染，连 maya 的头文件都不许 include，时钟也由调用方注入；内容会不断长高而状态栏必须留在底部，于是布局用 ColumnReverse 把「贴底」写成了语义而不是算术，状态栏的收缩写成了每一段的声明；进场改了终端的模式，就为每一种退场准备还原——正常退出、回退、崩溃，一条都不能少；最后，字节侧的正确性靠不住肉眼，于是接缝的俩侧都做成了假件，宽度用 oracle，断言用哨兵。最终，这些对不同约束的回应，组合成了一条从按键到字节的、每一站都可以单独检验的链路。而这条链路，也印证了<strong>变换式编程</strong>事实上贯穿了我们整个设计流程。</p>
+
+    </div>
+
+    
+    
+    
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束 <i class="fa fa-heart"></i> 感谢阅读-------------</div>
+
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>TCWW
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://tcww0.github.io/2026/09/15/agent/8-TUI/" title="Agent设计--TUI篇">https://tcww0.github.io/2026/09/15/agent/8-TUI/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tag/Agent/" rel="tag">fa-bookmark-o<i class="fa fa-tag"></i> Agent</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/09/13/agent/7-architecture/" rel="prev" title="Agent设计--架构篇">
+      <i class="fa fa-chevron-left"></i> Agent设计--架构篇
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#TUI-%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.</span> <span class="nav-text">TUI 设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%85%A5%E9%97%A8"><span class="nav-number">1.1.</span> <span class="nav-text">简单入门</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%B2%E6%9F%93%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">渲染流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%88%E7%AB%AF%E8%AE%B0%E4%BD%8F%E4%BA%86%E4%BB%80%E4%B9%88"><span class="nav-number">1.2.</span> <span class="nav-text">终端记住了什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%EF%BC%9A%E5%B1%8F%E5%B9%95%E8%AF%BB%E4%B8%8D%E5%9B%9E%E6%9D%A5"><span class="nav-number">1.3.</span> <span class="nav-text">问题：屏幕读不回来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%90%BD%E5%9C%B0"><span class="nav-number">1.4.</span> <span class="nav-text">落地</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E5%B8%A7%E7%9A%84%E5%9B%9B%E6%AD%A5"><span class="nav-number">1.4.1.</span> <span class="nav-text">一帧的四步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%86%E5%86%99%E5%85%A5%E5%8F%AF%E8%83%BD%E5%8F%AA%E6%88%90%E5%8A%9F%E4%B8%80%E5%8D%8A"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">但写入可能只成功一半</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%A7%EF%BC%9A%E4%B8%80%E4%BB%BD%E6%B2%A1%E6%9C%89%E5%9D%90%E6%A0%87%E7%9A%84%E4%B8%AD%E9%97%B4%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.4.2.</span> <span class="nav-text">帧：一份没有坐标的中间表示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#view%EF%BC%9A%E6%8A%8A%E7%8A%B6%E6%80%81%E6%8A%95%E5%BD%B1%E6%88%90%E5%B8%A7%E7%9A%84%E7%BA%AF%E5%87%BD%E6%95%B0"><span class="nav-number">1.4.3.</span> <span class="nav-text">view：把状态投影成帧的纯函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#maya%EF%BC%9A%E4%BB%8E%E5%B8%A7%E5%88%B0%E5%85%83%E7%B4%A0"><span class="nav-number">1.4.4.</span> <span class="nav-text">maya：从帧到元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%9A%E8%AF%9D%EF%BC%9A%E8%BF%9B%E5%BE%97%E5%8E%BB%EF%BC%8C%E8%BF%98%E8%A6%81%E5%87%BA%E5%BE%97%E6%9D%A5"><span class="nav-number">1.4.5.</span> <span class="nav-text">会话：进得去，还要出得来</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E5%B8%A7%E7%9A%84%E6%97%85%E7%A8%8B"><span class="nav-number">1.4.6.</span> <span class="nav-text">一帧的旅程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%EF%BC%9A%E4%B8%80%E4%BE%A7%E4%B8%8D%E7%A2%B0%E7%BB%88%E7%AB%AF%EF%BC%8C%E4%B8%80%E4%BE%A7%E8%87%AA%E5%B7%B1%E5%BD%93%E7%BB%88%E7%AB%AF"><span class="nav-number">1.4.7.</span> <span class="nav-text">测试：一侧不碰终端，一侧自己当终端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.5.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TCWW"
+      src="/images/tcww.jpg">
+  <p class="site-author-name" itemprop="name">TCWW</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">87</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/category/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tag/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/TCWW0" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;TCWW0" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/tcww3498@gmail.com" title="E-Mail → tcww3498@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <h3 class="widget-title">Tag Cloud</h3>
+          <div id="myCanvasContainer" class="widget tagcloud">
+              <canvas width="250" height="250" id="resCanvas" style="width=100%">
+                  <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tag/Agent/" rel="tag">Agent</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/C/" rel="tag">C++</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/JAVA/" rel="tag">JAVA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/OS/" rel="tag">OS</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/QT/" rel="tag">QT</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/UML%E7%B1%BB%E5%9B%BE/" rel="tag">UML类图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%80%9D%E8%80%83/" rel="tag">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BC%80%E5%8F%91/" rel="tag">服务端开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BB%93%E6%9E%84%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">结构型设计模式</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">行为型设计模式</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BA%E6%96%87/" rel="tag">论文</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="tag">设计模式基础</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E8%AF%BE%E7%A8%8B%E8%AE%BE%E8%AE%A1/" rel="tag">课程设计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tag/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">8</span></li></ul>
+              </canvas>
+          </div>
+      </div>
+      
+
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+  <!-- 网站运行时间的设置 -->
+  <span id="timeDate">载入天数...</span>
+  <span id="times">载入时分秒...</span>  Sometimes your whole life boils down to one insame move.
+  <script>
+      var now = new Date();
+      function createtime() {
+          var grt= new Date("12/20/2024 12:34:11");//此处修改你的建站时间或者网站上线时间
+          now.setTime(now.getTime()+250);
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+  }
+  setInterval("createtime()",250);
+  </script>
+
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TCWW</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">361k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">5:28</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+  <script defer src="/lib/three/three.min.js"></script>
+    <script defer src="/lib/three/canvas_lines.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'thumbs',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23lia4VPjDbs0MuXnT',
+      clientSecret: 'bb3361847dd1f1b0c653861a781c17128de11ecd',
+      repo        : 'comments',
+      owner       : 'TCWW0',
+      admin       : ['TCWW0'],
+      id          : 'a67306239b1e676715cf0921fbb9d0fe',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
